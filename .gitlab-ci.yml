@@ -8,13 +8,7 @@ stages:
   - build
 
 variables:
-  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
-
-cache:
-  key: gradle-cache
-  paths:
-    - .gradle/wrapper
-    - .gradle/caches
+  GRADLE_USER_HOME: "C:\\gitlab-runner-cache\\gradle\\$CI_PROJECT_NAME"
 
 before_script:
   - java -version
@@ -23,7 +17,7 @@ before_script:
 test:
   stage: test
   script:
-    - .\gradlew.bat test
+    - .\gradlew.bat --no-daemon test
   artifacts:
     when: always
     paths:
@@ -33,7 +27,7 @@ test:
 build:
   stage: build
   script:
-    - .\gradlew.bat clean bootJar -x test
+    - .\gradlew.bat --no-daemon clean bootJar -x test
   artifacts:
     paths:
       - build/libs/*.jar
