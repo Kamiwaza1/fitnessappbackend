@@ -1,23 +1,31 @@
-build-job:
+stages:
+  - test
+  - build
+
+variables:
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
+
+cache:
+  key: gradle-cache
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
+
+test:
+  stage: test
+  script:
+    - .\gradlew.bat test
+  artifacts:
+    when: always
+    paths:
+      - build/reports/tests/test/
+    expire_in: 1 week
+
+build:
   stage: build
   script:
-    - echo "Hello, $GITLAB_USER_LOGIN!"
-
-test-job1:
-  stage: test
-  script:
-    - echo "This job tests something"
-
-test-job2:
-  stage: test
-  script:
-    - echo "This job tests something, but takes more time than test-job1."
-    - echo "After the echo commands complete, it runs the sleep command for 20 seconds"
-    - echo "which simulates a test that runs 20 seconds longer than test-job1"
-    - sleep 20
-
-deploy-prod:
-  stage: deploy
-  script:
-    - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
-  environment: production
+    - .\gradlew.bat clean bootJar -x test
+  artifacts:
+    paths:
+      - build/libs/*.jar
+    expire_in: 1 week
