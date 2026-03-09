@@ -1,19 +1,40 @@
+default:
+  hooks:
+    pre_get_sources_script:
+      - $env:GIT_CONFIG_NOSYSTEM=''
+
 stages:
-  - build
   - test
-  - deploy
+  - build
 
-build-job:
-  stage: build
-  script:
-    - echo "Build stage running"
+variables:
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
 
-test-job:
+cache:
+  key: gradle-cache
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
+
+before_script:
+  - java -version
+  - .\gradlew.bat --version
+
+test:
   stage: test
   script:
-    - echo "Test stage running"
+    - .\gradlew.bat test
+  artifacts:
+    when: always
+    paths:
+      - build/reports/tests/test/
+    expire_in: 1 week
 
-deploy-job:
-  stage: deploy
+build:
+  stage: build
   script:
-    - echo "Deploy stage running"
+    - .\gradlew.bat clean bootJar -x test
+  artifacts:
+    paths:
+      - build/libs/*.jar
+    expire_in: 1 week
