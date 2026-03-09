@@ -1,31 +1,19 @@
 stages:
-  - test
   - build
+  - test
+  - deploy
 
-variables:
-  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
-
-cache:
-  key: gradle-cache
-  paths:
-    - .gradle/wrapper
-    - .gradle/caches
-
-test:
-  stage: test
-  script:
-    - .\gradlew.bat test
-  artifacts:
-    when: always
-    paths:
-      - build/reports/tests/test/
-    expire_in: 1 week
-
-build:
+build-job:
   stage: build
   script:
-    - .\gradlew.bat clean bootJar -x test
-  artifacts:
-    paths:
-      - build/libs/*.jar
-    expire_in: 1 week
+    - echo "Build stage running"
+
+test-job:
+  stage: test
+  script:
+    - echo "Test stage running"
+
+deploy-job:
+  stage: deploy
+  script:
+    - echo "Deploy stage running"
