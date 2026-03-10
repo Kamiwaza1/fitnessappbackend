@@ -4,6 +4,9 @@ import com.zeki.demo.dto.RegisterRequest;
 import com.zeki.demo.dto.AuthRequest;
 import com.zeki.demo.dto.AuthResponse;
 import com.zeki.demo.security.JWTService;
+
+import jakarta.validation.Valid;
+
 import com.zeki.demo.repository.UserRepository;
 import com.zeki.demo.entity.User;
 
@@ -23,7 +26,7 @@ public class AuthService {
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthResponse register(RegisterRequest request) {
+    public AuthResponse register(com.zeki.demo.dto.RegisterRequest request) {
         User user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -42,7 +45,7 @@ public class AuthService {
         return new AuthResponse(token);
     }
 
-    public AuthResponse login(AuthRequest request) {
+    public AuthResponse login(com.zeki.demo.dto.AuthRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
