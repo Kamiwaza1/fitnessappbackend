@@ -44,8 +44,11 @@ public class JWTService{
     }
 
     private Claims extractAllClaims(String token){
-        return Jwts.parser().verifyWith(getSignInKey()).build()
-        .parseSignedClaims(token).getPayload();
+        return Jwts.parser()
+                .verifyWith(getSignInKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     private SecretKey getSignInKey() { 
@@ -53,7 +56,18 @@ public class JWTService{
     }
 
     public String generateToken(UserDetails userDetails, String role) {
-     
-        throw new UnsupportedOperationException("Unimplemented method 'generateToken'");
+        Map<String, Object> claims = new HashMap<>();
+        if (role != null) claims.put("role", role);
+
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + jwtExpiration);
+
+        return Jwts.builder()
+                .claims(claims)
+                .subject(userDetails.getUsername())
+                .issuedAt(now)
+                .expiration(expiry)
+                .signWith(getSignInKey())
+                .compact();
     }
 }

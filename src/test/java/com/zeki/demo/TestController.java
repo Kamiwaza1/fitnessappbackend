@@ -10,7 +10,7 @@ public class TestController {
     public String test(Authentication authentication) {
         return "Hello, " + authentication.getName();
     }
-    @GetMapping("/api/admin/dashboard")
+    @GetMapping("/api/admin/adminDashboard")
     public String adminDashboard(Authentication authentication) {
         return "Welcome admin";
     }

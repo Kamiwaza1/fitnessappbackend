@@ -7,12 +7,9 @@ import com.zeki.demo.service.AuthService;
 import com.zeki.demo.dto.AuthRequest;
 import com.zeki.demo.dto.AuthResponse;
 import com.zeki.demo.dto.RegisterRequest;
-import org.apache.catalina.connector.Response;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
