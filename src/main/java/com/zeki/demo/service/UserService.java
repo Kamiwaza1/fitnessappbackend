@@ -3,6 +3,7 @@ package com.zeki.demo.service;
 
 import org.springframework.stereotype.Service;
 import com.zeki.demo.repository.UserRepository;
+import com.zeki.demo.dto.RegisterRequest;
 import com.zeki.demo.entity.User;
 
 
@@ -18,8 +19,8 @@ public class UserService{
         this.userRepository = userRepository;
     }
 
-    public User registerUser(User user) {
-        return userRepository.save(user);
+    public User registerUser(RegisterRequest request) {
+        return userRepository.save(request);
     }
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);

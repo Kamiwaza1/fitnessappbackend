@@ -2,6 +2,7 @@ package com.zeki.demo.repository;
 
 import org.springframework.data.domain.*;
 
+import com.zeki.demo.dto.RegisterRequest;
 import com.zeki.demo.entity.User;
 
 import java.util.*;
@@ -59,6 +60,12 @@ public class InMemoryUserRepository implements UserRepository {
     public <S extends User> List<S> findAll(Example<S> example, Sort sort) {
         // Example matching with sorting logic can be implemented here if needed
         return new ArrayList<>();
+    }
+
+    @Override
+    public User save(RegisterRequest request) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'save'");
     }
 
     // Add other JpaRepository methods as needed

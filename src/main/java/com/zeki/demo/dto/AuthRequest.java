@@ -12,4 +12,7 @@ public class AuthRequest {
 
     @NotBlank
     private String password;
+
+    @NotBlank
+    private String fullName;
 }

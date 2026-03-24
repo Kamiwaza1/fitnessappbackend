@@ -11,8 +11,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 
@@ -35,7 +33,7 @@ public class AuthControllerTest {
         request.setFullName("Test User");
         request.setPassword("StrongPass123!");
 
-        AuthResponse mockResponse = new AuthResponse("mockToken");
+        AuthResponse mockResponse = new AuthResponse("mockToken", null, null, null, null, null);
         Mockito.when(authService.register(any(RegisterRequest.class))).thenReturn(mockResponse);
 
         ResponseEntity<AuthResponse> response = authController.register(request);
@@ -77,7 +75,7 @@ public class AuthControllerTest {
         request.setEmail("test@example.com");
         request.setPassword("StrongPass123!");
 
-        AuthResponse mockResponse = new AuthResponse("mockToken");
+        AuthResponse mockResponse = new AuthResponse("mockToken", null, null, null, null, null);
         Mockito.when(authService.login(any(AuthRequest.class))).thenReturn(mockResponse);
 
         ResponseEntity<AuthResponse> response = authController.login(request);
@@ -96,6 +94,17 @@ public class AuthControllerTest {
 
         Exception exception = assertThrows(RuntimeException.class, () -> authController.login(request));
         assertEquals("Invalid email or password", exception.getMessage());
+    }
+
+    @Test
+    public void testRegisterWithoutRole_UsesDefaultUserRole() {
+        RegisterRequest request = new RegisterRequest();
+        request.setEmail("test@example.com");
+        request.setPassword("StrongPass123!");
+        AuthResponse mockResponse = new AuthResponse("mockToken", null, null, null, null, null);
+        Mockito.when(authService.register(any(RegisterRequest.class))).thenReturn(mockResponse);
+        ResponseEntity<AuthResponse> response = authController.register(request);
+        assertEquals("mockToken", response.getBody().getToken());
     }
 
    

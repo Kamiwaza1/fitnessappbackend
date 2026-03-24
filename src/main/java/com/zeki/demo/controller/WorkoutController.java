@@ -4,6 +4,10 @@ import com.zeki.demo.dto.CreateWorkoutRequest;
 import com.zeki.demo.dto.UpdateWorkoutRequest;
 import com.zeki.demo.dto.WorkoutResponse;
 import com.zeki.demo.service.Interface.IWorkoutService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,12 +25,19 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/user/workouts")
+@RequestMapping({"/api/user/workouts", "/api/workouts", "/workouts"})
 @RequiredArgsConstructor
+@Tag(name = "Workouts", description = "CRUD endpoints for user workouts")
 public class WorkoutController {
 
     private final IWorkoutService workoutService;
 
+    @Operation(summary = "Add workout", description = "Creates a new workout for the authenticated user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Workout created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid workout input"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @PostMapping
     public ResponseEntity<WorkoutResponse> createWorkout(
             @Valid @RequestBody CreateWorkoutRequest request,

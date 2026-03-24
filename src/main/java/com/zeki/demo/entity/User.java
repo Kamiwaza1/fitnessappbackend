@@ -2,10 +2,10 @@ package com.zeki.demo.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import jakarta.persistence.*;
 
 @Entity
