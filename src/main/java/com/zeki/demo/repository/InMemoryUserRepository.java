@@ -64,7 +64,7 @@ public class InMemoryUserRepository implements UserRepository {
 
     @Override
     public User save(RegisterRequest request) {
-        // TODO Auto-generated method stub
+        
         throw new UnsupportedOperationException("Unimplemented method 'save'");
     }
 

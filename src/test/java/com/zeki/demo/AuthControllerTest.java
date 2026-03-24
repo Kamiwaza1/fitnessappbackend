@@ -33,7 +33,7 @@ public class AuthControllerTest {
         request.setFullName("Test User");
         request.setPassword("StrongPass123!");
 
-        AuthResponse mockResponse = new AuthResponse("mockToken", null, null, null, null, null);
+        AuthResponse mockResponse = new AuthResponse("mockToken", null, null, null, null);
         Mockito.when(authService.register(any(RegisterRequest.class))).thenReturn(mockResponse);
 
         ResponseEntity<AuthResponse> response = authController.register(request);
@@ -75,7 +75,7 @@ public class AuthControllerTest {
         request.setEmail("test@example.com");
         request.setPassword("StrongPass123!");
 
-        AuthResponse mockResponse = new AuthResponse("mockToken", null, null, null, null, null);
+        AuthResponse mockResponse = new AuthResponse("mockToken", null, null, null, null);
         Mockito.when(authService.login(any(AuthRequest.class))).thenReturn(mockResponse);
 
         ResponseEntity<AuthResponse> response = authController.login(request);
@@ -101,7 +101,7 @@ public class AuthControllerTest {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("test@example.com");
         request.setPassword("StrongPass123!");
-        AuthResponse mockResponse = new AuthResponse("mockToken", null, null, null, null, null);
+        AuthResponse mockResponse = new AuthResponse("mockToken", null, null, null, null);
         Mockito.when(authService.register(any(RegisterRequest.class))).thenReturn(mockResponse);
         ResponseEntity<AuthResponse> response = authController.register(request);
         assertEquals("mockToken", response.getBody().getToken());

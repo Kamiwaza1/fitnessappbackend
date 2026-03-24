@@ -80,7 +80,7 @@ public class AuthService implements IAuthService {
                                 .build();
 
                 String token = jwtService.generateToken(userDetails, user.getRole());
-                return new AuthResponse(token, user.getFullName(), user.getEmail(), user.getRole(), user.getId(), null);
+                return new AuthResponse(token, user.getFullName(), user.getEmail(), user.getRole(), user.getId());
     }
 
     private boolean isValidEmail(String email) {
@@ -110,7 +110,7 @@ public class AuthService implements IAuthService {
                         .build();
 
         String token = jwtService.generateToken(userDetails, user.getRole());
-        return new AuthResponse(token, user.getFullName(), user.getEmail(), user.getRole(), user.getId(), null);
+        return new AuthResponse(token, user.getFullName(), user.getEmail(), user.getRole(), user.getId());
     }
 
     @Override
