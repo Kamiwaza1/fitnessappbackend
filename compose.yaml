@@ -1,35 +1,37 @@
 services:
-  mysql:
-    image: mysql:latest
-    container_name: fitness_mysql
+  postgres:
+    image: postgres:16
+    container_name: fitness_postgres
+    command: ["postgres", "-c", "hba_file=/etc/postgresql/pg_hba.conf"]
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: fitness_app
-      MYSQL_USER: fitness_user
-      MYSQL_PASSWORD: fitness_pass
+      POSTGRES_DB: fitness_app
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=trust"
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 20s
 
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     container_name: fitness_backend
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/fitness_app"
-      SPRING_DATASOURCE_USERNAME: fitness_user
-      SPRING_DATASOURCE_PASSWORD: fitness_pass
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/fitness_app"
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       JWT_SECRET: your-super-secret-key-that-is-at-least-32-characters
       JWT_EXPIRATION: 86400000
@@ -37,4 +39,4 @@ services:
       - "8080:8080"
 
 volumes:
-  mysql_data:
+  postgres_data:

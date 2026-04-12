@@ -6,7 +6,6 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import com.zeki.demo.entity.User;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -53,7 +52,20 @@ public class JWTService{
     }
 
     public String generateToken(UserDetails userDetails, String role) {
-     
-        throw new UnsupportedOperationException("Unimplemented method 'generateToken'");
+        Map<String, Object> claims = new HashMap<>();
+        if (role != null && !role.isBlank()) {
+            claims.put("role", role);
+        }
+
+        Date now = new Date();
+        Date expiration = new Date(now.getTime() + jwtExpiration);
+
+        return Jwts.builder()
+                .claims(claims)
+                .subject(userDetails.getUsername())
+                .issuedAt(now)
+                .expiration(expiration)
+                .signWith(getSignInKey())
+                .compact();
     }
 }

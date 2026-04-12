@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 import com.zeki.demo.repository.UserRepository;
 import com.zeki.demo.entity.User;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
