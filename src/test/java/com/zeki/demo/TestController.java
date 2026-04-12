@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zeki.demo.dto.AuthRequest;
-import com.zeki.demo.dto.RegisterRequest;
+import com.zeki.demo.auth.dto.AuthRequest;
+import com.zeki.demo.auth.dto.RegisterRequest;
 
 @RestController
 public class TestController {

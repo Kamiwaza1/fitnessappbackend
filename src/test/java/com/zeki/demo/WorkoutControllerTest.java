@@ -1,10 +1,10 @@
 package com.zeki.demo;
 
-import com.zeki.demo.controller.WorkoutController;
-import com.zeki.demo.dto.CreateWorkoutRequest;
-import com.zeki.demo.dto.UpdateWorkoutRequest;
-import com.zeki.demo.dto.WorkoutResponse;
-import com.zeki.demo.service.Interface.IWorkoutService;
+import com.zeki.demo.workouts.controller.WorkoutController;
+import com.zeki.demo.workouts.dto.CreateWorkoutRequest;
+import com.zeki.demo.workouts.dto.UpdateWorkoutRequest;
+import com.zeki.demo.workouts.dto.WorkoutResponse;
+import com.zeki.demo.workouts.service.interfaces.IWorkoutService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -40,7 +40,7 @@ public class WorkoutControllerTest {
         request.setName("Leg Day");
         request.setWorkoutDate(LocalDate.of(2026, 3, 16));
         request.setDurationMinutes(60);
-        request.setNotes("Heavy squats and lunges");
+        request.setNotes("Leg Day");
 
         Authentication authentication = new UsernamePasswordAuthenticationToken("test@example.com", null);
 
@@ -49,7 +49,7 @@ public class WorkoutControllerTest {
                 "Leg Day",
                 LocalDate.of(2026, 3, 16),
                 60,
-                "Heavy squats and lunges"
+                "Leg Day", null, null
         );
 
         Mockito.when(workoutService.createWorkout(Mockito.eq("test@example.com"), any(CreateWorkoutRequest.class)))
@@ -59,7 +59,7 @@ public class WorkoutControllerTest {
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(1L, response.getBody().getId());
-        assertEquals("Leg Day", response.getBody().getName());
+        assertEquals("Leg Day", response.getBody().getNotes());
         Mockito.verify(workoutService).createWorkout("test@example.com", request);
     }
 
@@ -67,8 +67,8 @@ public class WorkoutControllerTest {
     void getWorkouts_ReturnsWorkoutList() {
         Authentication authentication = new UsernamePasswordAuthenticationToken("test@example.com", null);
         List<WorkoutResponse> responseBody = List.of(
-                new WorkoutResponse(1L, "Leg Day", LocalDate.of(2026, 3, 16), 60, "Heavy squats"),
-                new WorkoutResponse(2L, "Run", LocalDate.of(2026, 3, 15), 30, "Easy pace")
+                new WorkoutResponse(1L, "Leg Day", LocalDate.of(2026, 3, 16), 60, "Heavy squats", null, null),
+                new WorkoutResponse(2L, "Run", LocalDate.of(2026, 3, 15), 30, "Easy pace", null, null)
         );
 
         Mockito.when(workoutService.getWorkouts("test@example.com")).thenReturn(responseBody);
@@ -83,7 +83,7 @@ public class WorkoutControllerTest {
     @Test
     void getWorkoutById_ReturnsWorkout() {
         Authentication authentication = new UsernamePasswordAuthenticationToken("test@example.com", null);
-        WorkoutResponse responseBody = new WorkoutResponse(1L, "Leg Day", LocalDate.of(2026, 3, 16), 60, "Heavy squats");
+        WorkoutResponse responseBody = new WorkoutResponse(1L, "Leg Day", LocalDate.of(2026, 3, 16), 60, "Heavy squats", null, null);
 
         Mockito.when(workoutService.getWorkoutById("test@example.com", 1L)).thenReturn(responseBody);
 
@@ -100,10 +100,10 @@ public class WorkoutControllerTest {
         request.setName("Push Day");
         request.setWorkoutDate(LocalDate.of(2026, 3, 17));
         request.setDurationMinutes(50);
-        request.setNotes("Bench and dips");
+        request.setNotes("Push Day");
 
         Authentication authentication = new UsernamePasswordAuthenticationToken("test@example.com", null);
-        WorkoutResponse responseBody = new WorkoutResponse(1L, "Push Day", LocalDate.of(2026, 3, 17), 50, "Bench and dips");
+        WorkoutResponse responseBody = new WorkoutResponse(1L, "Push Day", LocalDate.of(2026, 3, 17), 50, "Push Day", null, null);
 
         Mockito.when(workoutService.updateWorkout(Mockito.eq("test@example.com"), Mockito.eq(1L), any(UpdateWorkoutRequest.class)))
                 .thenReturn(responseBody);
@@ -111,7 +111,7 @@ public class WorkoutControllerTest {
         ResponseEntity<WorkoutResponse> response = workoutController.updateWorkout(1L, request, authentication);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Push Day", response.getBody().getName());
+        assertEquals("Push Day", response.getBody().getNotes());
         Mockito.verify(workoutService).updateWorkout("test@example.com", 1L, request);
     }
 

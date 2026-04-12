@@ -1,10 +1,10 @@
 package com.zeki.demo;
 
-import com.zeki.demo.controller.AuthController;
-import com.zeki.demo.dto.AuthRequest;
-import com.zeki.demo.dto.AuthResponse;
-import com.zeki.demo.dto.RegisterRequest;
-import com.zeki.demo.service.Interface.IAuthService;
+import com.zeki.demo.auth.controller.AuthController;
+import com.zeki.demo.auth.dto.AuthRequest;
+import com.zeki.demo.auth.dto.AuthResponse;
+import com.zeki.demo.auth.dto.RegisterRequest;
+import com.zeki.demo.auth.service.interfaces.IAuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -33,7 +33,7 @@ public class AuthControllerTest {
         request.setFullName("Test User");
         request.setPassword("StrongPass123!");
 
-        AuthResponse mockResponse = new AuthResponse("mockToken", null, null, null, null);
+        AuthResponse mockResponse = new AuthResponse("mockToken", null, null, null, 0L);
         Mockito.when(authService.register(any(RegisterRequest.class))).thenReturn(mockResponse);
 
         ResponseEntity<AuthResponse> response = authController.register(request);
@@ -75,7 +75,7 @@ public class AuthControllerTest {
         request.setEmail("test@example.com");
         request.setPassword("StrongPass123!");
 
-        AuthResponse mockResponse = new AuthResponse("mockToken", null, null, null, null);
+        AuthResponse mockResponse = new AuthResponse("mockToken", null, null, null, 0L);
         Mockito.when(authService.login(any(AuthRequest.class))).thenReturn(mockResponse);
 
         ResponseEntity<AuthResponse> response = authController.login(request);
@@ -101,7 +101,7 @@ public class AuthControllerTest {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("test@example.com");
         request.setPassword("StrongPass123!");
-        AuthResponse mockResponse = new AuthResponse("mockToken", null, null, null, null);
+        AuthResponse mockResponse = new AuthResponse("mockToken", null, null, null, 0L);
         Mockito.when(authService.register(any(RegisterRequest.class))).thenReturn(mockResponse);
         ResponseEntity<AuthResponse> response = authController.register(request);
         assertEquals("mockToken", response.getBody().getToken());
