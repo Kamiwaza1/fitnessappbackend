@@ -4,8 +4,9 @@ default:
       - $env:GIT_CONFIG_NOSYSTEM=''
 
 stages:
-  - test
   - build
+  - test
+  
 
 variables:
   GRADLE_USER_HOME: "C:\\gitlab-runner-cache\\gradle\\$CI_PROJECT_NAME"
