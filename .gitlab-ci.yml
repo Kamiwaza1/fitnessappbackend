@@ -1,8 +1,8 @@
-stages: 
-  - validate
+stages:
+  - quality
   - test
   - build
-  - security
+  - package
   - deploy
 
 variables:
@@ -11,6 +11,11 @@ variables:
 before_script:
   - java -version
   - ./gradlew --version
+
+quality:
+  stage: quality
+  script:
+    - ./gradlew --no-daemon check
 
 test:
   stage: test
@@ -25,4 +30,20 @@ test:
 build:
   stage: build
   script:
-    - ./gradlew --no-daemon build
+    - ./gradlew --no-daemon classes
+
+package:
+  stage: package
+  script:
+    - ./gradlew --no-daemon bootJar
+  artifacts:
+    paths:
+      - build/libs/
+    expire_in: 1 week
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploy step here"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
