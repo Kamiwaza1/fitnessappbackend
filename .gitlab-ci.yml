@@ -1,6 +1,9 @@
-stages:
+stages: 
+  - validate
   - test
   - build
+  - security
+  - deploy
 
 variables:
   GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
