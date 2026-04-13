@@ -27,8 +27,4 @@ test:
 build:
   stage: build
   script:
-    - .\gradlew.bat --no-daemon clean bootJar -x test
-  artifacts:
-    paths:
-      - build/libs/*.jar
-    expire_in: 1 week
+    - .\gradlew.bat --no-daemon build
