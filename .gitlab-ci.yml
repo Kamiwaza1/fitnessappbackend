@@ -1,31 +1,25 @@
-default:
-  hooks:
-    pre_get_sources_script:
-      - $env:GIT_CONFIG_NOSYSTEM=''
-
 stages:
-  - build
   - test
-  
+  - build
 
 variables:
-  GRADLE_USER_HOME: "C:\\gitlab-runner-cache\\gradle\\$CI_PROJECT_NAME"
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
 
 before_script:
   - java -version
-  - .\gradlew.bat --version
+  - ./gradlew --version
 
 test:
   stage: test
   script:
-    - .\gradlew.bat --no-daemon test
+    - ./gradlew --no-daemon test
   artifacts:
     when: always
     paths:
       - build/reports/tests/test/
-    expire_in: 1 hour
+    expire_in: 1 week
 
 build:
   stage: build
   script:
-    - .\gradlew.bat --no-daemon build
+    - ./gradlew --no-daemon build
