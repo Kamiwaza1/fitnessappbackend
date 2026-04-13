@@ -22,7 +22,7 @@ test:
     when: always
     paths:
       - build/reports/tests/test/
-    expire_in: 1 week
+    expire_in: 1 hour
 
 build:
   stage: build
