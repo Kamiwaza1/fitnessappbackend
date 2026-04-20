@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,9 +44,10 @@ public class WorkoutControllerTest {
         request.setNotes("Leg Day");
 
         Authentication authentication = new UsernamePasswordAuthenticationToken("test@example.com", null);
+        UUID workoutId = UUID.randomUUID();
 
         WorkoutResponse responseBody = new WorkoutResponse(
-                1L,
+                workoutId,
                 "Leg Day",
                 LocalDate.of(2026, 3, 16),
                 60,
@@ -58,7 +60,7 @@ public class WorkoutControllerTest {
         ResponseEntity<WorkoutResponse> response = workoutController.createWorkout(request, authentication);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(1L, response.getBody().getId());
+        assertEquals(workoutId, response.getBody().getId());
         assertEquals("Leg Day", response.getBody().getNotes());
         Mockito.verify(workoutService).createWorkout("test@example.com", request);
     }
@@ -66,9 +68,11 @@ public class WorkoutControllerTest {
     @Test
     void getWorkouts_ReturnsWorkoutList() {
         Authentication authentication = new UsernamePasswordAuthenticationToken("test@example.com", null);
+        UUID firstWorkoutId = UUID.randomUUID();
+        UUID secondWorkoutId = UUID.randomUUID();
         List<WorkoutResponse> responseBody = List.of(
-                new WorkoutResponse(1L, "Leg Day", LocalDate.of(2026, 3, 16), 60, "Heavy squats", null, null),
-                new WorkoutResponse(2L, "Run", LocalDate.of(2026, 3, 15), 30, "Easy pace", null, null)
+                new WorkoutResponse(firstWorkoutId, "Leg Day", LocalDate.of(2026, 3, 16), 60, "Heavy squats", null, null),
+                new WorkoutResponse(secondWorkoutId, "Run", LocalDate.of(2026, 3, 15), 30, "Easy pace", null, null)
         );
 
         Mockito.when(workoutService.getWorkouts("test@example.com")).thenReturn(responseBody);
@@ -83,15 +87,16 @@ public class WorkoutControllerTest {
     @Test
     void getWorkoutById_ReturnsWorkout() {
         Authentication authentication = new UsernamePasswordAuthenticationToken("test@example.com", null);
-        WorkoutResponse responseBody = new WorkoutResponse(1L, "Leg Day", LocalDate.of(2026, 3, 16), 60, "Heavy squats", null, null);
+        UUID workoutId = UUID.randomUUID();
+        WorkoutResponse responseBody = new WorkoutResponse(workoutId, "Leg Day", LocalDate.of(2026, 3, 16), 60, "Heavy squats", null, null);
 
-        Mockito.when(workoutService.getWorkoutById("test@example.com", 1L)).thenReturn(responseBody);
+        Mockito.when(workoutService.getWorkoutById("test@example.com", workoutId)).thenReturn(responseBody);
 
-        ResponseEntity<WorkoutResponse> response = workoutController.getWorkoutById(1L, authentication);
+        ResponseEntity<WorkoutResponse> response = workoutController.getWorkoutById(workoutId, authentication);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(1L, response.getBody().getId());
-        Mockito.verify(workoutService).getWorkoutById("test@example.com", 1L);
+        assertEquals(workoutId, response.getBody().getId());
+        Mockito.verify(workoutService).getWorkoutById("test@example.com", workoutId);
     }
 
     @Test
@@ -103,25 +108,27 @@ public class WorkoutControllerTest {
         request.setNotes("Push Day");
 
         Authentication authentication = new UsernamePasswordAuthenticationToken("test@example.com", null);
-        WorkoutResponse responseBody = new WorkoutResponse(1L, "Push Day", LocalDate.of(2026, 3, 17), 50, "Push Day", null, null);
+        UUID workoutId = UUID.randomUUID();
+        WorkoutResponse responseBody = new WorkoutResponse(workoutId, "Push Day", LocalDate.of(2026, 3, 17), 50, "Push Day", null, null);
 
-        Mockito.when(workoutService.updateWorkout(Mockito.eq("test@example.com"), Mockito.eq(1L), any(UpdateWorkoutRequest.class)))
+        Mockito.when(workoutService.updateWorkout(Mockito.eq("test@example.com"), Mockito.eq(workoutId), any(UpdateWorkoutRequest.class)))
                 .thenReturn(responseBody);
 
-        ResponseEntity<WorkoutResponse> response = workoutController.updateWorkout(1L, request, authentication);
+        ResponseEntity<WorkoutResponse> response = workoutController.updateWorkout(workoutId, request, authentication);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Push Day", response.getBody().getNotes());
-        Mockito.verify(workoutService).updateWorkout("test@example.com", 1L, request);
+        Mockito.verify(workoutService).updateWorkout("test@example.com", workoutId, request);
     }
 
     @Test
     void deleteWorkout_ReturnsNoContent() {
         Authentication authentication = new UsernamePasswordAuthenticationToken("test@example.com", null);
+        UUID workoutId = UUID.randomUUID();
 
-        ResponseEntity<Void> response = workoutController.deleteWorkout(1L, authentication);
+        ResponseEntity<Void> response = workoutController.deleteWorkout(workoutId, authentication);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        Mockito.verify(workoutService).deleteWorkout("test@example.com", 1L);
+        Mockito.verify(workoutService).deleteWorkout("test@example.com", workoutId);
     }
 }

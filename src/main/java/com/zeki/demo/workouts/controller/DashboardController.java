@@ -6,19 +6,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zeki.demo.workouts.service.WorkoutService;
+import com.zeki.demo.workouts.service.interfaces.IWorkoutService;
 
 @RestController
-@RequestMapping("/api/workouts")
+@RequestMapping("/api/dashboard")
 public class DashboardController {
 
-    private final WorkoutService workoutService;
+    private final IWorkoutService workoutService;
 
-    public DashboardController(WorkoutService workoutService) {
+    public DashboardController(IWorkoutService workoutService) {
         this.workoutService = workoutService;
     }
 
-    @GetMapping("/summary")
+    @GetMapping
     public ResponseEntity<String> getDashboard(Authentication authentication) {
         String dashboardData = workoutService.getDashboardData(authentication.getName());
         return ResponseEntity.ok(dashboardData);

@@ -47,3 +47,9 @@ deploy:
     - echo "Deploy step here"
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+
+sonarqube-check-backend:
+  stage: quality
+  script:
+    - cd fitnessappbackend
+    - ./gradlew jacocoTestReport sonarqube --no-daemon

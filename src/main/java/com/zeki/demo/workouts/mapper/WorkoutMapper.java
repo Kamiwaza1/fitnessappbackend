@@ -21,10 +21,12 @@ public class WorkoutMapper {
     }
 
     public void updateEntity(Workout workout, UpdateWorkoutRequest request) {
-        workout.setName(normalizeName(request.getName()));
-        workout.setWorkoutDate(request.getWorkoutDate());
-        workout.setDurationMinutes(request.getDurationMinutes());
-        workout.setNotes(normalizeNotes(request.getNotes()));
+        workout.applyUpdate(
+                normalizeName(request.getName()),
+                request.getWorkoutDate(),
+                request.getDurationMinutes(),
+                normalizeNotes(request.getNotes())
+        );
     }
 
     public WorkoutResponse toResponse(Workout workout) {

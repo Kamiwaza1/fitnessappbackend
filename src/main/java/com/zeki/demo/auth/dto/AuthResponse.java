@@ -3,6 +3,8 @@ package com.zeki.demo.auth.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 @AllArgsConstructor
 public class AuthResponse {
@@ -10,5 +12,5 @@ public class AuthResponse {
     private String fullName;
     private String email;
     private String role;
-    private Long id;
+    private UUID id;
 }

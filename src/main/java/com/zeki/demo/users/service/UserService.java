@@ -7,14 +7,17 @@ import com.zeki.demo.auth.dto.RegisterRequest;
 import com.zeki.demo.users.entity.User;
 import com.zeki.demo.users.mapper.UserMapper;
 import com.zeki.demo.users.repository.UserRepository;
+import com.zeki.demo.users.service.interfaces.IUserService;
+
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 
-public class UserService{
+public class UserService implements IUserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserDomainService userDomainService;
@@ -33,6 +36,7 @@ public class UserService{
         this.userMapper = userMapper;
     }
 
+    @Override
     public CurrentUserResponse registerUser(RegisterRequest request) {
         String normalizedEmail = userDomainService.normalizeEmail(request.getEmail());
         String fullName = userDomainService.resolveFullName(request.getFullName(), normalizedEmail);
@@ -42,7 +46,8 @@ public class UserService{
         return userMapper.toCurrentUserResponse(userRepository.save(user));
     }
 
-    public Optional<CurrentUserResponse> getUserById(Long id) {
+    @Override
+    public Optional<CurrentUserResponse> getUserById(UUID id) {
         return userRepository.findById(id).map(userMapper::toCurrentUserResponse);
     }
     

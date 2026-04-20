@@ -14,16 +14,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import lombok.Setter;
 import lombok.EqualsAndHashCode;
 import com.zeki.demo.users.entity.User;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(name = "workouts")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -31,8 +30,9 @@ import java.time.LocalDate;
 public class Workout {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "uuid")
+    private UUID id;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -49,4 +49,11 @@ public class Workout {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public void applyUpdate(String name, LocalDate workoutDate, Integer durationMinutes, String notes) {
+        this.name = name;
+        this.workoutDate = workoutDate;
+        this.durationMinutes = durationMinutes;
+        this.notes = notes;
+    }
 }

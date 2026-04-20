@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/workouts")
@@ -55,14 +56,14 @@ public class WorkoutController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<WorkoutResponse> getWorkoutById(@PathVariable Long id, Authentication authentication) {
+    public ResponseEntity<WorkoutResponse> getWorkoutById(@PathVariable UUID id, Authentication authentication) {
         WorkoutResponse response = workoutService.getWorkoutById(authentication.getName(), id);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<WorkoutResponse> updateWorkout(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Valid @RequestBody UpdateWorkoutRequest request,
             Authentication authentication
     ) {
@@ -71,7 +72,7 @@ public class WorkoutController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteWorkout(@PathVariable Long id, Authentication authentication) {
+    public ResponseEntity<Void> deleteWorkout(@PathVariable UUID id, Authentication authentication) {
         workoutService.deleteWorkout(authentication.getName(), id);
         return ResponseEntity.noContent().build();
     }

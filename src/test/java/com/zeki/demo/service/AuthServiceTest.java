@@ -5,6 +5,8 @@ import com.zeki.demo.users.domain.UserDomainService;
 import com.zeki.demo.auth.dto.AuthRequest;
 import com.zeki.demo.auth.dto.AuthResponse;
 import com.zeki.demo.auth.dto.RegisterRequest;
+import com.zeki.demo.common.exception.ConflictException;
+import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.users.entity.User;
 import com.zeki.demo.auth.mapper.AuthMapper;
 import com.zeki.demo.auth.service.AuthService;
@@ -17,16 +19,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -75,9 +76,8 @@ class AuthServiceTest {
 
         when(userRepository.existsByEmailIgnoreCase("user@example.com")).thenReturn(true);
 
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> authService.register(request));
-        assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
-        assertEquals("An account with this email already exists", ex.getReason());
+        ConflictException ex = assertThrows(ConflictException.class, () -> authService.register(request));
+        assertEquals("An account with this email already exists", ex.getMessage());
     }
 
     @Test
@@ -88,9 +88,8 @@ class AuthServiceTest {
 
         when(userRepository.findByEmailIgnoreCase("missing@example.com")).thenReturn(Optional.empty());
 
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> authService.login(request));
-        assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
-        assertEquals("No account found with this email", ex.getReason());
+        UnauthorizedException ex = assertThrows(UnauthorizedException.class, () -> authService.login(request));
+        assertEquals("No account found with this email", ex.getMessage());
     }
 
     @Test
@@ -100,7 +99,7 @@ class AuthServiceTest {
         request.setPassword("wrong-password");
 
         User user = User.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .fullName("Test User")
                 .email("test@example.com")
                 .password("encoded-password")
@@ -111,9 +110,8 @@ class AuthServiceTest {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(new BadCredentialsException("Bad credentials"));
 
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> authService.login(request));
-        assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
-        assertEquals("Invalid email or password", ex.getReason());
+        UnauthorizedException ex = assertThrows(UnauthorizedException.class, () -> authService.login(request));
+        assertEquals("Invalid email or password", ex.getMessage());
     }
 
     @Test
@@ -123,7 +121,7 @@ class AuthServiceTest {
         request.setPassword("StrongPassword123!");
 
         User user = User.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .fullName("Test User")
                 .email("test@example.com")
                 .password("encoded-password")
