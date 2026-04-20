@@ -5,11 +5,12 @@ stages:
   - docker
 
 variables:
-  GRADLE_USER_HOME: "$HOME/.gradle"
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle-home"
 
 before_script:
   - java -version
   - chmod +x ./gradlew
+  - mkdir -p "$GRADLE_USER_HOME"
   - ./gradlew --version || (rm -rf "$GRADLE_USER_HOME/wrapper/dists" && ./gradlew --version)
 
 quality:
