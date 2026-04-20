@@ -6,11 +6,12 @@ stages:
   - deploy
 
 variables:
-  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
+  GRADLE_USER_HOME: "$HOME/.gradle"
 
 before_script:
   - java -version
-  - ./gradlew --version
+  - chmod +x ./gradlew
+  - ./gradlew --version || (rm -rf "$GRADLE_USER_HOME/wrapper/dists" && ./gradlew --version)
 
 quality:
   stage: quality
