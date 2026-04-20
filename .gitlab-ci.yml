@@ -1,9 +1,8 @@
 stages:
-  - quality
-  - test
   - build
-  - package
-  - deploy
+  - test
+  - quality
+  - docker
 
 variables:
   GRADLE_USER_HOME: "$HOME/.gradle"
@@ -33,21 +32,15 @@ build:
   script:
     - ./gradlew --no-daemon classes
 
-package:
-  stage: package
+docker:
+  stage: docker
   script:
-    - ./gradlew --no-daemon bootJar
+    - docker compose up --build -d
   artifacts:
     paths:
       - build/libs/
     expire_in: 1 week
 
-deploy:
-  stage: deploy
-  script:
-    - echo "Deploy step here"
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
 
 sonarqube-check-backend:
   stage: quality
