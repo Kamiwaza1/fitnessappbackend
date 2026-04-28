@@ -3,6 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '4.0.3'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id "org.sonarqube" version "7.2.3.7755"
+	id 'jacoco'
 }
 
 group = 'com.zeki'
@@ -48,8 +49,23 @@ dependencies {
 	testImplementation 'org.mockito:mockito-core:5.2.0'
 }
 
+jacoco {
+	toolVersion = "0.8.14"
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
+	finalizedBy tasks.named('jacocoTestReport')
+}
+
+tasks.named('jacocoTestReport') {
+	dependsOn tasks.named('test')
+	reports {
+		xml.required = true
+		csv.required = false
+		html.required = true
+		html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+	}
 }
 
 sonar {
@@ -58,5 +74,7 @@ sonar {
         property "sonar.projectKey", "FitnessApp01"
         property "sonar.host.url", "http://localhost:9000"
         property "sonar.token", "sqp_62c3ddb1fc7d114fa4125790333f9cbc6ca51c7d"
+        property "sonar.coverage.jacoco.xmlReportPaths",
+                layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile.absolutePath
     }
 }

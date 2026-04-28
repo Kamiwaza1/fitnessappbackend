@@ -1,12 +1,12 @@
 package com.zeki.demo.users.domain;
 
-import com.zeki.demo.users.entity.User;
+import com.zeki.demo.users.entity.UserEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 
 @Component
-public class UserDomainService {
+public class User {
 
     private static final String DEFAULT_ROLE = "USER";
 
@@ -23,8 +23,8 @@ public class UserDomainService {
         return atIndex > 0 ? normalizedEmail.substring(0, atIndex) : normalizedEmail;
     }
 
-    public User buildRegisteredUser(String fullName, String normalizedEmail, String encodedPassword) {
-        return User.builder()
+    public UserEntity buildRegisteredUser(String fullName, String normalizedEmail, String encodedPassword) {
+        return UserEntity.builder()
                 .fullName(fullName)
                 .email(normalizedEmail)
                 .password(encodedPassword)

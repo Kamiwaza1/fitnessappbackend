@@ -1,10 +1,10 @@
 package com.zeki.demo.workouts.dto;
 
 import java.time.LocalDate;
-import java.util.List;
+
 import java.util.UUID;
 
-import com.zeki.demo.exerciseLibrary.dto.exerciseDto;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,15 +14,18 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
 public class WorkoutResponse {
-    private UUID id;
-    private String workoutTitle;
+    private UUID workoutId;
     private LocalDate workoutDate;
     private Integer durationMinutes;
+    private String workoutName;
     private String notes;
-    private String primaryGoal;
-    private List<exerciseDto> exerciseLibrary;
+    private String description;
+    private String category;
+    private Boolean isPublic;
+    private LocalDate updatedAt;
+    private LocalDate createdAt;
 
 }

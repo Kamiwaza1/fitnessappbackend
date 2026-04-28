@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.zeki.demo.auth.dto.AuthRequest;
 import com.zeki.demo.auth.dto.AuthResponse;
-import com.zeki.demo.users.dto.CurrentUserResponse;
+import com.zeki.demo.users.dto.UserResponse;
 import com.zeki.demo.auth.dto.RegisterRequest;
 import com.zeki.demo.auth.service.interfaces.IAuthService;
 import org.springframework.http.ResponseEntity;
@@ -48,7 +48,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<CurrentUserResponse> me(Authentication authentication) {
+    public ResponseEntity<UserResponse> me(Authentication authentication) {
         return ResponseEntity.ok(authService.getCurrentUser(authentication.getName()));
     }
 }

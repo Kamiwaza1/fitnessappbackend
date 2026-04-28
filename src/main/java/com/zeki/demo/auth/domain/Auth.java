@@ -1,6 +1,6 @@
 package com.zeki.demo.auth.domain;
 
-import com.zeki.demo.users.entity.User;
+import com.zeki.demo.users.entity.UserEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 @Component
-public class AuthDomainService {
+public class Auth {
 
     private static final Pattern SPECIAL_CHAR_PATTERN = Pattern.compile("[^A-Za-z0-9]");
 
@@ -38,7 +38,7 @@ public class AuthDomainService {
         return issues;
     }
 
-    public UserDetails toUserDetails(User user) {
+    public UserDetails toUserDetails(UserEntity user) {
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail())
                 .password(user.getPassword())

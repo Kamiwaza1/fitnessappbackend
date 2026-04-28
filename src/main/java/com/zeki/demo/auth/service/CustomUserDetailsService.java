@@ -1,13 +1,13 @@
 package com.zeki.demo.auth.service;
 
-import com.zeki.demo.auth.domain.AuthDomainService;
+import com.zeki.demo.auth.domain.Auth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.zeki.demo.users.entity.User;
+import com.zeki.demo.users.entity.UserEntity;
 import com.zeki.demo.users.repository.UserRepository;
 
 @Service
@@ -15,13 +15,13 @@ import com.zeki.demo.users.repository.UserRepository;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private final AuthDomainService authDomainService;
+    private final Auth auth;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByEmailIgnoreCase(username)
+        UserEntity user = userRepository.findByEmailIgnoreCase(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        return authDomainService.toUserDetails(user);
+        return auth.toUserDetails(user);
     }
 }

@@ -1,6 +1,6 @@
 package com.zeki.demo.users.repository.jpa;
 
-import com.zeki.demo.users.entity.User;
+import com.zeki.demo.users.entity.UserEntity;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -16,17 +16,17 @@ public class UserRepositoryJpaAdapter implements com.zeki.demo.users.repository.
     }
 
     @Override
-    public User save(User user) {
+    public UserEntity save(UserEntity user) {
         return userRepoJPA.save(user);
     }
 
     @Override
-    public Optional<User> findById(UUID id) {
+    public Optional<UserEntity> findById(UUID id) {
         return userRepoJPA.findById(id);
     }
 
     @Override
-    public Optional<User> findByEmailIgnoreCase(String email) {
+    public Optional<UserEntity> findByEmailIgnoreCase(String email) {
         return userRepoJPA.findByEmailIgnoreCase(email);
     }
 

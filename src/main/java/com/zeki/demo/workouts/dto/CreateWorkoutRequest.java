@@ -1,24 +1,31 @@
 package com.zeki.demo.workouts.dto;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
-
 import java.time.LocalDate;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class CreateWorkoutRequest {
 
     @NotBlank
-    private String name;
-
+    private String workoutName;
     @NotNull
     private LocalDate workoutDate;
-
     @NotNull
-    @Min(1)
     private Integer durationMinutes;
-
     private String notes;
+
+
+    public CreateWorkoutRequest(String workoutName, LocalDate workoutDate, Integer durationMinutes, String notes) {
+
+        this.workoutName = workoutName;
+        this.workoutDate = workoutDate;
+        this.durationMinutes = durationMinutes;
+        this.notes = notes;
+    }
+
+
 }

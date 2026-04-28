@@ -1,13 +1,17 @@
 package com.zeki.demo.users.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
-public class CurrentUserResponse {
+@Builder
+public class UserResponse {
     private UUID id;
     private String fullName;
     private String email;

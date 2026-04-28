@@ -1,13 +1,12 @@
 package com.zeki.demo.service;
 
-import com.zeki.demo.auth.domain.AuthDomainService;
-import com.zeki.demo.users.domain.UserDomainService;
+import com.zeki.demo.auth.domain.Auth;
+import com.zeki.demo.users.domain.User;
 import com.zeki.demo.auth.dto.AuthRequest;
 import com.zeki.demo.auth.dto.AuthResponse;
 import com.zeki.demo.auth.dto.RegisterRequest;
 import com.zeki.demo.common.exception.ConflictException;
 import com.zeki.demo.common.exception.UnauthorizedException;
-import com.zeki.demo.users.entity.User;
 import com.zeki.demo.auth.mapper.AuthMapper;
 import com.zeki.demo.auth.service.AuthService;
 import com.zeki.demo.users.mapper.UserMapper;
@@ -54,10 +53,10 @@ class AuthServiceTest {
     private AuthenticationManager authenticationManager;
 
     @Spy
-    private AuthDomainService authDomainService = new AuthDomainService();
+    private Auth auth = new Auth();
 
     @Spy
-    private UserDomainService userDomainService = new UserDomainService();
+    private User user = new User();
 
     @Spy
     private AuthMapper authMapper = new AuthMapper();
@@ -98,7 +97,7 @@ class AuthServiceTest {
         request.setEmail("test@example.com");
         request.setPassword("wrong-password");
 
-        User user = User.builder()
+        com.zeki.demo.users.entity.UserEntity user = com.zeki.demo.users.entity.UserEntity.builder()
                 .id(UUID.randomUUID())
                 .fullName("Test User")
                 .email("test@example.com")
@@ -120,7 +119,7 @@ class AuthServiceTest {
         request.setEmail("TEST@Example.com");
         request.setPassword("StrongPassword123!");
 
-        User user = User.builder()
+        com.zeki.demo.users.entity.UserEntity user = com.zeki.demo.users.entity.UserEntity.builder()
                 .id(UUID.randomUUID())
                 .fullName("Test User")
                 .email("test@example.com")
