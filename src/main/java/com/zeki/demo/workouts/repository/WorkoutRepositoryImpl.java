@@ -42,7 +42,7 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
 
     @Override
     public List<Workout> findAllByUserEmail(String userEmail) {
-        return workoutRepoJPA.findAllByUserEmailOrderByWorkoutDateDescIdDesc(userEmail)
+        return workoutRepoJPA.findAllByUserEmailOrderByWorkoutDateDescWorkoutIdDesc(userEmail)
                 .stream()
                 .map(workoutEntityDomain::toDomain)
                 .toList();
