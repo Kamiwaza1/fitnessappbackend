@@ -70,11 +70,16 @@ tasks.named('jacocoTestReport') {
 
 sonar {
     properties{
+        def sonarHostUrl = findProperty("sonar.host.url") ?: System.getenv("SONAR_HOST_URL") ?: "http://localhost:9000"
+        def sonarToken = findProperty("sonar.token") ?: System.getenv("SONAR_TOKEN")
+
         property "sonar.projectName", "FitnessApp"
         property "sonar.projectKey", "FitnessApp"
 		property 'sonar.qualitygate.wait', 'true'
-        property "sonar.host.url", "http://localhost:9000"
-        property "sonar.token", "sqp_62c3ddb1fc7d114fa4125790333f9cbc6ca51c7d"
+        property "sonar.host.url", sonarHostUrl
+        if (sonarToken) {
+            property "sonar.token", sonarToken
+        }
         property "sonar.coverage.jacoco.xmlReportPaths",
                 layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile.absolutePath
     }
