@@ -1,8 +1,6 @@
 package com.zeki.demo.workouts.mapperEntityDomain;
 
-import com.zeki.demo.users.domain.User;
 import com.zeki.demo.users.entity.UserEntity;
-import com.zeki.demo.users.mapperDtoDomain.UserDtoDomain;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.entity.WorkoutEntity;
 import org.springframework.stereotype.Component;
@@ -10,13 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class WorkoutEntityDomain {
 
-    private final UserDtoDomain userDtoDomain;
-
-    public WorkoutEntityDomain(UserDtoDomain userDtoDomain) {
-        this.userDtoDomain = userDtoDomain;
-    }
-
-    public WorkoutEntity toEntity(Workout workout, User user) {
+    public WorkoutEntity toEntity(Workout workout, UserEntity user) {
         return WorkoutEntity.builder()
                 .workoutId(workout.getWorkoutId())
                 .workoutName(workout.getWorkoutName())
@@ -27,7 +19,8 @@ public class WorkoutEntityDomain {
                 .workoutDate(workout.getWorkoutDate())
                 .durationMinutes(workout.getDurationMinutes())
                 .notes(workout.getNotes())
-                .user(userDtoDomain.toEntity(user))
+                .userEmail(workout.getUserEmail())
+                .user(user)
                 .build();
     }
 

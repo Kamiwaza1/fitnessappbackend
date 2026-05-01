@@ -24,7 +24,6 @@ public class WorkoutDtoDomain {
                 .category(workout.getCategory())
                 .updatedAt(workout.getUpdatedAt())
                 .createdAt(workout.getCreatedAt())
-                .userEmail(workout.getUserEmail())
                 .build();
     }
 

@@ -52,6 +52,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(normalizedEmail)
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role("USER")
+                .isActive(true)
                 .build();
 
         UserEntity saved = userRepoJPA.save(user);
@@ -74,7 +75,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Email is required");
         }
 
-        UserEntity user = userRepoJPA.findByEmailIgnoreCase(normalizedEmail)
+        UserEntity user = userRepoJPA.findByEmailIgnoreCaseAndIsActiveTrue(normalizedEmail)
                 .orElseThrow(() -> new UnauthorizedException("No account found with this email"));
 
         try {

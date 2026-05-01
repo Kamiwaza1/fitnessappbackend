@@ -39,8 +39,11 @@ public class WorkoutController {
     @Operation(summary = "Get all workouts for the current user")
     @ApiResponse(responseCode = "200", description = "List of workouts for the current user")
     @GetMapping
-    public List<WorkoutResponse> getMyWorkouts(String userEmail) {
-        return workoutService.getMyWorkouts(userEmail);
+    public List<WorkoutResponse> getMyWorkouts(Authentication authentication) {
+        return workoutService.getMyWorkouts(authentication.getName())
+                .stream()
+                .map(workoutDtoDomain::toResponse)
+                .toList();
     }
 
     @Operation(summary = "Get a workout by ID for the current user")
@@ -50,7 +53,7 @@ public class WorkoutController {
     })
     @GetMapping("/{workoutId}")
     public WorkoutResponse getWorkoutById(@PathVariable UUID workoutId) {
-        return workoutService.getWorkoutById(workoutId);
+        return workoutDtoDomain.toResponse(workoutService.getWorkoutById(workoutId));
     }
 
     @Operation(summary = "Create a new workout for the current user")

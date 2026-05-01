@@ -30,6 +30,10 @@ public class Workout {
             LocalDate updatedAt,
             String userEmail
     ) {
+        if (category == null) {
+            throw new IllegalArgumentException("Workout category is required");
+        }
+
         this.workoutId = workoutId;
         this.workoutName = normalize(workoutName);
         this.workoutDate = workoutDate;

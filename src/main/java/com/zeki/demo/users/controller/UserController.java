@@ -1,11 +1,7 @@
 package com.zeki.demo.users.controller;
 
-import com.zeki.demo.users.dto.AuthRequest;
-import com.zeki.demo.users.dto.AuthResponse;
-import com.zeki.demo.users.dto.RegisterRequest;
 import com.zeki.demo.users.dto.UpdateUserRequest;
 import com.zeki.demo.users.dto.UserResponse;
-import com.zeki.demo.users.service.AuthService;
 import com.zeki.demo.users.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -25,29 +21,6 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private final AuthService authService;
-
-    @Operation(summary = "Register a new user", description = "Creates a new user account")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "User registered successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input"),
-            @ApiResponse(responseCode = "409", description = "Email already exists")
-    })
-    @PostMapping("/register")
-    @ResponseStatus(HttpStatus.CREATED)
-    public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
-        return authService.register(request);
-    }
-
-    @Operation(summary = "Login user", description = "Authenticates user and returns token")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Login successful"),
-            @ApiResponse(responseCode = "401", description = "Invalid credentials")
-    })
-    @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
-        return ResponseEntity.ok(authService.login(request));
-    }
 
     @Operation(summary = "Get current user", description = "Returns the authenticated user's profile")
     @ApiResponses({
@@ -70,5 +43,16 @@ public class UserController {
             @Valid @RequestBody UpdateUserRequest request,
             Authentication authentication) {
         return ResponseEntity.ok(userService.updateUser(authentication.getName(), request));
+    }
+
+    @Operation(summary = "Delete current user", description = "Soft deletes the authenticated user's account")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "User deleted successfully"),
+            @ApiResponse(responseCode = "401", description = "Not authenticated")
+    })
+    @DeleteMapping("/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCurrentUser(Authentication authentication) {
+        userService.deleteCurrentUser(authentication.getName());
     }
 }

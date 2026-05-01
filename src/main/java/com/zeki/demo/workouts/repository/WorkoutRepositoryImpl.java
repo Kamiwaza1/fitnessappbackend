@@ -2,7 +2,7 @@ package com.zeki.demo.workouts.repository;
 
 import com.zeki.demo.common.exception.NotFoundException;
 import com.zeki.demo.users.entity.UserEntity;
-import com.zeki.demo.users.repository.UserRepository;
+import com.zeki.demo.users.repository.jpa.UserRepoJPA;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.entity.WorkoutEntity;
 import com.zeki.demo.workouts.mapperEntityDomain.WorkoutEntityDomain;
@@ -20,12 +20,12 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
 
     private final WorkoutRepoJPA workoutRepoJPA;
     private final WorkoutEntityDomain workoutEntityDomain;
-    private final UserRepository userRepository;
+    private final UserRepoJPA userRepoJPA;
 
 
     @Override
     public Workout save(Workout workout) {
-        UserEntity user = userRepository.findByEmailIgnoreCase(workout.getUserEmail())
+        UserEntity user = userRepoJPA.findByEmailIgnoreCaseAndIsActiveTrue(workout.getUserEmail())
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         WorkoutEntity workoutEntity = workoutEntityDomain.toEntity(workout, user);

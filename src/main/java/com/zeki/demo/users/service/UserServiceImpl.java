@@ -1,5 +1,7 @@
 package com.zeki.demo.users.service;
 
+import com.zeki.demo.common.exception.BadRequestException;
+import com.zeki.demo.common.exception.ConflictException;
 import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.users.domain.UserValidator;
 import com.zeki.demo.users.dto.UpdateUserRequest;
@@ -12,8 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,41 +27,49 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse getCurrentUser(String email) {
         String normalizedEmail = UserValidator.normalizeEmail(email);
-        UserEntity user = userRepoJPA.findByEmailIgnoreCase(normalizedEmail)
+        UserEntity user = userRepoJPA.findByEmailIgnoreCaseAndIsActiveTrue(normalizedEmail)
                 .orElseThrow(() -> new UnauthorizedException("User not found"));
         return userDtoDomain.toUserResponse(user);
     }
 
     @Override
-    public Optional<UserResponse> getUserById(UUID id) {
-        return userRepoJPA.findById(id).map(userDtoDomain::toUserResponse);
-    }
-
-    @Override
     public UserResponse updateUser(String email, UpdateUserRequest request) {
         String normalizedEmail = UserValidator.normalizeEmail(email);
-        UserEntity user = userRepoJPA.findByEmailIgnoreCase(normalizedEmail)
+        UserEntity user = userRepoJPA.findByEmailIgnoreCaseAndIsActiveTrue(normalizedEmail)
                 .orElseThrow(() -> new UnauthorizedException("User not found"));
+
+        String updatedEmail = UserValidator.normalizeEmail(request.getEmail());
+        if (updatedEmail.isBlank()) {
+            throw new BadRequestException("Email is required");
+        }
+
+        if (!normalizedEmail.equals(updatedEmail)
+                && userRepoJPA.existsByEmailIgnoreCaseAndIsActiveTrue(updatedEmail)) {
+            throw new ConflictException("An account with this email already exists");
+        }
 
         List<String> passwordIssues = userValidator.getPasswordIssues(request.getPassword());
         if (!passwordIssues.isEmpty()) {
-            throw new com.zeki.demo.common.exception.BadRequestException(
+            throw new BadRequestException(
                     "Password is not strong enough: " + String.join(", ", passwordIssues));
         }
 
-        UserEntity updated = UserEntity.builder()
-                .id(user.getId())
-                .fullName(UserValidator.resolveFullName(request.getFullName(), normalizedEmail))
-                .email(UserValidator.normalizeEmail(request.getEmail()))
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(user.getRole())
-                .isActive(user.getIsActive())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .build();
+        user.setFullName(UserValidator.resolveFullName(request.getFullName(), updatedEmail));
+        user.setEmail(updatedEmail);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        UserEntity saved = userRepoJPA.save(updated);
+        UserEntity saved = userRepoJPA.save(user);
         return userDtoDomain.toUserResponse(saved);
     }
-}
 
+    @Override
+    public void deleteCurrentUser(String email) {
+        String normalizedEmail = UserValidator.normalizeEmail(email);
+        UserEntity user = userRepoJPA.findByEmailIgnoreCaseAndIsActiveTrue(normalizedEmail)
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
+
+        user.setIsActive(false);
+        user.setEmail("deleted+" + user.getId() + "-" + normalizedEmail);
+        userRepoJPA.save(user);
+    }
+}

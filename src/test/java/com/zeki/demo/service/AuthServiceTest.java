@@ -1,22 +1,21 @@
 package com.zeki.demo.service;
 
-import com.zeki.demo.auth.domain.Auth;
-import com.zeki.demo.users.domain.User;
-import com.zeki.demo.auth.dto.AuthRequest;
-import com.zeki.demo.auth.dto.AuthResponse;
-import com.zeki.demo.auth.dto.RegisterRequest;
 import com.zeki.demo.common.exception.ConflictException;
 import com.zeki.demo.common.exception.UnauthorizedException;
-import com.zeki.demo.auth.mapper.AuthMapper;
-import com.zeki.demo.auth.service.AuthService;
-import com.zeki.demo.users.mapper.UserMapper;
-import com.zeki.demo.users.repository.UserRepository;
-import com.zeki.demo.auth.security.JWTService;
+import com.zeki.demo.users.domain.UserValidator;
+import com.zeki.demo.users.dto.AuthRequest;
+import com.zeki.demo.users.dto.AuthResponse;
+import com.zeki.demo.users.dto.RegisterRequest;
+import com.zeki.demo.users.entity.UserEntity;
+import com.zeki.demo.users.repository.jpa.UserRepoJPA;
+import com.zeki.demo.users.security.JWTService;
+import com.zeki.demo.users.service.AuthServiceImpl;
+import java.util.Optional;
+import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -24,9 +23,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -41,7 +37,7 @@ import static org.mockito.Mockito.when;
 class AuthServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserRepoJPA userRepoJPA;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -52,60 +48,59 @@ class AuthServiceTest {
     @Mock
     private AuthenticationManager authenticationManager;
 
-    @Spy
-    private Auth auth = new Auth();
+    private AuthServiceImpl authService;
 
-    @Spy
-    private User user = new User();
-
-    @Spy
-    private AuthMapper authMapper = new AuthMapper();
-
-    @Spy
-    private UserMapper userMapper = new UserMapper();
-
-    @InjectMocks
-    private AuthService authService;
+    @BeforeEach
+    void setUp() {
+        authService = new AuthServiceImpl(
+                userRepoJPA,
+                passwordEncoder,
+                jwtService,
+                authenticationManager,
+                new UserValidator()
+        );
+    }
 
     @Test
-    void register_whenEmailAlreadyExistsIgnoringCase_throwsConflict() {
+    void registerWhenEmailAlreadyExistsIgnoringCaseThrowsConflict() {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("User@Example.com");
         request.setPassword("StrongPassword123!");
 
-        when(userRepository.existsByEmailIgnoreCase("user@example.com")).thenReturn(true);
+        when(userRepoJPA.existsByEmailIgnoreCase("user@example.com")).thenReturn(true);
 
         ConflictException ex = assertThrows(ConflictException.class, () -> authService.register(request));
         assertEquals("An account with this email already exists", ex.getMessage());
     }
 
     @Test
-    void login_whenEmailDoesNotExist_throwsUnauthorized() {
+    void loginWhenEmailDoesNotExistThrowsUnauthorized() {
         AuthRequest request = new AuthRequest();
         request.setEmail("missing@example.com");
         request.setPassword("StrongPassword123!");
 
-        when(userRepository.findByEmailIgnoreCase("missing@example.com")).thenReturn(Optional.empty());
+        when(userRepoJPA.findByEmailIgnoreCaseAndIsActiveTrue("missing@example.com")).thenReturn(Optional.empty());
 
         UnauthorizedException ex = assertThrows(UnauthorizedException.class, () -> authService.login(request));
         assertEquals("No account found with this email", ex.getMessage());
     }
 
     @Test
-    void login_whenPasswordIsWrong_throwsUnauthorized() {
+    void loginWhenPasswordIsWrongThrowsUnauthorized() {
         AuthRequest request = new AuthRequest();
         request.setEmail("test@example.com");
         request.setPassword("wrong-password");
 
-        com.zeki.demo.users.entity.UserEntity user = com.zeki.demo.users.entity.UserEntity.builder()
+        UserEntity user = UserEntity.builder()
                 .id(UUID.randomUUID())
                 .fullName("Test User")
                 .email("test@example.com")
                 .password("encoded-password")
                 .role("USER")
+                .isActive(true)
                 .build();
 
-        when(userRepository.findByEmailIgnoreCase("test@example.com")).thenReturn(Optional.of(user));
+        when(userRepoJPA.findByEmailIgnoreCaseAndIsActiveTrue("test@example.com")).thenReturn(Optional.of(user));
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(new BadCredentialsException("Bad credentials"));
 
@@ -114,20 +109,21 @@ class AuthServiceTest {
     }
 
     @Test
-    void login_whenCredentialsAreValid_returnsTokenAndUserInfo() {
+    void loginWhenCredentialsAreValidReturnsTokenAndUserInfo() {
         AuthRequest request = new AuthRequest();
         request.setEmail("TEST@Example.com");
         request.setPassword("StrongPassword123!");
 
-        com.zeki.demo.users.entity.UserEntity user = com.zeki.demo.users.entity.UserEntity.builder()
+        UserEntity user = UserEntity.builder()
                 .id(UUID.randomUUID())
                 .fullName("Test User")
                 .email("test@example.com")
                 .password("encoded-password")
                 .role("USER")
+                .isActive(true)
                 .build();
 
-        when(userRepository.findByEmailIgnoreCase("test@example.com")).thenReturn(Optional.of(user));
+        when(userRepoJPA.findByEmailIgnoreCaseAndIsActiveTrue("test@example.com")).thenReturn(Optional.of(user));
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(mock(Authentication.class));
         when(jwtService.generateToken(any(UserDetails.class), eq("USER"))).thenReturn("jwt-token");
