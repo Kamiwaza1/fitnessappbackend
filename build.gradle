@@ -71,7 +71,8 @@ tasks.named('jacocoTestReport') {
 sonar {
     properties{
         property "sonar.projectName", "FitnessApp"
-        property "sonar.projectKey", "FitnessApp01"
+        property "sonar.projectKey", "FitnessApp"
+		property 'sonar.qualitygate.wait', 'true'
         property "sonar.host.url", "http://localhost:9000"
         property "sonar.token", "sqp_62c3ddb1fc7d114fa4125790333f9cbc6ca51c7d"
         property "sonar.coverage.jacoco.xmlReportPaths",
