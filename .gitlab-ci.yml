@@ -1,23 +1,27 @@
-default:
-  hooks:
-    pre_get_sources_script:
-      - $env:GIT_CONFIG_NOSYSTEM=''
-
 stages:
-  - test
   - build
+  - test
+  - quality
+  - docker
 
 variables:
-  GRADLE_USER_HOME: "C:\\gitlab-runner-cache\\gradle\\$CI_PROJECT_NAME"
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle-home/$CI_JOB_ID"
 
 before_script:
   - java -version
-  - .\gradlew.bat --version
+  - chmod +x ./gradlew
+  - mkdir -p "$GRADLE_USER_HOME"
+  - ./gradlew --no-daemon --version
+
+quality:
+  stage: quality
+  script:
+    - ./gradlew --no-daemon check
 
 test:
   stage: test
   script:
-    - .\gradlew.bat --no-daemon test
+    - ./gradlew --no-daemon test
   artifacts:
     when: always
     paths:
@@ -27,8 +31,19 @@ test:
 build:
   stage: build
   script:
-    - .\gradlew.bat --no-daemon clean bootJar -x test
+    - ./gradlew --no-daemon classes
+
+docker:
+  stage: docker
+  script:
+    - docker compose up --build -d
   artifacts:
     paths:
-      - build/libs/*.jar
+      - build/libs/
     expire_in: 1 week
+
+
+sonarqube-check-backend:
+  stage: quality
+  script:
+    - ./gradlew jacocoTestReport sonarqube --no-daemon
