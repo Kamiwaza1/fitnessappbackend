@@ -1,34 +1,43 @@
 package com.zeki.demo.users.domain;
 
-import com.zeki.demo.users.entity.UserEntity;
-import org.springframework.stereotype.Component;
+import java.util.UUID;
 
-import java.util.Locale;
-
-@Component
 public class User {
 
-    private static final String DEFAULT_ROLE = "USER";
+    private final UUID id;
+    private final String fullName;
+    private final String email;
+    private final String password;
+    private final Role role;
 
-    public String normalizeEmail(String email) {
-        return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
+    public User(UUID id, String fullName, String email, String password, Role role) {
+        this.id = id;
+        this.fullName = fullName;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
+    public User update(String username, String email) {
+        return new User(this.id, username, email, this.password, this.role);
     }
 
-    public String resolveFullName(String providedFullName, String normalizedEmail) {
-        if (providedFullName != null && !providedFullName.isBlank()) {
-            return providedFullName.trim();
-        }
-
-        int atIndex = normalizedEmail.indexOf('@');
-        return atIndex > 0 ? normalizedEmail.substring(0, atIndex) : normalizedEmail;
+    public UUID getId() {
+        return id;
     }
 
-    public UserEntity buildRegisteredUser(String fullName, String normalizedEmail, String encodedPassword) {
-        return UserEntity.builder()
-                .fullName(fullName)
-                .email(normalizedEmail)
-                .password(encodedPassword)
-                .role(DEFAULT_ROLE)
-                .build();
+    public String getFullName() {
+        return fullName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public Role getRole() {
+        return role;
     }
 }

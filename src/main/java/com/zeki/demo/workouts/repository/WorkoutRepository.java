@@ -9,18 +9,9 @@ import java.util.UUID;
 
 public interface WorkoutRepository {
 
-    Workout save(String userEmail, UUID workoutId);
-
-
-    Workout save(String userEmail, Workout workout);
-
-    Workout update(UUID workoutId);
-
-    Workout save(String userEmail);
-
-    Workout save(Workout workout, String userEmail);
-
     Optional<Workout> getWorkoutById(UUID workoutId);
+
+    Workout save(Workout workout);
 
     List<Workout> findAllByUserEmail(String userEmail);
 

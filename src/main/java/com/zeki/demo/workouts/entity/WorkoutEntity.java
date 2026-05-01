@@ -1,8 +1,11 @@
 package com.zeki.demo.workouts.entity;
 
 import com.zeki.demo.users.entity.UserEntity;
+import com.zeki.demo.workouts.enums.WorkoutCategory;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,11 +13,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.*;
-
-
 import java.time.LocalDate;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "workouts")
@@ -30,18 +35,15 @@ public class WorkoutEntity {
     @Column(columnDefinition = "uuid")
     private UUID workoutId;
 
-
     @Column(name = "name", nullable = false)
-    private String name;
+    private String workoutName;
 
     @Column(name = "description")
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false)
-    private String category;
-
-    @Column(name = "is_public", nullable = false)
-    private Boolean isPublic;
+    private WorkoutCategory category;
 
     @Column(name = "created_at", nullable = false)
     private LocalDate createdAt;
@@ -49,6 +51,8 @@ public class WorkoutEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDate updatedAt;
 
+    @Column(name = "user_email", nullable = false)
+    private String userEmail;
 
     @Column(name = "workout_date", nullable = false)
     private LocalDate workoutDate;
@@ -62,20 +66,4 @@ public class WorkoutEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
-
-
-    public void patch(String name, LocalDate workoutDate, Integer durationMinutes, String notes) {
-        if (name != null) {
-            this.name = name;
-        }
-        if (workoutDate != null) {
-            this.workoutDate = workoutDate;
-        }
-        if (durationMinutes != null) {
-            this.durationMinutes = durationMinutes;
-        }
-        if (notes != null) {
-            this.notes = notes;
-        }
-    }
 }

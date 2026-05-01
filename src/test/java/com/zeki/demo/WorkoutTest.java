@@ -1,104 +1,92 @@
 package com.zeki.demo;
 
+import com.zeki.demo.workouts.domain.Workout;
+import com.zeki.demo.workouts.dto.CreateWorkoutRequest;
 import com.zeki.demo.workouts.dto.WorkoutResponse;
+import com.zeki.demo.workouts.enums.WorkoutCategory;
 import com.zeki.demo.workouts.mapperDtoDomain.WorkoutDtoDomain;
-import com.zeki.demo.workouts.repository.WorkoutRepository;
-import com.zeki.demo.workouts.service.WorkoutServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class WorkoutTest {
 
-    @Mock
-    private WorkoutDtoDomain workoutDtoDomain;
-    @Mock
-    private WorkoutRepository workoutRepository;
-    private WorkoutServiceImpl workoutService;
+    private final WorkoutDtoDomain workoutDtoDomain = new WorkoutDtoDomain();
 
-    //no need for new the mock object.In this case only service interface is normal
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        workoutService = new WorkoutServiceImpl( workoutRepository, workoutDtoDomain);
+    @Test
+    void toDomainUsesProvidedWorkoutCategory() {
+        CreateWorkoutRequest request = new CreateWorkoutRequest(
+                "Leg Day",
+                LocalDate.of(2026, 5, 16),
+                60,
+                "Heavy squats",
+                "Lower body session",
+                WorkoutCategory.STRENGTH,
+                UUID.randomUUID()
+        );
+
+        Workout workout = workoutDtoDomain.toDomain(request, "test@example.com");
+
+        assertEquals(WorkoutCategory.STRENGTH, workout.getCategory());
+        assertEquals("test@example.com", workout.getUserEmail());
     }
 
     @Test
-    void createWorkoutReturnsCreatedWorkoutName() {
-        Workout createWorkout = new CreateWorkout(
-                "Leg Day",
-                LocalDate.of(2026, 5, 16),
-                60,
-                "a"
-
-        );
-
-        UUID workoutId = UUID.randomUUID();
-
-        WorkoutResponse response = new WorkoutResponse(
-                workoutId,
-                LocalDate.of(2026, 5, 16),
-                60,
-                "Leg Day",
-                "a",
+    void toDomainDefaultsCategoryToGeneral() {
+        CreateWorkoutRequest request = new CreateWorkoutRequest(
+                "Run",
+                LocalDate.of(2026, 5, 17),
+                30,
+                "Easy pace",
+                "Morning run",
                 null,
-
+                UUID.randomUUID()
         );
 
-        Mockito.when(workoutRepository.existsByUserEmailAndWorkoutDate("test@example.com", request.getWorkoutDate(), request.getWorkoutName())).thenReturn(false);
-        Mockito.when(workoutDtoDomain.toDto(Mockito.any())).thenReturn(response);
+        Workout workout = workoutDtoDomain.toDomain(request, "test@example.com");
 
-        WorkoutResponse actual = workoutService.createWorkout("test@example.com", );
-
-        assertEquals("Leg Day", actual.getWorkoutName());
-
+        assertEquals(WorkoutCategory.GENERAL, workout.getCategory());
     }
 
     @Test
-    void getMyWorkoutsReturnsWorkoutList() {
-        Authentication authentication = new UsernamePasswordAuthenticationToken("test@example.com", null);
-        List<WorkoutResponse> response = List.of(
-                new WorkoutResponse(
-                        UUID.randomUUID(),
+    void responseExposesEnumCategory() {
+        Workout workout = new Workout(
+                "Leg Day",
+                LocalDate.of(2026, 5, 16),
+                60,
+                "Heavy squats",
+                UUID.randomUUID(),
+                "Lower body session",
+                WorkoutCategory.STRENGTH,
+                LocalDate.of(2026, 4, 23),
+                LocalDate.of(2026, 4, 23),
+                "test@example.com"
+        );
+
+        WorkoutResponse response = workoutDtoDomain.toResponse(workout);
+
+        assertEquals(WorkoutCategory.STRENGTH, response.getCategory());
+    }
+
+    @Test
+    void workoutRejectsNullCategory() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new Workout(
+                        "Leg Day",
                         LocalDate.of(2026, 5, 16),
                         60,
-                        "Leg Day",
                         "Heavy squats",
-                        null,
-                        "General",
-                        Boolean.FALSE,
-                        LocalDate.of(2026, 4, 23),
-                        LocalDate.of(2026, 4, 23)
-                ),
-                new WorkoutResponse(
                         UUID.randomUUID(),
-                        LocalDate.of(2026, 5, 17),
-                        30,
-                        "Run",
-                        "Easy pace",
+                        "Lower body session",
                         null,
-                        "General",
-                        Boolean.FALSE,
                         LocalDate.of(2026, 4, 23),
-                        LocalDate.of(2026, 4, 23)
+                        LocalDate.of(2026, 4, 23),
+                        "test@example.com"
                 )
         );
-
-        Mockito.when(workoutService.getMyWorkouts("test@example.com")).thenReturn(response);
-
-        List<WorkoutResponse> actual = workoutController.getMyWorkouts(authentication);
-
-        assertEquals(2, actual.size());
-        Mockito.verify(workoutService).getMyWorkouts("test@example.com");
     }
 }

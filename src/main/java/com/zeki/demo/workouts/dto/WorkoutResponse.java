@@ -1,16 +1,12 @@
 package com.zeki.demo.workouts.dto;
 
+import com.zeki.demo.workouts.enums.WorkoutCategory;
 import java.time.LocalDate;
-
 import java.util.UUID;
-
-
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-
 
 @Getter
 @Setter
@@ -23,9 +19,7 @@ public class WorkoutResponse {
     private String workoutName;
     private String notes;
     private String description;
-    private String category;
-    private Boolean isPublic;
+    private WorkoutCategory category;
     private LocalDate updatedAt;
     private LocalDate createdAt;
-
 }
