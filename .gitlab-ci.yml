@@ -40,11 +40,6 @@ docker:
     expire_in: 4 week
 
 
-sonarqube-check-backend:
-  stage: quality
-  script:
-    - ./gradlew jacocoTestReport sonarqube --no-daemon
-
 build-sonar:
   image: gradle:8.10.0-jdk17-jammy
   stage: build-sonar
