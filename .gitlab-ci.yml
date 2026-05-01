@@ -5,8 +5,8 @@ stages:
   - docker
 
 variables:
-  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle-home/$CI_JOB_ID"
-  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle-home"
+  SONAR_USER_HOME: "$CI_PROJECT_DIR/.sonar"
   GIT_DEPTH: "0"
 
 before_script:
@@ -15,20 +15,43 @@ before_script:
   - mkdir -p "$GRADLE_USER_HOME"
   - ./gradlew --no-daemon --version
 
-test:
-  stage: test
-  script:
-    - ./gradlew --no-daemon test
-  artifacts:
-    when: always
-    paths:
-      - build/reports/tests/test/
-    expire_in: 4 week
-
 build:
   stage: build
   script:
     - ./gradlew --no-daemon classes
+
+test:
+  stage: test
+  script:
+    - ./gradlew --no-daemon test jacocoTestReport
+  artifacts:
+    when: always
+    paths:
+      - build/reports/tests/test/
+      - build/reports/jacoco/test/html/
+      - build/reports/jacoco/test/jacocoTestReport.xml
+    expire_in: 4 weeks
+
+build-sonar:
+  stage: build-sonar
+  needs:
+    - job: test
+      artifacts: true
+  cache:
+    policy: pull-push
+    key: "sonar-cache-$CI_COMMIT_REF_SLUG"
+    paths:
+      - "$SONAR_USER_HOME/cache"
+  script:
+    - ./gradlew --no-daemon sonar
+  allow_failure: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "Auth"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "Development"'
+    - if: '$CI_COMMIT_BRANCH == "Workouts"'
+    - if: '$CI_COMMIT_BRANCH == "Nutrition"'
 
 docker:
   stage: docker
@@ -37,25 +60,4 @@ docker:
   artifacts:
     paths:
       - build/libs/
-    expire_in: 4 week
-
-
-build-sonar:
-  image: gradle:8.10.0-jdk17-jammy
-  stage: build-sonar
-  cache:
-    policy: pull-push
-    key: "sonar-cache-$CI_COMMIT_REF_SLUG"
-    paths:
-      - "${SONAR_USER_HOME}/cache"
-      - sonar-scanner/
-  script:
-    - ./gradle sonar
-  allow_failure: true
-  rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-    - if: $CI_COMMIT_BRANCH == 'Auth'
-    - if: $CI_COMMIT_BRANCH == 'main'
-    - if: $CI_COMMIT_BRANCH == 'Development'
-    - if: $CI_COMMIT_BRANCH == 'Workouts'
-    - if: $CI_COMMIT_BRANCH == 'Nutrition'
+    expire_in: 4 weeks
