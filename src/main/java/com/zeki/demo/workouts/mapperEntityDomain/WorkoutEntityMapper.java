@@ -6,7 +6,7 @@ import com.zeki.demo.workouts.entity.WorkoutEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class WorkoutEntityDomain {
+public class WorkoutEntityMapper {
 
     public WorkoutEntity toEntity(Workout workout, UserEntity user) {
         return WorkoutEntity.builder()
@@ -24,18 +24,18 @@ public class WorkoutEntityDomain {
                 .build();
     }
 
-    public Workout toDomain(WorkoutEntity workoutEntity) {
+    public Workout toDomain(WorkoutEntity entity) {
         return new Workout(
-                workoutEntity.getWorkoutName(),
-                workoutEntity.getWorkoutDate(),
-                workoutEntity.getDurationMinutes(),
-                workoutEntity.getNotes(),
-                workoutEntity.getWorkoutId(),
-                workoutEntity.getDescription(),
-                workoutEntity.getCategory(),
-                workoutEntity.getCreatedAt(),
-                workoutEntity.getUpdatedAt(),
-                workoutEntity.getUserEmail()
+                entity.getWorkoutName(),
+                entity.getWorkoutDate(),
+                entity.getDurationMinutes(),
+                entity.getNotes(),
+                entity.getWorkoutId(),
+                entity.getDescription(),
+                entity.getCategory(),
+                entity.getCreatedAt(),
+                entity.getUpdatedAt(),
+                entity.getUserEmail()
         );
     }
 }

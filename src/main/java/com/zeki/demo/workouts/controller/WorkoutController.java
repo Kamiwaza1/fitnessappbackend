@@ -5,15 +5,16 @@ import com.zeki.demo.workouts.dto.UpdateWorkoutRequest;
 import com.zeki.demo.workouts.dto.WorkoutResponse;
 import com.zeki.demo.workouts.mapperDtoDomain.WorkoutDtoDomain;
 import com.zeki.demo.workouts.service.WorkoutService;
-import com.zeki.demo.workouts.domain.Workout;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -23,9 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/workouts")
@@ -64,9 +62,13 @@ public class WorkoutController {
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public WorkoutResponse createWorkout(@Valid @RequestBody  CreateWorkoutRequest createWorkoutRequest, Authentication authentication) {
-        Workout workout = workoutDtoDomain.toDomain(createWorkoutRequest, authentication.getName());
-        return workoutDtoDomain.toResponse(workoutService.createWorkout(workout));
+    public WorkoutResponse createWorkout(
+            @Valid @RequestBody CreateWorkoutRequest request,
+            Authentication authentication
+    ) {
+        return workoutDtoDomain.toResponse(
+                workoutService.createWorkout(workoutDtoDomain.toDomain(request, authentication.getName()))
+        );
     }
 
     @Operation(summary = "Update an existing workout for the current user")
@@ -76,10 +78,12 @@ public class WorkoutController {
             @ApiResponse(responseCode = "404", description = "Workout not found")
     })
     @PatchMapping("/{workoutId}")
-    public WorkoutResponse updateWorkout(@PathVariable UUID workoutId,
-                                 @Valid @RequestBody UpdateWorkoutRequest updateWorkoutRequest) {
-        Workout workout = workoutService.updateWorkout(workoutId, updateWorkoutRequest);
-        return workoutDtoDomain.toResponse(workout);
+    public WorkoutResponse updateWorkout(
+            @PathVariable UUID workoutId,
+            @Valid @RequestBody UpdateWorkoutRequest request,
+            Authentication authentication
+    ) {
+        return workoutDtoDomain.toResponse(workoutService.updateWorkout(workoutId, request, authentication.getName()));
     }
 
     @Operation(summary = "Delete an existing workout for the current user")

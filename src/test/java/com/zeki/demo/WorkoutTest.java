@@ -68,25 +68,24 @@ class WorkoutTest {
 
         WorkoutResponse response = workoutDtoDomain.toResponse(workout);
 
-        assertEquals(WorkoutCategory.STRENGTH, response.getCategory());
+        assertEquals(WorkoutCategory.STRENGTH, response.category());
     }
 
     @Test
     void workoutRejectsNullCategory() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new Workout(
-                        "Leg Day",
-                        LocalDate.of(2026, 5, 16),
-                        60,
-                        "Heavy squats",
-                        UUID.randomUUID(),
-                        "Lower body session",
-                        null,
-                        LocalDate.of(2026, 4, 23),
-                        LocalDate.of(2026, 4, 23),
-                        "test@example.com"
-                )
+        Workout workout = new Workout(
+                "Leg Day",
+                LocalDate.of(2026, 5, 16),
+                60,
+                "Heavy squats",
+                UUID.randomUUID(),
+                "Lower body session",
+                null,
+                LocalDate.of(2026, 4, 23),
+                LocalDate.of(2026, 4, 23),
+                "test@example.com"
         );
+
+        assertThrows(IllegalArgumentException.class, workout::validate);
     }
 }

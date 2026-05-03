@@ -11,4 +11,5 @@ public interface WorkoutRepoJPA extends JpaRepository<WorkoutEntity, UUID> {
     List<WorkoutEntity> findAllByUserEmailOrderByWorkoutDateDescWorkoutIdDesc(String email);
     Optional<WorkoutEntity> findById(UUID WorkoutId);
 
+    boolean existsByIdAndUserEmail(UUID workoutId, String userEmail);
 }

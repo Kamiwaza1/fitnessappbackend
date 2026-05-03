@@ -24,13 +24,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(of = "userId")
 public class UserEntity {
 
     @Id
     @Column(columnDefinition = "uuid")
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private UUID userId;
 
     @Column(name = "full_name")
     private String fullName;

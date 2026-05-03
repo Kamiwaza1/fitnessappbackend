@@ -3,13 +3,11 @@ package com.zeki.demo.users.service;
 import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.common.exception.ConflictException;
 import com.zeki.demo.common.exception.UnauthorizedException;
-import com.zeki.demo.users.domain.UserValidator;
-import com.zeki.demo.users.dto.AuthRequest;
-import com.zeki.demo.users.dto.AuthResponse;
-import com.zeki.demo.users.dto.RegisterRequest;
-import com.zeki.demo.users.entity.UserEntity;
-import com.zeki.demo.users.repository.jpa.UserRepoJPA;
+import com.zeki.demo.users.domain.User;
+import com.zeki.demo.users.repository.UserRepository;
 import com.zeki.demo.users.security.JWTService;
+import jakarta.transaction.Transactional;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,83 +16,51 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AuthServiceImpl implements AuthService {
 
-    private final UserRepoJPA userRepoJPA;
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final UserValidator userValidator;
+    private final UserRepository userRepository;
 
     @Override
-    public AuthResponse register(RegisterRequest request) {
-        String normalizedEmail = UserValidator.normalizeEmail(request.getEmail());
-        if (normalizedEmail.isBlank()) {
-            throw new BadRequestException("Email is required");
+    public User register(User user) {
+        user.validate();
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new ConflictException("An account with this email already exists");
         }
-
-        List<String> passwordIssues = userValidator.getPasswordIssues(request.getPassword());
+        List<String> passwordIssues = user.getPasswordIssues();
         if (!passwordIssues.isEmpty()) {
             throw new BadRequestException("Password is not strong enough: " + String.join(", ", passwordIssues));
         }
-
-        if (userRepoJPA.existsByEmailIgnoreCase(normalizedEmail)) {
-            throw new ConflictException("An account with this email already exists");
-        }
-
-        String fullName = UserValidator.resolveFullName(request.getFullName(), normalizedEmail);
-        UserEntity user = UserEntity.builder()
-                .fullName(fullName)
-                .email(normalizedEmail)
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role("USER")
-                .isActive(true)
-                .build();
-
-        UserEntity saved = userRepoJPA.save(user);
-        UserDetails userDetails = userValidator.toUserDetails(saved);
-        String token = jwtService.generateToken(userDetails, saved.getRole());
-
-        return AuthResponse.builder()
-                .token(token)
-                .fullName(saved.getFullName())
-                .email(saved.getEmail())
-                .role(saved.getRole())
-                .id(saved.getId())
-                .build();
+        user.setEncodedPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user);
     }
 
     @Override
-    public AuthResponse login(AuthRequest request) {
-        String normalizedEmail = UserValidator.normalizeEmail(request.getEmail());
+    public AuthenticatedUser login(User user) {
+        String normalizedEmail = User.normalizeEmail(user.getEmail());
         if (normalizedEmail.isBlank()) {
             throw new BadRequestException("Email is required");
         }
-
-        UserEntity user = userRepoJPA.findByEmailIgnoreCaseAndIsActiveTrue(normalizedEmail)
-                .orElseThrow(() -> new UnauthorizedException("No account found with this email"));
-
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getEmail(), request.getPassword())
+                    new UsernamePasswordAuthenticationToken(normalizedEmail, user.getPassword())
             );
-        } catch (AuthenticationException ex) {
+        } catch (AuthenticationException exception) {
             throw new UnauthorizedException("Invalid email or password");
         }
-
-        UserDetails userDetails = userValidator.toUserDetails(user);
-        String token = jwtService.generateToken(userDetails, user.getRole());
-
-        return AuthResponse.builder()
-                .token(token)
-                .fullName(user.getFullName())
-                .email(user.getEmail())
-                .role(user.getRole())
-                .id(user.getId())
+        User existingUser = userRepository.findActiveByEmail(normalizedEmail)
+                .orElseThrow(() -> new UnauthorizedException("No account found with this email"));
+        UserDetails userDetails = org.springframework.security.core.userdetails.User
+                .withUsername(existingUser.getEmail())
+                .password(existingUser.getPassword())
+                .authorities("ROLE_" + existingUser.getRole())
                 .build();
+        String accessToken = jwtService.generateToken(userDetails, existingUser.getRole());
+        return new AuthenticatedUser(existingUser, accessToken, accessToken);
     }
 }

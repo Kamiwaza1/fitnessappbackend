@@ -2,45 +2,59 @@ package com.zeki.demo.workouts.mapperDtoDomain;
 
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.dto.CreateWorkoutRequest;
+import com.zeki.demo.workouts.dto.UpdateWorkoutRequest;
 import com.zeki.demo.workouts.dto.WorkoutResponse;
 import com.zeki.demo.workouts.enums.WorkoutCategory;
 import java.time.LocalDate;
-import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
 public class WorkoutDtoDomain {
 
-    public static final WorkoutCategory DEFAULT_CATEGORY = WorkoutCategory.GENERAL;
+    private static final WorkoutCategory DEFAULT_CATEGORY = WorkoutCategory.GENERAL;
 
-    public WorkoutResponse toResponse(Workout workout) {
-        return WorkoutResponse.builder()
-                .workoutId(workout.getWorkoutId())
-                .workoutDate(workout.getWorkoutDate())
-                .durationMinutes(workout.getDurationMinutes())
-                .workoutName(workout.getWorkoutName())
-                .notes(workout.getNotes())
-                .description(workout.getDescription())
-                .category(workout.getCategory())
-                .updatedAt(workout.getUpdatedAt())
-                .createdAt(workout.getCreatedAt())
-                .build();
-    }
-
-    public Workout toDomain(CreateWorkoutRequest createWorkoutRequest, String userEmail) {
+    public Workout toDomain(CreateWorkoutRequest request, String userEmail) {
         LocalDate now = LocalDate.now();
-
         return new Workout(
-                createWorkoutRequest.getWorkoutName(),
-                createWorkoutRequest.getWorkoutDate(),
-                createWorkoutRequest.getDurationMinutes(),
-                createWorkoutRequest.getNotes(),
-                createWorkoutRequest.getWorkoutId(),
-                createWorkoutRequest.getDescription(),
-                createWorkoutRequest.getCategory() != null ? createWorkoutRequest.getCategory() : DEFAULT_CATEGORY,
+                request.workoutName(),
+                request.workoutDate(),
+                request.durationMinutes(),
+                request.notes(),
+                request.workoutId(),
+                request.description(),
+                request.category() != null ? request.category() : DEFAULT_CATEGORY,
                 now,
                 now,
                 userEmail
+        );
+    }
+
+    public Workout toUpdatedDomain(UpdateWorkoutRequest request, Workout existingWorkout) {
+        return new Workout(
+                request.workoutName() != null ? request.workoutName() : existingWorkout.getWorkoutName(),
+                request.workoutDate() != null ? request.workoutDate() : existingWorkout.getWorkoutDate(),
+                request.durationMinutes() != null ? request.durationMinutes() : existingWorkout.getDurationMinutes(),
+                request.notes() != null ? request.notes() : existingWorkout.getNotes(),
+                existingWorkout.getWorkoutId(),
+                request.description() != null ? request.description() : existingWorkout.getDescription(),
+                request.category() != null ? request.category() : existingWorkout.getCategory(),
+                existingWorkout.getCreatedAt(),
+                LocalDate.now(),
+                existingWorkout.getUserEmail()
+        );
+    }
+
+    public WorkoutResponse toResponse(Workout workout) {
+        return new WorkoutResponse(
+                workout.getWorkoutId(),
+                workout.getWorkoutDate(),
+                workout.getDurationMinutes(),
+                workout.getWorkoutName(),
+                workout.getNotes(),
+                workout.getDescription(),
+                workout.getCategory(),
+                workout.getUpdatedAt(),
+                workout.getCreatedAt()
         );
     }
 }
