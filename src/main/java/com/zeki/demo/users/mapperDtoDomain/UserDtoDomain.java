@@ -1,10 +1,12 @@
 package com.zeki.demo.users.mapperDtoDomain;
 
 import com.zeki.demo.users.domain.User;
+import com.zeki.demo.users.dto.AuthResponse;
 import com.zeki.demo.users.dto.LoginRequest;
 import com.zeki.demo.users.dto.RegisterRequest;
 import com.zeki.demo.users.dto.UpdateUserRequest;
 import com.zeki.demo.users.dto.UserResponse;
+import com.zeki.demo.users.service.AuthenticatedUser;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
 
@@ -57,6 +59,14 @@ public class UserDtoDomain {
                 User.resolveFullName(user.getFullName(), user.getEmail()),
                 user.getEmail(),
                 user.getRole()
+        );
+    }
+
+    public AuthResponse toAuthResponse(AuthenticatedUser authenticatedUser) {
+        return new AuthResponse(
+                authenticatedUser.accessToken(),
+                authenticatedUser.refreshToken(),
+                toResponse(authenticatedUser.user())
         );
     }
 }

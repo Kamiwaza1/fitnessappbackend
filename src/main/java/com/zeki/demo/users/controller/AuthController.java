@@ -3,6 +3,7 @@ package com.zeki.demo.users.controller;
 import com.zeki.demo.users.dto.*;
 import com.zeki.demo.users.mapperDtoDomain.UserDtoDomain;
 import com.zeki.demo.users.service.AuthService;
+import com.zeki.demo.users.service.AuthenticatedUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -34,7 +35,8 @@ public class AuthController {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
-        return authService.register(userDtoDomain.toDomain(request));
+        AuthenticatedUser authenticatedUser = authService.register(userDtoDomain.toDomain(request));
+        return userDtoDomain.toAuthResponse(authenticatedUser);
     }
 
     @Operation(summary = "Login user", description = "Authenticates user and returns token")
@@ -45,6 +47,7 @@ public class AuthController {
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
-        return authService.login(userDtoDomain.toDomain(request));
+        AuthenticatedUser authenticatedUser = authService.login(userDtoDomain.toDomain(request));
+        return userDtoDomain.toAuthResponse(authenticatedUser);
     }
 }

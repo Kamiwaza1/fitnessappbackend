@@ -4,8 +4,6 @@ import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.common.exception.ConflictException;
 import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.users.domain.User;
-import com.zeki.demo.users.dto.AuthResponse;
-import com.zeki.demo.users.dto.UserResponse;
 import com.zeki.demo.users.repository.UserRepository;
 import com.zeki.demo.users.security.JWTService;
 import jakarta.transaction.Transactional;
@@ -29,7 +27,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
 
     @Override
-    public AuthResponse register(User user) {
+    public AuthenticatedUser register(User user) {
         user.validate();
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new ConflictException("An account with this email already exists");
@@ -46,11 +44,11 @@ public class AuthServiceImpl implements AuthService {
                 .authorities("ROLE_" + savedUser.getRole())
                 .build();
         String accessToken = jwtService.generateToken(userDetails, savedUser.getRole());
-        return toAuthResponse(savedUser, accessToken, accessToken);
+        return new AuthenticatedUser(savedUser, accessToken, accessToken);
     }
 
     @Override
-    public AuthResponse login(User user) {
+    public AuthenticatedUser login(User user) {
         String normalizedEmail = User.normalizeEmail(user.getEmail());
         if (normalizedEmail.isBlank()) {
             throw new BadRequestException("Email is required");
@@ -70,19 +68,6 @@ public class AuthServiceImpl implements AuthService {
                 .authorities("ROLE_" + existingUser.getRole())
                 .build();
         String accessToken = jwtService.generateToken(userDetails, existingUser.getRole());
-        return toAuthResponse(existingUser, accessToken, accessToken);
-    }
-
-    private AuthResponse toAuthResponse(User user, String accessToken, String refreshToken) {
-        return new AuthResponse(
-                accessToken,
-                refreshToken,
-                new UserResponse(
-                        user.getUserId(),
-                        User.resolveFullName(user.getFullName(), user.getEmail()),
-                        user.getEmail(),
-                        user.getRole()
-                )
-        );
+        return new AuthenticatedUser(existingUser, accessToken, accessToken);
     }
 }
