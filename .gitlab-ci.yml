@@ -27,6 +27,8 @@ test:
   artifacts:
     when: always
     paths:
+      - build/classes/java/main/
+      - build/resources/main/
       - build/reports/tests/test/
       - build/reports/jacoco/test/html/
       - build/reports/jacoco/test/jacocoTestReport.xml
@@ -44,7 +46,7 @@ build-sonar:
       - "$SONAR_USER_HOME/cache"
   script:
       - echo "SONAR_TOKEN exists? ${SONAR_TOKEN:+yes}"
-      - ./gradlew --no-daemon sonar -Dsonar.token="$SONAR_TOKEN"
+      - ./gradlew --no-daemon classes sonar -Dsonar.token="$SONAR_TOKEN"
   allow_failure: true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
