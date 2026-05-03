@@ -48,6 +48,7 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/workouts/**").hasAnyRole("USER")
+                        .requestMatchers("/api/v1/nutrition/**").hasAnyRole("USER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
