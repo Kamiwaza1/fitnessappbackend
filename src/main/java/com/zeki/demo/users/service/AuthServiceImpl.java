@@ -4,6 +4,8 @@ import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.common.exception.ConflictException;
 import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.users.domain.User;
+import com.zeki.demo.users.dto.AuthResponse;
+import com.zeki.demo.users.dto.UserResponse;
 import com.zeki.demo.users.repository.UserRepository;
 import com.zeki.demo.users.security.JWTService;
 import jakarta.transaction.Transactional;
@@ -27,7 +29,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
 
     @Override
-    public User register(User user) {
+    public AuthResponse register(User user) {
         user.validate();
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new ConflictException("An account with this email already exists");
@@ -37,11 +39,18 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Password is not strong enough: " + String.join(", ", passwordIssues));
         }
         user.setEncodedPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        UserDetails userDetails = org.springframework.security.core.userdetails.User
+                .withUsername(savedUser.getEmail())
+                .password(savedUser.getPassword())
+                .authorities("ROLE_" + savedUser.getRole())
+                .build();
+        String accessToken = jwtService.generateToken(userDetails, savedUser.getRole());
+        return toAuthResponse(savedUser, accessToken, accessToken);
     }
 
     @Override
-    public AuthenticatedUser login(User user) {
+    public AuthResponse login(User user) {
         String normalizedEmail = User.normalizeEmail(user.getEmail());
         if (normalizedEmail.isBlank()) {
             throw new BadRequestException("Email is required");
@@ -61,6 +70,19 @@ public class AuthServiceImpl implements AuthService {
                 .authorities("ROLE_" + existingUser.getRole())
                 .build();
         String accessToken = jwtService.generateToken(userDetails, existingUser.getRole());
-        return new AuthenticatedUser(existingUser, accessToken, accessToken);
+        return toAuthResponse(existingUser, accessToken, accessToken);
+    }
+
+    private AuthResponse toAuthResponse(User user, String accessToken, String refreshToken) {
+        return new AuthResponse(
+                accessToken,
+                refreshToken,
+                new UserResponse(
+                        user.getUserId(),
+                        User.resolveFullName(user.getFullName(), user.getEmail()),
+                        user.getEmail(),
+                        user.getRole()
+                )
+        );
     }
 }

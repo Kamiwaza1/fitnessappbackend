@@ -28,7 +28,7 @@ import lombok.Setter;
 public class UserEntity {
 
     @Id
-    @Column(columnDefinition = "uuid")
+    @Column(name = "id", columnDefinition = "uuid")
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID userId;
 

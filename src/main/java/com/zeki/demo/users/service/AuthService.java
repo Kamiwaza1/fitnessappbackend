@@ -1,9 +1,10 @@
 package com.zeki.demo.users.service;
 
 import com.zeki.demo.users.domain.User;
+import com.zeki.demo.users.dto.AuthResponse;
 
 public interface AuthService {
-    User register(User user);
+    AuthResponse register(User user);
 
-    AuthenticatedUser login(User user);
+    AuthResponse login(User user);
 }

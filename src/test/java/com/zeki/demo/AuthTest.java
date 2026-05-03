@@ -3,9 +3,9 @@ package com.zeki.demo.service;
 import com.zeki.demo.common.exception.ConflictException;
 import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.users.domain.User;
+import com.zeki.demo.users.dto.AuthResponse;
 import com.zeki.demo.users.repository.UserRepository;
 import com.zeki.demo.users.security.JWTService;
-import com.zeki.demo.users.service.AuthenticatedUser;
 import com.zeki.demo.users.service.AuthServiceImpl;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -136,10 +136,10 @@ class AuthServiceTest {
         when(userRepository.findActiveByEmail("test@example.com")).thenReturn(Optional.of(storedUser));
         when(jwtService.generateToken(any(UserDetails.class), eq("USER"))).thenReturn("jwt-token");
 
-        AuthenticatedUser response = authService.login(loginUser);
+        AuthResponse response = authService.login(loginUser);
 
         assertEquals("jwt-token", response.accessToken());
-        assertEquals("test@example.com", response.user().getEmail());
+        assertEquals("test@example.com", response.user().email());
         verify(authenticationManager).authenticate(
                 argThat(token -> "test@example.com".equals(token.getPrincipal()))
         );

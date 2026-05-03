@@ -2,7 +2,6 @@ package com.zeki.demo.users.mapperDtoDomain;
 
 import com.zeki.demo.users.domain.User;
 import com.zeki.demo.users.dto.LoginRequest;
-import com.zeki.demo.users.dto.LoginResponse;
 import com.zeki.demo.users.dto.RegisterRequest;
 import com.zeki.demo.users.dto.UpdateUserRequest;
 import com.zeki.demo.users.dto.UserResponse;
@@ -59,9 +58,5 @@ public class UserDtoDomain {
                 user.getEmail(),
                 user.getRole()
         );
-    }
-
-    public LoginResponse toLoginResponse(User user, String accessToken, String refreshToken) {
-        return new LoginResponse(accessToken, refreshToken, toResponse(user));
     }
 }

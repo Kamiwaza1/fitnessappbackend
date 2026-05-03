@@ -51,6 +51,6 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
 
     @Override
     public boolean isOwnedByUser(UUID workoutId, String userEmail) {
-        return workoutRepoJPA.existsByIdAndUserEmail(workoutId, userEmail);
+        return workoutRepoJPA.existsByWorkoutIdAndUserEmail(workoutId, userEmail);
     }
 }

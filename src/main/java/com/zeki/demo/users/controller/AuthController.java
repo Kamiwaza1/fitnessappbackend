@@ -1,12 +1,8 @@
 package com.zeki.demo.users.controller;
 
-import com.zeki.demo.users.dto.LoginRequest;
-import com.zeki.demo.users.dto.LoginResponse;
-import com.zeki.demo.users.dto.RegisterRequest;
-import com.zeki.demo.users.dto.UserResponse;
+import com.zeki.demo.users.dto.*;
 import com.zeki.demo.users.mapperDtoDomain.UserDtoDomain;
 import com.zeki.demo.users.service.AuthService;
-import com.zeki.demo.users.service.AuthenticatedUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -37,8 +33,8 @@ public class AuthController {
     })
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse register(@Valid @RequestBody RegisterRequest request) {
-        return userDtoDomain.toResponse(authService.register(userDtoDomain.toDomain(request)));
+    public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
+        return authService.register(userDtoDomain.toDomain(request));
     }
 
     @Operation(summary = "Login user", description = "Authenticates user and returns token")
@@ -47,12 +43,8 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Invalid credentials")
     })
     @PostMapping("/login")
-    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
-        AuthenticatedUser authenticatedUser = authService.login(userDtoDomain.toDomain(request));
-        return userDtoDomain.toLoginResponse(
-                authenticatedUser.user(),
-                authenticatedUser.accessToken(),
-                authenticatedUser.refreshToken()
-        );
+    @ResponseStatus(HttpStatus.OK)
+    public AuthResponse login(@Valid @RequestBody LoginRequest request) {
+        return authService.login(userDtoDomain.toDomain(request));
     }
 }
