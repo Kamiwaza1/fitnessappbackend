@@ -2,14 +2,12 @@ package com.zeki.demo.service;
 
 import com.zeki.demo.common.exception.ConflictException;
 import com.zeki.demo.common.exception.UnauthorizedException;
-import com.zeki.demo.users.domain.UserValidator;
-import com.zeki.demo.users.dto.AuthRequest;
-import com.zeki.demo.users.dto.AuthResponse;
-import com.zeki.demo.users.dto.RegisterRequest;
-import com.zeki.demo.users.entity.UserEntity;
-import com.zeki.demo.users.repository.jpa.UserRepoJPA;
+import com.zeki.demo.users.domain.User;
+import com.zeki.demo.users.repository.UserRepository;
 import com.zeki.demo.users.security.JWTService;
+import com.zeki.demo.users.service.AuthenticatedUser;
 import com.zeki.demo.users.service.AuthServiceImpl;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +35,7 @@ import static org.mockito.Mockito.when;
 class AuthServiceTest {
 
     @Mock
-    private UserRepoJPA userRepoJPA;
+    private UserRepository userRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -53,85 +51,95 @@ class AuthServiceTest {
     @BeforeEach
     void setUp() {
         authService = new AuthServiceImpl(
-                userRepoJPA,
                 passwordEncoder,
                 jwtService,
                 authenticationManager,
-                new UserValidator()
+                userRepository
         );
     }
 
     @Test
     void registerWhenEmailAlreadyExistsIgnoringCaseThrowsConflict() {
-        RegisterRequest request = new RegisterRequest();
-        request.setEmail("User@Example.com");
-        request.setPassword("StrongPassword123!");
+        User user = new User(
+                null,
+                null,
+                "User@Example.com",
+                "StrongPassword123!",
+                "USER",
+                true,
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
 
-        when(userRepoJPA.existsByEmailIgnoreCase("user@example.com")).thenReturn(true);
+        when(userRepository.existsByEmail("user@example.com")).thenReturn(true);
 
-        ConflictException ex = assertThrows(ConflictException.class, () -> authService.register(request));
+        ConflictException ex = assertThrows(ConflictException.class, () -> authService.register(user));
         assertEquals("An account with this email already exists", ex.getMessage());
     }
 
     @Test
     void loginWhenEmailDoesNotExistThrowsUnauthorized() {
-        AuthRequest request = new AuthRequest();
-        request.setEmail("missing@example.com");
-        request.setPassword("StrongPassword123!");
+        User user = new User(
+                null,
+                null,
+                "missing@example.com",
+                "StrongPassword123!",
+                "USER",
+                true,
+                null,
+                null
+        );
 
-        when(userRepoJPA.findByEmailIgnoreCaseAndIsActiveTrue("missing@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findActiveByEmail("missing@example.com")).thenReturn(Optional.empty());
 
-        UnauthorizedException ex = assertThrows(UnauthorizedException.class, () -> authService.login(request));
+        UnauthorizedException ex = assertThrows(UnauthorizedException.class, () -> authService.login(user));
         assertEquals("No account found with this email", ex.getMessage());
     }
 
     @Test
     void loginWhenPasswordIsWrongThrowsUnauthorized() {
-        AuthRequest request = new AuthRequest();
-        request.setEmail("test@example.com");
-        request.setPassword("wrong-password");
+        User loginUser = new User(null, null, "test@example.com", "wrong-password", "USER", true, null, null);
+        User storedUser = new User(
+                UUID.randomUUID(),
+                "Test User",
+                "test@example.com",
+                "encoded-password",
+                "USER",
+                true,
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
 
-        UserEntity user = UserEntity.builder()
-                .id(UUID.randomUUID())
-                .fullName("Test User")
-                .email("test@example.com")
-                .password("encoded-password")
-                .role("USER")
-                .isActive(true)
-                .build();
-
-        when(userRepoJPA.findByEmailIgnoreCaseAndIsActiveTrue("test@example.com")).thenReturn(Optional.of(user));
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(new BadCredentialsException("Bad credentials"));
 
-        UnauthorizedException ex = assertThrows(UnauthorizedException.class, () -> authService.login(request));
+        UnauthorizedException ex = assertThrows(UnauthorizedException.class, () -> authService.login(loginUser));
         assertEquals("Invalid email or password", ex.getMessage());
     }
 
     @Test
     void loginWhenCredentialsAreValidReturnsTokenAndUserInfo() {
-        AuthRequest request = new AuthRequest();
-        request.setEmail("TEST@Example.com");
-        request.setPassword("StrongPassword123!");
+        User loginUser = new User(null, null, "TEST@Example.com", "StrongPassword123!", "USER", true, null, null);
+        User storedUser = new User(
+                UUID.randomUUID(),
+                "Test User",
+                "test@example.com",
+                "encoded-password",
+                "USER",
+                true,
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
 
-        UserEntity user = UserEntity.builder()
-                .id(UUID.randomUUID())
-                .fullName("Test User")
-                .email("test@example.com")
-                .password("encoded-password")
-                .role("USER")
-                .isActive(true)
-                .build();
-
-        when(userRepoJPA.findByEmailIgnoreCaseAndIsActiveTrue("test@example.com")).thenReturn(Optional.of(user));
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(mock(Authentication.class));
+        when(userRepository.findActiveByEmail("test@example.com")).thenReturn(Optional.of(storedUser));
         when(jwtService.generateToken(any(UserDetails.class), eq("USER"))).thenReturn("jwt-token");
 
-        AuthResponse response = authService.login(request);
+        AuthenticatedUser response = authService.login(loginUser);
 
-        assertEquals("jwt-token", response.getToken());
-        assertEquals("test@example.com", response.getEmail());
+        assertEquals("jwt-token", response.accessToken());
+        assertEquals("test@example.com", response.user().getEmail());
         verify(authenticationManager).authenticate(
                 argThat(token -> "test@example.com".equals(token.getPrincipal()))
         );

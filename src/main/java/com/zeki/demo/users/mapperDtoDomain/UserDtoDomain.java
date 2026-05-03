@@ -1,17 +1,72 @@
 package com.zeki.demo.users.mapperDtoDomain;
 
+import com.zeki.demo.users.domain.User;
+import com.zeki.demo.users.dto.AuthResponse;
+import com.zeki.demo.users.dto.LoginRequest;
+import com.zeki.demo.users.dto.RegisterRequest;
+import com.zeki.demo.users.dto.UpdateUserRequest;
 import com.zeki.demo.users.dto.UserResponse;
-import com.zeki.demo.users.entity.UserEntity;
+import com.zeki.demo.users.service.AuthenticatedUser;
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserDtoDomain {
-    public UserResponse toUserResponse(UserEntity user) {
-        return UserResponse.builder()
-                .id(user.getId())
-                .fullName(user.getFullName())
-                .email(user.getEmail())
-                .role(user.getRole())
-                .build();
+
+    public User toDomain(RegisterRequest request) {
+        LocalDateTime now = LocalDateTime.now();
+        return new User(
+                null,
+                request.fullName(),
+                request.email(),
+                request.password(),
+                "USER",
+                true,
+                now,
+                now
+        );
+    }
+
+    public User toDomain(LoginRequest request) {
+        return new User(
+                null,
+                null,
+                request.email(),
+                request.password(),
+                "USER",
+                true,
+                null,
+                null
+        );
+    }
+
+    public User toUpdatedDomain(UpdateUserRequest request, User existingUser, String encodedPassword) {
+        return new User(
+                existingUser.getUserId(),
+                request.fullName() != null ? request.fullName() : existingUser.getFullName(),
+                request.email() != null ? request.email() : existingUser.getEmail(),
+                encodedPassword,
+                existingUser.getRole(),
+                existingUser.isActive(),
+                existingUser.getCreatedAt(),
+                LocalDateTime.now()
+        );
+    }
+
+    public UserResponse toResponse(User user) {
+        return new UserResponse(
+                user.getUserId(),
+                User.resolveFullName(user.getFullName(), user.getEmail()),
+                user.getEmail(),
+                user.getRole()
+        );
+    }
+
+    public AuthResponse toAuthResponse(AuthenticatedUser authenticatedUser) {
+        return new AuthResponse(
+                authenticatedUser.accessToken(),
+                authenticatedUser.refreshToken(),
+                toResponse(authenticatedUser.user())
+        );
     }
 }

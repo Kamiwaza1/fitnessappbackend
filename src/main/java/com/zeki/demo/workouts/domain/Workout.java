@@ -13,15 +13,15 @@ public class Workout {
     private WorkoutCategory category;
     private final LocalDate createdAt;
     private LocalDate updatedAt;
-    private LocalDate workoutDate;
-    private Integer durationMinutes;
+    private final LocalDate workoutDate;
+    private final Integer durationMinutes;
     private String notes;
-    private String userEmail;
+    private final String userEmail;
 
     public Workout(
             String workoutName,
             LocalDate workoutDate,
-            int durationMinutes,
+            Integer durationMinutes,
             String notes,
             UUID workoutId,
             String description,
@@ -30,10 +30,6 @@ public class Workout {
             LocalDate updatedAt,
             String userEmail
     ) {
-        if (category == null) {
-            throw new IllegalArgumentException("Workout category is required");
-        }
-
         this.workoutId = workoutId;
         this.workoutName = normalize(workoutName);
         this.workoutDate = workoutDate;
@@ -43,39 +39,64 @@ public class Workout {
         this.category = category;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.userEmail = userEmail;
+        this.userEmail = normalize(userEmail);
     }
 
-    public void patch(
-            String workoutName,
-            LocalDate workoutDate,
-            Integer durationMinutes,
-            String notes,
-            WorkoutCategory category
-    ) {
-        if (workoutName != null) {
-            this.workoutName = normalize(workoutName);
+    public void validate() {
+        if (workoutName == null || workoutName.isBlank()) {
+            throw new IllegalArgumentException("Workout name is required");
         }
-
-        if (workoutDate != null) {
-            this.workoutDate = workoutDate;
+        if (workoutName.length() < 3) {
+            throw new IllegalArgumentException("Name must be at least 3 characters");
         }
-
-        if (durationMinutes != null) {
-            this.durationMinutes = durationMinutes;
+        if (workoutName.length() > 255) {
+            throw new IllegalArgumentException("Name cannot be longer than 255 characters");
         }
-
-        if (notes != null) {
-            this.notes = normalizeNullable(notes);
+        if (workoutDate == null) {
+            throw new IllegalArgumentException("Workout date is required");
         }
-
-        if (category != null) {
-            this.category = category;
+        if (workoutDate.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Workout date cannot be in the past");
         }
-    }
-
-    public void markUpdated() {
-        this.updatedAt = LocalDate.now();
+        if (workoutDate.isAfter(LocalDate.now().plusYears(1))) {
+            throw new IllegalArgumentException("Workout date cannot be more than one year ahead");
+        }
+        if (durationMinutes == null) {
+            throw new IllegalArgumentException("Duration is required");
+        }
+        if (durationMinutes < 1) {
+            throw new IllegalArgumentException("Duration must be at least 1 minute");
+        }
+        if (durationMinutes > 999) {
+            throw new IllegalArgumentException("Duration cannot be greater than 999 minutes");
+        }
+        if (description != null && description.length() > 255) {
+            throw new IllegalArgumentException("Description cannot be longer than 255 characters");
+        }
+        if (category == null) {
+            throw new IllegalArgumentException("Workout category is required");
+        }
+        if (notes != null && notes.length() > 1000) {
+            throw new IllegalArgumentException("Notes cannot be longer than 1000 characters");
+        }
+        if (createdAt == null) {
+            throw new IllegalArgumentException("Created at is required");
+        }
+        if (createdAt.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Created at cannot be in the future");
+        }
+        if (updatedAt == null) {
+            throw new IllegalArgumentException("Updated at is required");
+        }
+        if (updatedAt.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Updated at cannot be in the future");
+        }
+        if (updatedAt.isBefore(createdAt)) {
+            throw new IllegalArgumentException("Updated at cannot be before created at");
+        }
+        if (userEmail == null || userEmail.isBlank()) {
+            throw new IllegalArgumentException("User email cannot be blank");
+        }
     }
 
     private String normalize(String value) {

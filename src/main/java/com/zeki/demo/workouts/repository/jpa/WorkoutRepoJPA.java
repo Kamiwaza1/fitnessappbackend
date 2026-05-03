@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface WorkoutRepoJPA extends JpaRepository<WorkoutEntity, UUID> {
-    List<WorkoutEntity> findAllByUserEmailOrderByWorkoutDateDescIdDesc(String email);
-    Optional<WorkoutEntity> findById(UUID WorkoutId);
+    List<WorkoutEntity> findAllByUserEmailOrderByWorkoutDateDescWorkoutIdDesc(String email);
 
+    boolean existsByWorkoutIdAndUserEmail(UUID workoutId, String userEmail);
 }

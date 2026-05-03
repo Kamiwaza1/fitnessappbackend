@@ -41,13 +41,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
-                                "/api/auth/login",
-                                "/api/auth/register",
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/register",
                                 "/error",
                                 "/error/**"
                         ).permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/workouts/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/v1/workouts/**").hasAnyRole("USER")
+                        .requestMatchers("/api/v1/nutrition/**").hasAnyRole("USER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

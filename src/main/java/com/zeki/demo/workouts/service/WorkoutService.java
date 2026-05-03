@@ -1,10 +1,7 @@
 package com.zeki.demo.workouts.service;
 
 import com.zeki.demo.workouts.domain.Workout;
-import com.zeki.demo.workouts.dto.CreateWorkoutRequest;
-import com.zeki.demo.workouts.dto.DeleteWorkoutRequest;
 import com.zeki.demo.workouts.dto.UpdateWorkoutRequest;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -16,8 +13,7 @@ public interface WorkoutService {
 
     List<Workout> getMyWorkouts(String userEmail);
 
-    void deleteWorkout( UUID workoutId);
+    Workout updateWorkout(UUID workoutId, UpdateWorkoutRequest request, String userEmail);
 
-
-    Workout updateWorkout(UUID workoutId, UpdateWorkoutRequest updateWorkoutRequest);
+    void deleteWorkout(UUID workoutId);
 }
