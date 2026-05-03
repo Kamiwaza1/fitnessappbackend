@@ -1,0 +1,158 @@
+<mxfile host="app.diagrams.net" modified="2026-05-03T12:00:00.000Z" agent="Codex" version="24.7.17">
+  <diagram id="fitnesstrackapp-c3" name="C3 Component Diagram">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="FitnessTrackApp Backend - C3 Component Diagram" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=22;fontStyle=1;fontColor=#1F2937;" vertex="1" parent="1">
+          <mxGeometry x="420" y="20" width="520" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="client" value="Frontend Client /&#xa;API Consumer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#0284C7;fontSize=14;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="40" y="280" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="backend" value="FitnessTrackApp Backend (Spring Boot)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#94A3B8;fontSize=18;fontStyle=1;fontColor=#0F172A;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="260" y="80" width="980" height="640" as="geometry" />
+        </mxCell>
+        <mxCell id="security" value="SecurityConfig +&#xa;JWTAuthenticationFilter" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#2563EB;fontSize=13;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="320" y="140" width="170" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="authController" value="AuthController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;fontSize=13;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="530" y="140" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="userController" value="UserController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;fontSize=13;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="530" y="220" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="workoutController" value="WorkoutController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;fontSize=13;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="530" y="300" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="libraryController" value="LibraryController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;fontSize=13;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="530" y="380" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="authService" value="AuthServiceImpl" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;fontSize=13;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="740" y="140" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="userService" value="UserServiceImpl" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;fontSize=13;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="740" y="220" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="workoutService" value="WorkoutServiceImpl" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;fontSize=13;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="740" y="300" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="libraryService" value="LibraryServiceImpl" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;fontSize=13;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="740" y="380" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="userRepo" value="UserRepositoryImpl" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE7F3;strokeColor=#DB2777;fontSize=13;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="950" y="160" width="160" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="workoutRepo" value="WorkoutRepositoryImpl" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE7F3;strokeColor=#DB2777;fontSize=13;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="950" y="280" width="160" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="libraryRepo" value="LibraryRepositoryImpl" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE7F3;strokeColor=#DB2777;fontSize=13;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="950" y="400" width="160" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="userJpa" value="UserRepoJPA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#7C3AED;fontSize=13;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="160" width="120" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="workoutJpa" value="WorkoutRepoJPA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#7C3AED;fontSize=13;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="280" width="120" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="libraryJpa" value="LibraryRepoJPA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#7C3AED;fontSize=13;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="400" width="120" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="mappers" value="DTO / Entity Mappers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#475569;fontSize=13;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="520" y="530" width="190" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="exceptions" value="GlobalExceptionHandler" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#475569;fontSize=13;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="770" y="530" width="190" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="db" value="PostgreSQL" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#E2E8F0;strokeColor=#475569;fontSize=14;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="1320" y="280" width="140" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="client" target="security">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="security" target="authController">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="security" target="userController">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="security" target="workoutController">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="security" target="libraryController">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="authController" target="authService">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="userController" target="userService">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="workoutController" target="workoutService">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="libraryController" target="libraryService">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#94A3B8;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1" source="authController" target="mappers">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#94A3B8;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1" source="userController" target="mappers">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#94A3B8;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1" source="workoutController" target="mappers">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#94A3B8;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1" source="libraryController" target="mappers">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#94A3B8;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1" source="authController" target="exceptions">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#94A3B8;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1" source="userController" target="exceptions">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#94A3B8;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1" source="workoutController" target="exceptions">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#94A3B8;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1" source="libraryController" target="exceptions">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="authService" target="userRepo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="userService" target="userRepo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="workoutService" target="workoutRepo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="libraryService" target="libraryRepo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="userRepo" target="userJpa">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="workoutRepo" target="workoutJpa">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="workoutRepo" target="userJpa">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="libraryRepo" target="libraryJpa">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="userJpa" target="db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="workoutJpa" target="db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;endArrow=block;endFill=1;" edge="1" parent="1" source="libraryJpa" target="db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
