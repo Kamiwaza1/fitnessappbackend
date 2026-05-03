@@ -1,6 +1,6 @@
 package com.zeki.demo.users.service;
 
-import com.zeki.demo.users.repository.JPA.UserRepoJPA;
+import com.zeki.demo.users.repository.jpa.UserRepoJPA;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
