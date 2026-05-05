@@ -43,9 +43,7 @@ public class Workout {
     }
 
     public void validate() {
-        if (workoutName == null || workoutName.isBlank()) {
-            throw new IllegalArgumentException("Workout name is required");
-        }
+
         if (workoutName.length() < 3) {
             throw new IllegalArgumentException("Name must be at least 3 characters");
         }

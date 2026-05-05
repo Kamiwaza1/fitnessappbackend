@@ -49,11 +49,17 @@ public class Nutrition {
     }
 
     public void validate() {
+        if (mealName == null || mealName.isBlank()) {
+            throw new IllegalArgumentException("Meal name is required");
+        }
         if (mealName.length() < 2) {
             throw new IllegalArgumentException("Meal name must be at least 2 characters");
         }
         if (mealName.length() > 255) {
             throw new IllegalArgumentException("Meal name cannot be longer than 255 characters");
+        }
+        if (mealDate == null) {
+            throw new IllegalArgumentException("Meal date is required");
         }
         if (mealDate.isBefore(LocalDate.now().minusYears(1))) {
             throw new IllegalArgumentException("Meal date cannot be older than one year");
@@ -65,10 +71,18 @@ public class Nutrition {
         validateMacro(proteinGrams, "Protein", 0, 1000);
         validateMacro(carbsGrams, "Carbs", 0, 1000);
         validateMacro(fatGrams, "Fat", 0, 1000);
+        if (category == null) {
+            throw new IllegalArgumentException("Nutrition category is required");
+        }
         if (notes != null && notes.length() > 1000) {
             throw new IllegalArgumentException("Notes cannot be longer than 1000 characters");
         }
-
+        if (createdAt == null) {
+            throw new IllegalArgumentException("Created at is required");
+        }
+        if (updatedAt == null) {
+            throw new IllegalArgumentException("Updated at is required");
+        }
         if (createdAt.isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Created at cannot be in the future");
         }

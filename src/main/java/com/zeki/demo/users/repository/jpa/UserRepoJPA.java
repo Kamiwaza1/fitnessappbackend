@@ -1,4 +1,4 @@
-package com.zeki.demo.users.repository.JPA;
+package com.zeki.demo.users.repository.jpa;
 
 import com.zeki.demo.users.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

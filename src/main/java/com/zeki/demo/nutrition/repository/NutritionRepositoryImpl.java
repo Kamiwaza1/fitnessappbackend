@@ -6,7 +6,7 @@ import com.zeki.demo.nutrition.entity.NutritionEntity;
 import com.zeki.demo.nutrition.mapperEntityDomain.NutritionEntityMapper;
 import com.zeki.demo.nutrition.repository.jpa.NutritionRepoJPA;
 import com.zeki.demo.users.entity.UserEntity;
-import com.zeki.demo.users.repository.JPA.UserRepoJPA;
+import com.zeki.demo.users.repository.jpa.UserRepoJPA;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
