@@ -10,6 +10,8 @@ variables:
   GIT_DEPTH: "0"
 
 before_script:
+  - export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+  - export PATH="$JAVA_HOME/bin:$PATH"
   - java -version
   - chmod +x ./gradlew
   - mkdir -p "$GRADLE_USER_HOME"
