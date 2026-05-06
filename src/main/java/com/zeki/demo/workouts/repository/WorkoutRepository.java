@@ -16,4 +16,5 @@ public interface WorkoutRepository {
     void delete(UUID workoutId);
 
     boolean isOwnedByUser(UUID workoutId, String userEmail);
+    List<Workout> upcomingWorkouts(String userEmail);
 }

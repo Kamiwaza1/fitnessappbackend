@@ -32,7 +32,7 @@ public class WorkoutEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "uuid")
+    @Column(name = "workout_id", columnDefinition = "uuid")
     private UUID workoutId;
 
     @Column(name = "name", nullable = false)
@@ -59,6 +59,15 @@ public class WorkoutEntity {
 
     @Column(name = "duration_minutes", nullable = false)
     private Integer durationMinutes;
+
+    @Column(name = "sets", nullable = false)
+    private Integer sets;
+
+    @Column(name = "reps", nullable = false)
+    private Integer reps;
+
+    @Column(name = "weight_kg", nullable = false)
+    private Double weightKg;
 
     @Column(name = "notes")
     private String notes;

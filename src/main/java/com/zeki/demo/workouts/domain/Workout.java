@@ -15,6 +15,9 @@ public class Workout {
     private LocalDate updatedAt;
     private final LocalDate workoutDate;
     private final Integer durationMinutes;
+    private final Integer sets;
+    private final Integer reps;
+    private final Double weightKg;
     private String notes;
     private final String userEmail;
 
@@ -22,6 +25,9 @@ public class Workout {
             String workoutName,
             LocalDate workoutDate,
             Integer durationMinutes,
+            Integer sets,
+            Integer reps,
+            Double weightKg,
             String notes,
             UUID workoutId,
             String description,
@@ -34,6 +40,9 @@ public class Workout {
         this.workoutName = normalize(workoutName);
         this.workoutDate = workoutDate;
         this.durationMinutes = durationMinutes;
+        this.sets = sets;
+        this.reps = reps;
+        this.weightKg = weightKg;
         this.notes = normalizeNullable(notes);
         this.description = normalizeNullable(description);
         this.category = category;
@@ -67,6 +76,15 @@ public class Workout {
         }
         if (durationMinutes > 999) {
             throw new IllegalArgumentException("Duration cannot be greater than 999 minutes");
+        }
+        if (sets == null || sets < 1) {
+            throw new IllegalArgumentException("Sets must be at least 1");
+        }
+        if (reps == null || reps < 1) {
+            throw new IllegalArgumentException("Reps must be at least 1");
+        }
+        if (weightKg == null || weightKg < 0) {
+            throw new IllegalArgumentException("Weight (kg) must be 0 or greater");
         }
         if (description != null && description.length() > 255) {
             throw new IllegalArgumentException("Description cannot be longer than 255 characters");

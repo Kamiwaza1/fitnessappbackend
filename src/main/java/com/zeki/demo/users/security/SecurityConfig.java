@@ -48,6 +48,8 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/workouts/**").hasAnyRole("USER")
+                        .requestMatchers("/api/v1/progress/**").hasAnyRole("USER")
+                        .requestMatchers("/api/v1/workout-history/**", "/api/v1/workout-histories/**").hasAnyRole("USER")
                         .requestMatchers("/api/v1/nutrition/**").hasAnyRole("USER")
                         .anyRequest().authenticated()
                 )
