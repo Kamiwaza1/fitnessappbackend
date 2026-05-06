@@ -12,6 +12,7 @@ public interface WorkoutService {
     Workout getWorkoutById(UUID workoutId);
 
     List<Workout> getMyWorkouts(String userEmail);
+    List<Workout> upcomingWorkouts(String userEmail);
 
     Workout updateWorkout(UUID workoutId, UpdateWorkoutRequest request, String userEmail);
 

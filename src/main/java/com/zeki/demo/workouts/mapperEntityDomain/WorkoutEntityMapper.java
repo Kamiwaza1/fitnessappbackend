@@ -18,6 +18,9 @@ public class WorkoutEntityMapper {
                 .updatedAt(workout.getUpdatedAt())
                 .workoutDate(workout.getWorkoutDate())
                 .durationMinutes(workout.getDurationMinutes())
+                .sets(workout.getSets())
+                .reps(workout.getReps())
+                .weightKg(workout.getWeightKg())
                 .notes(workout.getNotes())
                 .userEmail(workout.getUserEmail())
                 .user(user)
@@ -29,6 +32,9 @@ public class WorkoutEntityMapper {
                 entity.getWorkoutName(),
                 entity.getWorkoutDate(),
                 entity.getDurationMinutes(),
+                entity.getSets(),
+                entity.getReps(),
+                entity.getWeightKg(),
                 entity.getNotes(),
                 entity.getWorkoutId(),
                 entity.getDescription(),

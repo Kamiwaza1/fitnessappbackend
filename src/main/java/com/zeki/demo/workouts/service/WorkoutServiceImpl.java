@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 @Transactional
 @RequiredArgsConstructor
 public class WorkoutServiceImpl implements WorkoutService {
-    private final WorkoutRepository workoutRepository;
+    private final WorkoutRepository  workoutRepository;
     private final WorkoutDtoDomain workoutDtoDomain;
 
     @Override
@@ -34,6 +34,11 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Override
     public List<Workout> getMyWorkouts(String userEmail) {
         return workoutRepository.findAllByUserEmail(userEmail);
+    }
+
+    @Override
+    public List<Workout> upcomingWorkouts(String userEmail) {
+        return workoutRepository.upcomingWorkouts(userEmail);
     }
 
     @Override

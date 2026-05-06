@@ -7,6 +7,7 @@ import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.entity.WorkoutEntity;
 import com.zeki.demo.workouts.mapperEntityDomain.WorkoutEntityMapper;
 import com.zeki.demo.workouts.repository.jpa.WorkoutRepoJPA;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -53,4 +54,16 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
     public boolean isOwnedByUser(UUID workoutId, String userEmail) {
         return workoutRepoJPA.existsByWorkoutIdAndUserEmail(workoutId, userEmail);
     }
+
+    @Override
+    public List<Workout> upcomingWorkouts(String userEmail) {
+        return workoutRepoJPA.findAllByUserEmailAndWorkoutDateGreaterThanEqualOrderByWorkoutDateAscWorkoutIdAsc(
+                        userEmail,
+                        LocalDate.now()
+                )
+                .stream()
+                .map(workoutEntityMapper::toDomain)
+                .toList();
+    }
+
 }

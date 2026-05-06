@@ -9,6 +9,9 @@ public record UpdateWorkoutRequest(
         String workoutName,
         LocalDate workoutDate,
         Integer durationMinutes,
+        Integer sets,
+        Integer reps,
+        Double weightKg,
         String notes,
         WorkoutCategory category,
         String description
