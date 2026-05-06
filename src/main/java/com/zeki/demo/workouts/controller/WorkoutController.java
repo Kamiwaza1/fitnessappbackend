@@ -44,6 +44,16 @@ public class WorkoutController {
                 .toList();
     }
 
+    @Operation(summary = "Get upcoming workouts for the current user")
+    @ApiResponse(responseCode = "200", description = "List of upcoming workouts")
+    @GetMapping("/upcoming")
+    public List<WorkoutResponse> getUpcomingWorkouts(Authentication authentication) {
+        return workoutService.upcomingWorkouts(authentication.getName())
+                .stream()
+                .map(workoutDtoDomain::toResponse)
+                .toList();
+    }
+
     @Operation(summary = "Get a workout by ID for the current user")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Workout details for the current user"),

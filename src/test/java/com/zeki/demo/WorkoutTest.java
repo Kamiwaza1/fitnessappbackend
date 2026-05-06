@@ -22,6 +22,9 @@ class WorkoutTest {
                 "Leg Day",
                 LocalDate.of(2026, 5, 16),
                 60,
+                4,
+                10,
+                100.0,
                 "Heavy squats",
                 "Lower body session",
                 WorkoutCategory.STRENGTH,
@@ -32,6 +35,8 @@ class WorkoutTest {
 
         assertEquals(WorkoutCategory.STRENGTH, workout.getCategory());
         assertEquals("test@example.com", workout.getUserEmail());
+        assertEquals(4, workout.getSets());
+        assertEquals(10, workout.getReps());
     }
 
     @Test
@@ -40,6 +45,9 @@ class WorkoutTest {
                 "Run",
                 LocalDate.of(2026, 5, 17),
                 30,
+                1,
+                1,
+                0.0,
                 "Easy pace",
                 "Morning run",
                 null,
@@ -57,6 +65,9 @@ class WorkoutTest {
                 "Leg Day",
                 LocalDate.of(2026, 5, 16),
                 60,
+                5,
+                8,
+                120.0,
                 "Heavy squats",
                 UUID.randomUUID(),
                 "Lower body session",
@@ -69,6 +80,8 @@ class WorkoutTest {
         WorkoutResponse response = workoutDtoDomain.toResponse(workout);
 
         assertEquals(WorkoutCategory.STRENGTH, response.category());
+        assertEquals(5, response.sets());
+        assertEquals(8, response.reps());
     }
 
     @Test
@@ -77,6 +90,9 @@ class WorkoutTest {
                 "Leg Day",
                 LocalDate.of(2026, 5, 16),
                 60,
+                4,
+                10,
+                90.0,
                 "Heavy squats",
                 UUID.randomUUID(),
                 "Lower body session",

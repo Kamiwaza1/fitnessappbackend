@@ -13,6 +13,12 @@ public record CreateWorkoutRequest(
         LocalDate workoutDate,
         @NotNull(message = "Duration minutes is required")
         Integer durationMinutes,
+        @NotNull(message = "Sets is required")
+        Integer sets,
+        @NotNull(message = "Reps is required")
+        Integer reps,
+        @NotNull(message = "Weight (kg) is required")
+        Double weightKg,
         String notes,
         String description,
         WorkoutCategory category,
