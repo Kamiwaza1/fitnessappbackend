@@ -1,6 +1,7 @@
 package com.zeki.demo.WorkoutHistory.entity;
 
 import com.zeki.demo.workouts.enums.WorkoutCategory;
+import com.zeki.demo.workouts.enums.MuscleType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,7 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "workouts")
+@Table(name = "workout_history")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,6 +38,10 @@ public class WorkoutHistoryEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false)
     private WorkoutCategory category;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "muscle_type", nullable = false)
+    private MuscleType muscleType;
 
     @Column(name = "created_at", nullable = false)
     private LocalDate createdAt;

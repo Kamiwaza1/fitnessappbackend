@@ -1,9 +1,10 @@
-package com.zeki.demo;
+package com.zeki.demo.Unit;
 
 import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.workouts.WorkoutException.WorkoutExistException;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.dto.UpdateWorkoutRequest;
+import com.zeki.demo.workouts.enums.MuscleType;
 import com.zeki.demo.workouts.enums.WorkoutCategory;
 import com.zeki.demo.workouts.mapperDtoDomain.WorkoutDtoDomain;
 import com.zeki.demo.workouts.repository.WorkoutRepository;
@@ -28,6 +29,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class WorkoutServiceTest {
 
+    private static final String OWNER_EMAIL = "owner@example.com";
+    private static final String OTHER_EMAIL = "other@example.com";
+    private static final String UPDATED_NAME = "Updated name";
+    private static final String UPDATED_NOTES = "Updated notes";
+    private static final String UPDATED_DESCRIPTION = "Updated description";
+
     @Mock
     private WorkoutRepository workoutRepository;
 
@@ -51,26 +58,23 @@ class WorkoutServiceTest {
     @Test
     void updateWorkoutWhenNotOwnedByUserThrowsUnauthorized() {
         UUID workoutId = UUID.randomUUID();
-        Workout existing = validWorkout(workoutId, "owner@example.com");
-        UpdateWorkoutRequest request = new UpdateWorkoutRequest(
+        Workout existing = validWorkout(workoutId, OWNER_EMAIL);
+        UpdateWorkoutRequest request = updateRequest(
                 workoutId,
-                "Updated name",
                 LocalDate.now().plusDays(1),
                 45,
                 5,
                 12,
                 85.0,
-                "Updated notes",
-                WorkoutCategory.CARDIO,
-                "Updated description"
+                MuscleType.CORE
         );
 
         when(workoutRepository.getWorkoutById(workoutId)).thenReturn(Optional.of(existing));
-        when(workoutRepository.isOwnedByUser(workoutId, "other@example.com")).thenReturn(false);
+        when(workoutRepository.isOwnedByUser(workoutId, OTHER_EMAIL)).thenReturn(false);
 
         UnauthorizedException ex = assertThrows(
                 UnauthorizedException.class,
-                () -> workoutService.updateWorkout(workoutId, request, "other@example.com")
+                () -> workoutService.updateWorkout(workoutId, request, OTHER_EMAIL)
         );
 
         assertEquals("You cannot update this workout", ex.getMessage());
@@ -80,27 +84,24 @@ class WorkoutServiceTest {
     @Test
     void updateWorkoutWhenOwnedPersistsUpdatedWorkout() {
         UUID workoutId = UUID.randomUUID();
-        Workout existing = validWorkout(workoutId, "owner@example.com");
-        UpdateWorkoutRequest request = new UpdateWorkoutRequest(
+        Workout existing = validWorkout(workoutId, OWNER_EMAIL);
+        UpdateWorkoutRequest request = updateRequest(
                 workoutId,
-                "Updated name",
                 LocalDate.now().plusDays(2),
                 50,
                 6,
                 6,
                 140.0,
-                "Updated notes",
-                WorkoutCategory.CARDIO,
-                "Updated description"
+                MuscleType.CHEST
         );
 
         when(workoutRepository.getWorkoutById(workoutId)).thenReturn(Optional.of(existing));
-        when(workoutRepository.isOwnedByUser(workoutId, "owner@example.com")).thenReturn(true);
+        when(workoutRepository.isOwnedByUser(workoutId, OWNER_EMAIL)).thenReturn(true);
         when(workoutRepository.save(any(Workout.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Workout updated = workoutService.updateWorkout(workoutId, request, "owner@example.com");
+        Workout updated = workoutService.updateWorkout(workoutId, request, OWNER_EMAIL);
 
-        assertEquals("Updated name", updated.getWorkoutName());
+        assertEquals(UPDATED_NAME, updated.getWorkoutName());
         assertEquals(WorkoutCategory.CARDIO, updated.getCategory());
         assertEquals(50, updated.getDurationMinutes());
         assertEquals(6, updated.getSets());
@@ -111,7 +112,7 @@ class WorkoutServiceTest {
     @Test
     void deleteWorkoutWhenFoundDeletesById() {
         UUID workoutId = UUID.randomUUID();
-        Workout existing = validWorkout(workoutId, "owner@example.com");
+        Workout existing = validWorkout(workoutId, OWNER_EMAIL);
         when(workoutRepository.getWorkoutById(workoutId)).thenReturn(Optional.of(existing));
 
         workoutService.deleteWorkout(workoutId);
@@ -132,9 +133,36 @@ class WorkoutServiceTest {
                 workoutId,
                 "description",
                 WorkoutCategory.GENERAL,
+                MuscleType.FULL_BODY,
+                null,
                 now,
                 now,
                 userEmail
+        );
+    }
+
+    private UpdateWorkoutRequest updateRequest(
+            UUID workoutId,
+            LocalDate workoutDate,
+            Integer durationMinutes,
+            Integer sets,
+            Integer reps,
+            Double weightKg,
+            MuscleType muscleType
+    ) {
+        return new UpdateWorkoutRequest(
+                workoutId,
+                UPDATED_NAME,
+                workoutDate,
+                durationMinutes,
+                sets,
+                reps,
+                weightKg,
+                UPDATED_NOTES,
+                WorkoutCategory.CARDIO,
+                muscleType,
+                null,
+                UPDATED_DESCRIPTION
         );
     }
 }

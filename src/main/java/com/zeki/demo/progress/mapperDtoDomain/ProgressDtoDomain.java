@@ -1,9 +1,7 @@
 package com.zeki.demo.progress.mapperDtoDomain;
 
-import com.zeki.demo.progress.domain.ProgressInsights;
-import com.zeki.demo.progress.domain.ProgressSummary;
-import com.zeki.demo.progress.dto.ProgressInsightsResponse;
-import com.zeki.demo.progress.dto.ProgressSummaryResponse;
+import com.zeki.demo.progress.domain.Progress;
+import com.zeki.demo.progress.dto.ProgressResponse;
 import com.zeki.demo.workouts.mapperDtoDomain.WorkoutDtoDomain;
 import org.springframework.stereotype.Component;
 
@@ -16,43 +14,38 @@ public class ProgressDtoDomain {
         this.workoutDtoDomain = workoutDtoDomain;
     }
 
-    public ProgressSummaryResponse toSummaryResponse(ProgressSummary progressSummary) {
-        return new ProgressSummaryResponse(
-                progressSummary.weekStartDate(),
-                progressSummary.weekEndDate(),
-                progressSummary.weeklyTrainingVolumeKg(),
-                progressSummary.weeklyDurationMinutes(),
-                progressSummary.weeklyWorkoutsCount(),
-                progressSummary.recentActivity()
+    public ProgressResponse toResponse(Progress progress) {
+        return new ProgressResponse(
+                progress.weekStartDate(),
+                progress.weekEndDate(),
+                progress.weeklyTrainingVolumeKg(),
+                progress.weeklyDurationMinutes(),
+                progress.weeklyWorkoutsCount(),
+                progress.recentActivity()
                         .stream()
                         .map(workoutDtoDomain::toResponse)
-                        .toList()
-        );
-    }
-
-    public ProgressInsightsResponse toInsightsResponse(ProgressInsights progressInsights) {
-        return new ProgressInsightsResponse(
-                progressInsights.weeklyVolumeTrend()
+                        .toList(),
+                progress.weeklyVolumeTrend()
                         .stream()
-                        .map(point -> new ProgressInsightsResponse.WeeklyVolumePoint(
+                        .map(point -> new ProgressResponse.WeeklyVolumePoint(
                                 point.weekLabel(),
                                 point.trainingVolumeKg()
                         ))
                         .toList(),
-                progressInsights.volumeByCategory()
+                progress.volumeByCategory()
                         .stream()
-                        .map(point -> new ProgressInsightsResponse.CategoryVolumePoint(
+                        .map(point -> new ProgressResponse.CategoryVolumePoint(
                                 point.category(),
                                 point.trainingVolumeKg()
                         ))
                         .toList(),
-                progressInsights.personalRecord() == null ? null : new ProgressInsightsResponse.PersonalRecord(
-                        progressInsights.personalRecord().workoutName(),
-                        progressInsights.personalRecord().weightKg(),
-                        progressInsights.personalRecord().reps(),
-                        progressInsights.personalRecord().sets(),
-                        progressInsights.personalRecord().trainingVolumeKg(),
-                        progressInsights.personalRecord().workoutDate()
+                progress.personalRecord() == null ? null : new ProgressResponse.PersonalRecord(
+                        progress.personalRecord().workoutName(),
+                        progress.personalRecord().weightKg(),
+                        progress.personalRecord().reps(),
+                        progress.personalRecord().sets(),
+                        progress.personalRecord().trainingVolumeKg(),
+                        progress.personalRecord().workoutDate()
                 )
         );
     }

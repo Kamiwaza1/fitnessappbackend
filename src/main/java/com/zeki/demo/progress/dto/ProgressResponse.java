@@ -1,8 +1,17 @@
-package com.zeki.demo.progress.domain;
+package com.zeki.demo.progress.dto;
 
+import com.zeki.demo.workouts.enums.WorkoutCategory;
+import com.zeki.demo.workouts.dto.WorkoutResponse;
+import java.time.LocalDate;
 import java.util.List;
 
-public record ProgressInsights(
+public record ProgressResponse(
+        LocalDate weekStartDate,
+        LocalDate weekEndDate,
+        Double weeklyTrainingVolumeKg,
+        Integer weeklyDurationMinutes,
+        Integer weeklyWorkoutsCount,
+        List<WorkoutResponse> recentActivity,
         List<WeeklyVolumePoint> weeklyVolumeTrend,
         List<CategoryVolumePoint> volumeByCategory,
         PersonalRecord personalRecord
@@ -14,7 +23,7 @@ public record ProgressInsights(
     }
 
     public record CategoryVolumePoint(
-            String category,
+            WorkoutCategory category,
             Double trainingVolumeKg
     ) {
     }

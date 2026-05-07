@@ -1,9 +1,7 @@
 package com.zeki.demo.progress.service;
 
-import com.zeki.demo.progress.domain.ProgressInsights;
-import com.zeki.demo.progress.domain.ProgressSummary;
+import com.zeki.demo.progress.domain.Progress;
 
 public interface ProgressService {
-    ProgressSummary getProgressSummary(String userEmail);
-    ProgressInsights getProgressInsights(String userEmail);
+    Progress getProgress(String userEmail);
 }

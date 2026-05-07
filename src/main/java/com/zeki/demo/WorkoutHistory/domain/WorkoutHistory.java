@@ -1,6 +1,7 @@
 package com.zeki.demo.WorkoutHistory.domain;
 
 import com.zeki.demo.workouts.enums.WorkoutCategory;
+import com.zeki.demo.workouts.enums.MuscleType;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ public class WorkoutHistory {
     private final String notes;
     private final String description;
     private final WorkoutCategory category;
+    private final MuscleType muscleType;
     private final LocalDate updatedAt;
     private final LocalDate createdAt;
     private final String userEmail;
