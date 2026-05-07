@@ -49,7 +49,7 @@ build-sonar:
   script:
     - echo "SONAR_TOKEN exists? ${SONAR_TOKEN:+yes}"
     - ls -la build/reports/jacoco/test/
-    - ./gradlew --no-daemon sonar -Dsonar.token="$SONAR_TOKEN" -Dsonar.qualitygate.wait=false
+    - ./gradlew --no-daemon test jacocoTestReport sonar -Dsonar.token="$SONAR_TOKEN" -Dsonar.qualitygate.wait=true
   allow_failure: true
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
@@ -58,6 +58,7 @@ build-sonar:
 docker:
   stage: docker
   script:
+    - ./gradlew --no-daemon bootJar
     - docker compose up --build -d
   artifacts:
     paths:
