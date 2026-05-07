@@ -1,4 +1,4 @@
-package com.zeki.demo;
+package com.zeki.demo.Unit;
 
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.dto.CreateWorkoutRequest;
@@ -16,35 +16,31 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class WorkoutTest {
 
     private final WorkoutDtoDomain workoutDtoDomain = new WorkoutDtoDomain();
+    private static final String TEST_EMAIL = "test@example.com";
+    private static final String DEFAULT_NAME = "Leg Day";
+    private static final String DEFAULT_NOTES = "Heavy squats";
+    private static final String DEFAULT_DESCRIPTION = "Lower body session";
     private static final LocalDate FIXED_DATE = LocalDate.of(2026, 5, 16);
     private static final LocalDate FIXED_CREATED_AT = LocalDate.of(2026, 4, 23);
 
     @Test
     void toDomainUsesProvidedWorkoutCategory() {
-        CreateWorkoutRequest request = createWorkoutRequest(
-                "Leg Day",
-                WorkoutCategory.STRENGTH,
-                MuscleType.LEGS
-        );
+        CreateWorkoutRequest request = createWorkoutRequest(WorkoutCategory.STRENGTH, MuscleType.LEGS);
 
-        Workout workout = workoutDtoDomain.toDomain(request, "test@example.com");
+        Workout workout = workoutDtoDomain.toDomain(request, TEST_EMAIL);
 
         assertEquals(WorkoutCategory.STRENGTH, workout.getCategory());
         assertEquals(MuscleType.LEGS, workout.getMuscleType());
-        assertEquals("test@example.com", workout.getUserEmail());
+        assertEquals(TEST_EMAIL, workout.getUserEmail());
         assertEquals(4, workout.getSets());
         assertEquals(10, workout.getReps());
     }
 
     @Test
     void toDomainDefaultsCategoryToGeneral() {
-        CreateWorkoutRequest request = createWorkoutRequest(
-                "Run",
-                null,
-                null
-        );
+        CreateWorkoutRequest request = createWorkoutRequest(null, null);
 
-        Workout workout = workoutDtoDomain.toDomain(request, "test@example.com");
+        Workout workout = workoutDtoDomain.toDomain(request, TEST_EMAIL);
 
         assertEquals(WorkoutCategory.GENERAL, workout.getCategory());
         assertEquals(MuscleType.FULL_BODY, workout.getMuscleType());
@@ -52,11 +48,7 @@ class WorkoutTest {
 
     @Test
     void responseExposesEnumCategory() {
-        Workout workout = createWorkout(
-                "Leg Day",
-                WorkoutCategory.STRENGTH,
-                MuscleType.LEGS
-        );
+        Workout workout = createWorkout(WorkoutCategory.STRENGTH, MuscleType.LEGS);
 
         WorkoutResponse response = workoutDtoDomain.toResponse(workout);
 
@@ -68,25 +60,21 @@ class WorkoutTest {
 
     @Test
     void workoutRejectsNullCategory() {
-        Workout workout = createWorkout("Leg Day", null, MuscleType.LEGS);
+        Workout workout = createWorkout(null, MuscleType.LEGS);
 
         assertThrows(IllegalArgumentException.class, workout::validate);
     }
 
-    private CreateWorkoutRequest createWorkoutRequest(
-            String workoutName,
-            WorkoutCategory category,
-            MuscleType muscleType
-    ) {
+    private CreateWorkoutRequest createWorkoutRequest(WorkoutCategory category, MuscleType muscleType) {
         return new CreateWorkoutRequest(
-                workoutName,
+                DEFAULT_NAME,
                 FIXED_DATE,
                 60,
                 4,
                 10,
                 100.0,
-                "Heavy squats",
-                "Lower body session",
+                DEFAULT_NOTES,
+                DEFAULT_DESCRIPTION,
                 category,
                 muscleType,
                 null,
@@ -94,27 +82,23 @@ class WorkoutTest {
         );
     }
 
-    private Workout createWorkout(
-            String workoutName,
-            WorkoutCategory category,
-            MuscleType muscleType
-    ) {
+    private Workout createWorkout(WorkoutCategory category, MuscleType muscleType) {
         return new Workout(
-                workoutName,
+                DEFAULT_NAME,
                 FIXED_DATE,
                 60,
                 5,
                 8,
                 120.0,
-                "Heavy squats",
+                DEFAULT_NOTES,
                 UUID.randomUUID(),
-                "Lower body session",
+                DEFAULT_DESCRIPTION,
                 category,
                 muscleType,
                 null,
                 FIXED_CREATED_AT,
                 FIXED_CREATED_AT,
-                "test@example.com"
+                TEST_EMAIL
         );
     }
 }
