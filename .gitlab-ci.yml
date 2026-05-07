@@ -47,8 +47,9 @@ build-sonar:
     paths:
       - "$SONAR_USER_HOME/cache"
   script:
-      - echo "SONAR_TOKEN exists? ${SONAR_TOKEN:+yes}"
-      - ./gradlew --no-daemon classes sonar -Dsonar.token="$SONAR_TOKEN"
+    - echo "SONAR_TOKEN exists? ${SONAR_TOKEN:+yes}"
+    - ls -la build/reports/jacoco/test/
+    - ./gradlew --no-daemon sonar -Dsonar.token="$SONAR_TOKEN" -Dsonar.qualitygate.wait=false
   allow_failure: true
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
