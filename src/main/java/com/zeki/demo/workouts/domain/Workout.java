@@ -1,7 +1,10 @@
 package com.zeki.demo.workouts.domain;
 
 import com.zeki.demo.workouts.enums.WorkoutCategory;
+import com.zeki.demo.workouts.enums.MuscleType;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 
@@ -11,6 +14,7 @@ public class Workout {
     private String workoutName;
     private String description;
     private WorkoutCategory category;
+    private MuscleType muscleType;
     private final LocalDate createdAt;
     private LocalDate updatedAt;
     private final LocalDate workoutDate;
@@ -19,6 +23,7 @@ public class Workout {
     private final Integer reps;
     private final Double weightKg;
     private String notes;
+    private final List<WorkoutExercise> exercises;
     private final String userEmail;
 
     public Workout(
@@ -32,6 +37,8 @@ public class Workout {
             UUID workoutId,
             String description,
             WorkoutCategory category,
+            MuscleType muscleType,
+            List<WorkoutExercise> exercises,
             LocalDate createdAt,
             LocalDate updatedAt,
             String userEmail
@@ -46,6 +53,8 @@ public class Workout {
         this.notes = normalizeNullable(notes);
         this.description = normalizeNullable(description);
         this.category = category;
+        this.muscleType = muscleType;
+        this.exercises = exercises == null ? List.of() : new ArrayList<>(exercises);
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.userEmail = normalize(userEmail);
@@ -91,6 +100,14 @@ public class Workout {
         }
         if (category == null) {
             throw new IllegalArgumentException("Workout category is required");
+        }
+        if (muscleType == null) {
+            throw new IllegalArgumentException("Muscle type is required");
+        }
+        if (!exercises.isEmpty()) {
+            for (WorkoutExercise exercise : exercises) {
+                exercise.validate();
+            }
         }
         if (notes != null && notes.length() > 1000) {
             throw new IllegalArgumentException("Notes cannot be longer than 1000 characters");

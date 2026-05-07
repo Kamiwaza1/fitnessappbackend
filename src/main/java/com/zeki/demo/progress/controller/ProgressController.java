@@ -1,7 +1,6 @@
 package com.zeki.demo.progress.controller;
 
-import com.zeki.demo.progress.dto.ProgressInsightsResponse;
-import com.zeki.demo.progress.dto.ProgressSummaryResponse;
+import com.zeki.demo.progress.dto.ProgressResponse;
 import com.zeki.demo.progress.mapperDtoDomain.ProgressDtoDomain;
 import com.zeki.demo.progress.service.ProgressService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,21 +21,12 @@ public class ProgressController {
     private final ProgressService progressService;
     private final ProgressDtoDomain progressDtoDomain;
 
-    @Operation(summary = "Get workout-driven summary for dashboard/progress")
-    @ApiResponse(responseCode = "200", description = "Progress summary")
-    @GetMapping("/summary")
-    public ProgressSummaryResponse getProgressSummary(Authentication authentication) {
-        return progressDtoDomain.toSummaryResponse(
-                progressService.getProgressSummary(authentication.getName())
-        );
-    }
-
-    @Operation(summary = "Get workout-driven insights for progress charts")
-    @ApiResponse(responseCode = "200", description = "Progress insights")
-    @GetMapping("/insights")
-    public ProgressInsightsResponse getProgressInsights(Authentication authentication) {
-        return progressDtoDomain.toInsightsResponse(
-                progressService.getProgressInsights(authentication.getName())
+    @Operation(summary = "Get workout-driven progress")
+    @ApiResponse(responseCode = "200", description = "Progress data for dashboard and charts")
+    @GetMapping
+    public ProgressResponse getProgress(Authentication authentication) {
+        return progressDtoDomain.toResponse(
+                progressService.getProgress(authentication.getName())
         );
     }
 }

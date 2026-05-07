@@ -2,6 +2,7 @@ package com.zeki.demo.workouts.entity;
 
 import com.zeki.demo.users.entity.UserEntity;
 import com.zeki.demo.workouts.enums.WorkoutCategory;
+import com.zeki.demo.workouts.enums.MuscleType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,10 +11,15 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,6 +51,10 @@ public class WorkoutEntity {
     @Column(name = "category", nullable = false)
     private WorkoutCategory category;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "muscle_type", nullable = false)
+    private MuscleType muscleType;
+
     @Column(name = "created_at", nullable = false)
     private LocalDate createdAt;
 
@@ -71,6 +81,15 @@ public class WorkoutEntity {
 
     @Column(name = "notes")
     private String notes;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "workout_exercises",
+            joinColumns = @JoinColumn(name = "workout_id", referencedColumnName = "workout_id")
+    )
+    @OrderColumn(name = "exercise_order")
+    @Builder.Default
+    private List<WorkoutExerciseValue> exercises = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

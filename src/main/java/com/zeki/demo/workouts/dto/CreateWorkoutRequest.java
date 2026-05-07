@@ -1,9 +1,11 @@
 package com.zeki.demo.workouts.dto;
 
 import com.zeki.demo.workouts.enums.WorkoutCategory;
+import com.zeki.demo.workouts.enums.MuscleType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 public record CreateWorkoutRequest(
@@ -22,6 +24,8 @@ public record CreateWorkoutRequest(
         String notes,
         String description,
         WorkoutCategory category,
+        MuscleType muscleType,
+        List<WorkoutExerciseRequest> exercises,
         UUID workoutId
 ) {
 }
