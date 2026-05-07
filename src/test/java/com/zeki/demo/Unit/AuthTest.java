@@ -1,4 +1,4 @@
-package com.zeki.demo.service;
+package com.zeki.demo.Unit;
 
 import com.zeki.demo.common.exception.ConflictException;
 import com.zeki.demo.common.exception.UnauthorizedException;
@@ -24,15 +24,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
+    private static final String TEST_EMAIL = "test@example.com";
+    private static final String STRONG_PASSWORD = "StrongPassword123!";
+    private static final String USER_ROLE = "USER";
 
     @Mock
     private UserRepository userRepository;
@@ -60,16 +65,7 @@ class AuthServiceTest {
 
     @Test
     void registerWhenEmailAlreadyExistsIgnoringCaseThrowsConflict() {
-        User user = new User(
-                null,
-                null,
-                "User@Example.com",
-                "StrongPassword123!",
-                "USER",
-                true,
-                LocalDateTime.now(),
-                LocalDateTime.now()
-        );
+        User user = userForAuth("User@Example.com", STRONG_PASSWORD);
 
         when(userRepository.existsByEmail("user@example.com")).thenReturn(true);
 
@@ -78,17 +74,38 @@ class AuthServiceTest {
     }
 
     @Test
+    void registerWhenPasswordIsWeakThrowsBadRequest() {
+        User user = userForAuth(TEST_EMAIL, "weak-password");
+
+        when(userRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
+
+        Exception ex = assertThrows(Exception.class, () -> authService.register(user));
+
+        assertTrue(ex.getMessage().startsWith("Password is not strong enough:"));
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void registerWhenInputIsValidEncodesPasswordSavesUserAndReturnsToken() {
+        User user = userForAuth(" Test@Example.com ", STRONG_PASSWORD);
+        User savedUser = storedUser(TEST_EMAIL);
+
+        when(userRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
+        when(passwordEncoder.encode(STRONG_PASSWORD)).thenReturn("encoded-password");
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(jwtService.generateToken(any(UserDetails.class), eq(USER_ROLE))).thenReturn("jwt-token");
+
+        AuthenticatedUser response = authService.register(user);
+
+        assertEquals("jwt-token", response.accessToken());
+        assertEquals(TEST_EMAIL, response.user().getEmail());
+        verify(passwordEncoder).encode(STRONG_PASSWORD);
+        verify(userRepository).save(any(User.class));
+    }
+
+    @Test
     void loginWhenEmailDoesNotExistThrowsUnauthorized() {
-        User user = new User(
-                null,
-                null,
-                "missing@example.com",
-                "StrongPassword123!",
-                "USER",
-                true,
-                null,
-                null
-        );
+        User user = userForAuth("missing@example.com", STRONG_PASSWORD);
 
         when(userRepository.findActiveByEmail("missing@example.com")).thenReturn(Optional.empty());
 
@@ -97,18 +114,17 @@ class AuthServiceTest {
     }
 
     @Test
+    void loginWhenEmailIsBlankThrowsBadRequest() {
+        User user = userForAuth("   ", STRONG_PASSWORD);
+
+        Exception ex = assertThrows(Exception.class, () -> authService.login(user));
+
+        assertEquals("Email is required", ex.getMessage());
+    }
+
+    @Test
     void loginWhenPasswordIsWrongThrowsUnauthorized() {
-        User loginUser = new User(null, null, "test@example.com", "wrong-password", "USER", true, null, null);
-        User storedUser = new User(
-                UUID.randomUUID(),
-                "Test User",
-                "test@example.com",
-                "encoded-password",
-                "USER",
-                true,
-                LocalDateTime.now(),
-                LocalDateTime.now()
-        );
+        User loginUser = userForAuth(TEST_EMAIL, "wrong-password");
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(new BadCredentialsException("Bad credentials"));
@@ -119,29 +135,38 @@ class AuthServiceTest {
 
     @Test
     void loginWhenCredentialsAreValidReturnsTokenAndUserInfo() {
-        User loginUser = new User(null, null, "TEST@Example.com", "StrongPassword123!", "USER", true, null, null);
-        User storedUser = new User(
-                UUID.randomUUID(),
-                "Test User",
-                "test@example.com",
-                "encoded-password",
-                "USER",
-                true,
-                LocalDateTime.now(),
-                LocalDateTime.now()
-        );
+        User loginUser = userForAuth("TEST@Example.com", STRONG_PASSWORD);
+        User storedUser = storedUser(TEST_EMAIL);
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(mock(Authentication.class));
-        when(userRepository.findActiveByEmail("test@example.com")).thenReturn(Optional.of(storedUser));
-        when(jwtService.generateToken(any(UserDetails.class), eq("USER"))).thenReturn("jwt-token");
+        when(userRepository.findActiveByEmail(TEST_EMAIL)).thenReturn(Optional.of(storedUser));
+        when(jwtService.generateToken(any(UserDetails.class), eq(USER_ROLE))).thenReturn("jwt-token");
 
         AuthenticatedUser response = authService.login(loginUser);
 
         assertEquals("jwt-token", response.accessToken());
-        assertEquals("test@example.com", response.user().getEmail());
+        assertEquals(TEST_EMAIL, response.user().getEmail());
         verify(authenticationManager).authenticate(
-                argThat(token -> "test@example.com".equals(token.getPrincipal()))
+                argThat(token -> TEST_EMAIL.equals(token.getPrincipal()))
+        );
+    }
+
+    private User userForAuth(String email, String password) {
+        return new User(null, null, email, password, USER_ROLE, true, null, null);
+    }
+
+    private User storedUser(String email) {
+        LocalDateTime now = LocalDateTime.now();
+        return new User(
+                UUID.randomUUID(),
+                "Test User",
+                email,
+                "encoded-password",
+                USER_ROLE,
+                true,
+                now,
+                now
         );
     }
 }

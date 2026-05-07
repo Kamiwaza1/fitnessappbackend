@@ -1,4 +1,4 @@
-package com.zeki.demo;
+package com.zeki.demo.Unit;
 
 import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.common.exception.ConflictException;
@@ -28,6 +28,10 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
+    private static final String OWNER_EMAIL = "owner@example.com";
+    private static final String UPDATED_EMAIL = "updated@example.com";
+    private static final String TAKEN_EMAIL = "taken@example.com";
+    private static final String STRONG_PASSWORD = "StrongPassword123!";
 
     @Mock
     private UserRepository userRepository;
@@ -54,15 +58,15 @@ class UserServiceTest {
 
     @Test
     void updateUserWhenEmailTakenThrowsConflict() {
-        User existing = activeUser("owner@example.com");
-        UpdateUserRequest request = new UpdateUserRequest("Owner", "taken@example.com", null);
+        User existing = activeUser(OWNER_EMAIL);
+        UpdateUserRequest request = updateRequest("Owner", TAKEN_EMAIL, null);
 
-        when(userRepository.findActiveByEmail("owner@example.com")).thenReturn(Optional.of(existing));
-        when(userRepository.existsActiveByEmail("taken@example.com")).thenReturn(true);
+        when(userRepository.findActiveByEmail(OWNER_EMAIL)).thenReturn(Optional.of(existing));
+        when(userRepository.existsActiveByEmail(TAKEN_EMAIL)).thenReturn(true);
 
         ConflictException ex = assertThrows(
                 ConflictException.class,
-                () -> userService.updateUser("owner@example.com", request)
+                () -> userService.updateUser(OWNER_EMAIL, request)
         );
 
         assertEquals("An account with this email already exists", ex.getMessage());
@@ -71,45 +75,68 @@ class UserServiceTest {
 
     @Test
     void updateUserWithStrongPasswordEncodesAndSaves() {
-        User existing = activeUser("owner@example.com");
-        UpdateUserRequest request = new UpdateUserRequest(
-                "Updated User",
-                "updated@example.com",
-                "StrongPassword123!"
-        );
+        User existing = activeUser(OWNER_EMAIL);
+        UpdateUserRequest request = updateRequest("Updated User", UPDATED_EMAIL, STRONG_PASSWORD);
 
-        when(userRepository.findActiveByEmail("owner@example.com")).thenReturn(Optional.of(existing));
-        when(userRepository.existsActiveByEmail("updated@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("StrongPassword123!")).thenReturn("encoded-password");
+        when(userRepository.findActiveByEmail(OWNER_EMAIL)).thenReturn(Optional.of(existing));
+        when(userRepository.existsActiveByEmail(UPDATED_EMAIL)).thenReturn(false);
+        when(passwordEncoder.encode(STRONG_PASSWORD)).thenReturn("encoded-password");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        User updated = userService.updateUser("owner@example.com", request);
+        User updated = userService.updateUser(OWNER_EMAIL, request);
 
-        assertEquals("updated@example.com", updated.getEmail());
+        assertEquals(UPDATED_EMAIL, updated.getEmail());
         assertEquals("encoded-password", updated.getPassword());
-        verify(passwordEncoder).encode("StrongPassword123!");
+        verify(passwordEncoder).encode(STRONG_PASSWORD);
     }
 
     @Test
     void updateUserWithWeakPasswordThrowsBadRequest() {
-        User existing = activeUser("owner@example.com");
-        UpdateUserRequest request = new UpdateUserRequest("Updated User", "updated@example.com", "weak");
+        User existing = activeUser(OWNER_EMAIL);
+        UpdateUserRequest request = updateRequest("Updated User", UPDATED_EMAIL, "weak");
 
-        when(userRepository.findActiveByEmail("owner@example.com")).thenReturn(Optional.of(existing));
-        when(userRepository.existsActiveByEmail("updated@example.com")).thenReturn(false);
+        when(userRepository.findActiveByEmail(OWNER_EMAIL)).thenReturn(Optional.of(existing));
+        when(userRepository.existsActiveByEmail(UPDATED_EMAIL)).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> userService.updateUser("owner@example.com", request));
+        assertThrows(BadRequestException.class, () -> userService.updateUser(OWNER_EMAIL, request));
         verify(passwordEncoder, never()).encode(any());
         verify(userRepository, never()).save(any());
     }
 
     @Test
-    void deleteCurrentUserSoftDeletesAndSaves() {
-        User existing = activeUser("owner@example.com");
-        when(userRepository.findActiveByEmail("owner@example.com")).thenReturn(Optional.of(existing));
+    void updateUserWithBlankEmailThrowsBadRequest() {
+        User existing = activeUser(OWNER_EMAIL);
+        UpdateUserRequest request = updateRequest("Updated User", "   ", STRONG_PASSWORD);
+
+        when(userRepository.findActiveByEmail(OWNER_EMAIL)).thenReturn(Optional.of(existing));
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> userService.updateUser(OWNER_EMAIL, request));
+
+        assertEquals("Email is required", ex.getMessage());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void updateUserWithSameEmailDoesNotCheckUniquenessAndSaves() {
+        User existing = activeUser(OWNER_EMAIL);
+        UpdateUserRequest request = updateRequest("Updated User", " OWNER@example.com ", null);
+
+        when(userRepository.findActiveByEmail(OWNER_EMAIL)).thenReturn(Optional.of(existing));
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        userService.deleteCurrentUser("owner@example.com");
+        User updated = userService.updateUser(OWNER_EMAIL, request);
+
+        assertEquals(OWNER_EMAIL, updated.getEmail());
+        verify(userRepository, never()).existsActiveByEmail(OWNER_EMAIL);
+    }
+
+    @Test
+    void deleteCurrentUserSoftDeletesAndSaves() {
+        User existing = activeUser(OWNER_EMAIL);
+        when(userRepository.findActiveByEmail(OWNER_EMAIL)).thenReturn(Optional.of(existing));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        userService.deleteCurrentUser(OWNER_EMAIL);
 
         assertFalse(existing.isActive());
         verify(userRepository).save(existing);
@@ -139,5 +166,9 @@ class UserServiceTest {
                 now.minusDays(1),
                 now
         );
+    }
+
+    private UpdateUserRequest updateRequest(String name, String email, String password) {
+        return new UpdateUserRequest(name, email, password);
     }
 }
