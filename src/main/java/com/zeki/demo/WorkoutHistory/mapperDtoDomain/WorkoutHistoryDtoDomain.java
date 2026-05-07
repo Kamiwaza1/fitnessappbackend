@@ -19,6 +19,7 @@ public class WorkoutHistoryDtoDomain {
                 workoutHistory.getNotes(),
                 workoutHistory.getDescription(),
                 workoutHistory.getCategory(),
+                workoutHistory.getMuscleType(),
                 workoutHistory.getUpdatedAt(),
                 workoutHistory.getCreatedAt()
         );

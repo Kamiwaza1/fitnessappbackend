@@ -1,9 +1,9 @@
 package com.zeki.demo.progress.service;
 
-import com.zeki.demo.progress.domain.ProgressInsights;
-import com.zeki.demo.progress.domain.ProgressSummary;
+import com.zeki.demo.progress.domain.Progress;
 import com.zeki.demo.progress.repository.ProgressRepository;
 import com.zeki.demo.workouts.domain.Workout;
+import com.zeki.demo.workouts.domain.WorkoutExercise;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
@@ -22,7 +22,7 @@ public class ProgressServiceImpl implements ProgressService {
     private final ProgressRepository progressRepository;
 
     @Override
-    public ProgressSummary getProgressSummary(String userEmail) {
+    public Progress getProgress(String userEmail) {
         List<Workout> workouts = progressRepository.findAllByUserEmail(userEmail);
         LocalDate today = LocalDate.now();
         LocalDate weekStart = today.with(WeekFields.ISO.dayOfWeek(), 1);
@@ -47,20 +47,6 @@ public class ProgressServiceImpl implements ProgressService {
                 .limit(10)
                 .toList();
 
-        return new ProgressSummary(
-                weekStart,
-                weekEnd,
-                weeklyTrainingVolumeKg,
-                weeklyDurationMinutes,
-                currentWeekWorkouts.size(),
-                recentActivity
-        );
-    }
-
-    @Override
-    public ProgressInsights getProgressInsights(String userEmail) {
-        List<Workout> workouts = progressRepository.findAllByUserEmail(userEmail);
-        LocalDate today = LocalDate.now();
         LocalDate currentWeekStart = today.with(WeekFields.ISO.dayOfWeek(), 1);
         DateTimeFormatter labelFormatter = DateTimeFormatter.ofPattern("MMM d");
 
@@ -70,41 +56,86 @@ public class ProgressServiceImpl implements ProgressService {
                         Collectors.summingDouble(this::calculateVolume)
                 ));
 
-        List<ProgressInsights.WeeklyVolumePoint> weeklyTrend = IntStream.rangeClosed(0, 3)
+        List<Progress.WeeklyVolumePoint> weeklyTrend = IntStream.rangeClosed(0, 3)
                 .mapToObj(index -> currentWeekStart.minusWeeks(3 - index))
-                .map(weekStart -> new ProgressInsights.WeeklyVolumePoint(
-                        weekStart.format(labelFormatter),
-                        volumeByWeek.getOrDefault(weekStart, 0.0)
+                .map(week -> new Progress.WeeklyVolumePoint(
+                        week.format(labelFormatter),
+                        volumeByWeek.getOrDefault(week, 0.0)
                 ))
                 .toList();
 
-        List<ProgressInsights.CategoryVolumePoint> categoryBreakdown = workouts.stream()
+        List<Progress.CategoryVolumePoint> categoryBreakdown = workouts.stream()
                 .collect(Collectors.groupingBy(
-                        workout -> workout.getCategory().name(),
+                        Workout::getCategory,
                         Collectors.summingDouble(this::calculateVolume)
                 ))
                 .entrySet()
                 .stream()
                 .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
-                .map(entry -> new ProgressInsights.CategoryVolumePoint(entry.getKey(), entry.getValue()))
+                .map(entry -> new Progress.CategoryVolumePoint(entry.getKey(), entry.getValue()))
                 .toList();
 
-        ProgressInsights.PersonalRecord personalRecord = workouts.stream()
+        Progress.PersonalRecord personalRecord = workouts.stream()
                 .max(Comparator.comparingDouble(this::calculateVolume))
-                .map(workout -> new ProgressInsights.PersonalRecord(
+                .map(workout -> new Progress.PersonalRecord(
                         workout.getWorkoutName(),
-                        workout.getWeightKg(),
-                        workout.getReps(),
-                        workout.getSets(),
+                        resolvePrWeight(workout),
+                        resolvePrReps(workout),
+                        resolvePrSets(workout),
                         calculateVolume(workout),
                         workout.getWorkoutDate().toString()
                 ))
                 .orElse(null);
 
-        return new ProgressInsights(weeklyTrend, categoryBreakdown, personalRecord);
+        return new Progress(
+                weekStart,
+                weekEnd,
+                weeklyTrainingVolumeKg,
+                weeklyDurationMinutes,
+                currentWeekWorkouts.size(),
+                recentActivity,
+                weeklyTrend,
+                categoryBreakdown,
+                personalRecord
+        );
     }
 
     private double calculateVolume(Workout workout) {
+        if (workout.getExercises() != null && !workout.getExercises().isEmpty()) {
+            return workout.getExercises().stream()
+                    .mapToDouble(exercise -> exercise.getWeightKg() * exercise.getSets() * exercise.getReps())
+                    .sum();
+        }
         return workout.getWeightKg() * workout.getSets() * workout.getReps();
+    }
+
+    private Double resolvePrWeight(Workout workout) {
+        if (workout.getExercises() == null || workout.getExercises().isEmpty()) {
+            return workout.getWeightKg();
+        }
+        return workout.getExercises().stream()
+                .mapToDouble(WorkoutExercise::getWeightKg)
+                .max()
+                .orElse(0.0);
+    }
+
+    private Integer resolvePrReps(Workout workout) {
+        if (workout.getExercises() == null || workout.getExercises().isEmpty()) {
+            return workout.getReps();
+        }
+        return workout.getExercises().stream()
+                .mapToInt(WorkoutExercise::getReps)
+                .max()
+                .orElse(0);
+    }
+
+    private Integer resolvePrSets(Workout workout) {
+        if (workout.getExercises() == null || workout.getExercises().isEmpty()) {
+            return workout.getSets();
+        }
+        return workout.getExercises().stream()
+                .mapToInt(WorkoutExercise::getSets)
+                .max()
+                .orElse(0);
     }
 }

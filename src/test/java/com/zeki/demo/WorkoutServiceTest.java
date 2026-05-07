@@ -5,6 +5,7 @@ import com.zeki.demo.workouts.WorkoutException.WorkoutExistException;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.dto.UpdateWorkoutRequest;
 import com.zeki.demo.workouts.enums.WorkoutCategory;
+import com.zeki.demo.workouts.enums.MuscleType;
 import com.zeki.demo.workouts.mapperDtoDomain.WorkoutDtoDomain;
 import com.zeki.demo.workouts.repository.WorkoutRepository;
 import com.zeki.demo.workouts.service.WorkoutServiceImpl;
@@ -52,7 +53,7 @@ class WorkoutServiceTest {
     void updateWorkoutWhenNotOwnedByUserThrowsUnauthorized() {
         UUID workoutId = UUID.randomUUID();
         Workout existing = validWorkout(workoutId, "owner@example.com");
-        UpdateWorkoutRequest request = new UpdateWorkoutRequest(
+        UpdateWorkoutRequest request = updateRequest(
                 workoutId,
                 "Updated name",
                 LocalDate.now().plusDays(1),
@@ -62,6 +63,7 @@ class WorkoutServiceTest {
                 85.0,
                 "Updated notes",
                 WorkoutCategory.CARDIO,
+                MuscleType.CORE,
                 "Updated description"
         );
 
@@ -81,7 +83,7 @@ class WorkoutServiceTest {
     void updateWorkoutWhenOwnedPersistsUpdatedWorkout() {
         UUID workoutId = UUID.randomUUID();
         Workout existing = validWorkout(workoutId, "owner@example.com");
-        UpdateWorkoutRequest request = new UpdateWorkoutRequest(
+        UpdateWorkoutRequest request = updateRequest(
                 workoutId,
                 "Updated name",
                 LocalDate.now().plusDays(2),
@@ -91,6 +93,7 @@ class WorkoutServiceTest {
                 140.0,
                 "Updated notes",
                 WorkoutCategory.CARDIO,
+                MuscleType.CHEST,
                 "Updated description"
         );
 
@@ -132,9 +135,40 @@ class WorkoutServiceTest {
                 workoutId,
                 "description",
                 WorkoutCategory.GENERAL,
+                MuscleType.FULL_BODY,
+                null,
                 now,
                 now,
                 userEmail
+        );
+    }
+
+    private UpdateWorkoutRequest updateRequest(
+            UUID workoutId,
+            String workoutName,
+            LocalDate workoutDate,
+            Integer durationMinutes,
+            Integer sets,
+            Integer reps,
+            Double weightKg,
+            String notes,
+            WorkoutCategory category,
+            MuscleType muscleType,
+            String description
+    ) {
+        return new UpdateWorkoutRequest(
+                workoutId,
+                workoutName,
+                workoutDate,
+                durationMinutes,
+                sets,
+                reps,
+                weightKg,
+                notes,
+                category,
+                muscleType,
+                null,
+                description
         );
     }
 }
