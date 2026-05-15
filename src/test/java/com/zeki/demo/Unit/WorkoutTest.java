@@ -3,41 +3,50 @@ package com.zeki.demo.Unit;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.dto.CreateWorkoutRequest;
 import com.zeki.demo.workouts.dto.WorkoutResponse;
-import com.zeki.demo.workouts.enums.WorkoutCategory;
 import com.zeki.demo.workouts.enums.MuscleType;
+import com.zeki.demo.workouts.enums.WorkoutCategory;
 import com.zeki.demo.workouts.mapperDtoDomain.WorkoutDtoDomain;
+import org.junit.jupiter.api.Test;
+
 import java.time.LocalDate;
 import java.util.UUID;
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class WorkoutTest {
+    //mapper test no need for mocks
 
     private final WorkoutDtoDomain workoutDtoDomain = new WorkoutDtoDomain();
+
     private static final String TEST_EMAIL = "test@example.com";
     private static final String DEFAULT_NAME = "Leg Day";
     private static final String DEFAULT_NOTES = "Heavy squats";
     private static final String DEFAULT_DESCRIPTION = "Lower body session";
-    private static final LocalDate FIXED_DATE = LocalDate.of(2026, 5, 16);
+    private static final LocalDate FIXED_WORKOUT_DATE = LocalDate.of(2026, 5, 16);
     private static final LocalDate FIXED_CREATED_AT = LocalDate.of(2026, 4, 23);
 
     @Test
-    void toDomainUsesProvidedWorkoutCategory() {
+    void toDomain_shouldMapCreateWorkoutRequestToWorkout_whenCategoryAndMuscleTypeAreProvided() {
         CreateWorkoutRequest request = createWorkoutRequest(WorkoutCategory.STRENGTH, MuscleType.LEGS);
 
         Workout workout = workoutDtoDomain.toDomain(request, TEST_EMAIL);
 
+        assertEquals(DEFAULT_NAME, workout.getName());
+        assertEquals(FIXED_WORKOUT_DATE, workout.getWorkoutDate());
+        assertEquals(60, workout.getDurationMinutes());
+        assertEquals(4, workout.getSets());
+        assertEquals(10, workout.getReps());
+        assertEquals(100.0, workout.getWeight());
+        assertEquals(DEFAULT_NOTES, workout.getNotes());
+        assertEquals(DEFAULT_DESCRIPTION, workout.getDescription());
         assertEquals(WorkoutCategory.STRENGTH, workout.getCategory());
         assertEquals(MuscleType.LEGS, workout.getMuscleType());
         assertEquals(TEST_EMAIL, workout.getUserEmail());
-        assertEquals(4, workout.getSets());
-        assertEquals(10, workout.getReps());
     }
 
     @Test
-    void toDomainDefaultsCategoryToGeneral() {
+    void toDomain_shouldUseDefaultCategoryAndMuscleType_whenRequestDoesNotProvideThem() {
         CreateWorkoutRequest request = createWorkoutRequest(null, null);
 
         Workout workout = workoutDtoDomain.toDomain(request, TEST_EMAIL);
@@ -47,19 +56,25 @@ class WorkoutTest {
     }
 
     @Test
-    void responseExposesEnumCategory() {
+    void toResponse_shouldMapWorkoutToWorkoutResponse() {
         Workout workout = createWorkout(WorkoutCategory.STRENGTH, MuscleType.LEGS);
 
         WorkoutResponse response = workoutDtoDomain.toResponse(workout);
 
-        assertEquals(WorkoutCategory.STRENGTH, response.category());
-        assertEquals(MuscleType.LEGS, response.muscleType());
+        assertEquals(DEFAULT_NAME, response.name());
+        assertEquals(FIXED_WORKOUT_DATE, response.workoutDate());
+        assertEquals(60, response.durationMinutes());
         assertEquals(5, response.sets());
         assertEquals(8, response.reps());
+        assertEquals(120.0, response.weight());
+        assertEquals(DEFAULT_NOTES, response.notes());
+        assertEquals(DEFAULT_DESCRIPTION, response.description());
+        assertEquals(WorkoutCategory.STRENGTH, response.category());
+        assertEquals(MuscleType.LEGS, response.muscleType());
     }
 
     @Test
-    void workoutRejectsNullCategory() {
+    void validate_shouldThrowException_whenWorkoutCategoryIsNull() {
         Workout workout = createWorkout(null, MuscleType.LEGS);
 
         assertThrows(IllegalArgumentException.class, workout::validate);
@@ -68,7 +83,7 @@ class WorkoutTest {
     private CreateWorkoutRequest createWorkoutRequest(WorkoutCategory category, MuscleType muscleType) {
         return new CreateWorkoutRequest(
                 DEFAULT_NAME,
-                FIXED_DATE,
+                FIXED_WORKOUT_DATE,
                 60,
                 4,
                 10,
@@ -85,7 +100,7 @@ class WorkoutTest {
     private Workout createWorkout(WorkoutCategory category, MuscleType muscleType) {
         return new Workout(
                 DEFAULT_NAME,
-                FIXED_DATE,
+                FIXED_WORKOUT_DATE,
                 60,
                 5,
                 8,
