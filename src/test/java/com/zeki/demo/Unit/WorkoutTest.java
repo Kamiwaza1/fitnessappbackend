@@ -32,12 +32,12 @@ class WorkoutTest {
 
         Workout workout = workoutDtoDomain.toDomain(request, TEST_EMAIL);
 
-        assertEquals(DEFAULT_NAME, workout.getName());
+        assertEquals(DEFAULT_NAME, workout.getWorkoutName());
         assertEquals(FIXED_WORKOUT_DATE, workout.getWorkoutDate());
         assertEquals(60, workout.getDurationMinutes());
         assertEquals(4, workout.getSets());
         assertEquals(10, workout.getReps());
-        assertEquals(100.0, workout.getWeight());
+        assertEquals(100.0, workout.getWeightKg());
         assertEquals(DEFAULT_NOTES, workout.getNotes());
         assertEquals(DEFAULT_DESCRIPTION, workout.getDescription());
         assertEquals(WorkoutCategory.STRENGTH, workout.getCategory());
@@ -61,12 +61,12 @@ class WorkoutTest {
 
         WorkoutResponse response = workoutDtoDomain.toResponse(workout);
 
-        assertEquals(DEFAULT_NAME, response.name());
+        assertEquals(DEFAULT_NAME, response.workoutName());
         assertEquals(FIXED_WORKOUT_DATE, response.workoutDate());
         assertEquals(60, response.durationMinutes());
         assertEquals(5, response.sets());
         assertEquals(8, response.reps());
-        assertEquals(120.0, response.weight());
+        assertEquals(120.0, response.weightKg());
         assertEquals(DEFAULT_NOTES, response.notes());
         assertEquals(DEFAULT_DESCRIPTION, response.description());
         assertEquals(WorkoutCategory.STRENGTH, response.category());
