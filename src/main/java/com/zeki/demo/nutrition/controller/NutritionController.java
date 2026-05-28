@@ -55,7 +55,10 @@ public class NutritionController {
     @Operation(summary = "Search food products from OpenFoodFacts")
     @ApiResponse(responseCode = "200", description = "Food search results")
     @GetMapping("/foods/search")
-    public FoodProductsResponse searchFoodProducts(@Valid @ModelAttribute FoodProductSearchRequest request) {
+    public FoodProductsResponse searchFoodProducts(
+            @Valid @ModelAttribute FoodProductSearchRequest request,
+            Authentication authentication
+    ) {
         return openFoodFactsClient.searchProducts(request);
     }
 
@@ -67,7 +70,8 @@ public class NutritionController {
     @GetMapping("/foods/{barcode}")
     public FoodProductResponse getFoodProductByBarcode(
             @PathVariable String barcode,
-            @RequestParam(required = false) String lang
+            @RequestParam(required = false) String lang,
+            Authentication authentication
     ) {
         return openFoodFactsClient.getProductByBarcode(barcode, lang);
     }
@@ -77,7 +81,8 @@ public class NutritionController {
     @GetMapping("/foods/brands/{brand}")
     public FoodProductsResponse getFoodProductsByBrand(
             @PathVariable String brand,
-            @Valid @ModelAttribute FoodProductsRequest request
+            @Valid @ModelAttribute FoodProductsRequest request,
+            Authentication authentication
     ) {
         return openFoodFactsClient.getProductsByBrand(brand, request);
     }
@@ -87,7 +92,8 @@ public class NutritionController {
     @GetMapping("/foods/categories/{category}")
     public FoodProductsResponse getFoodProductsByCategory(
             @PathVariable String category,
-            @Valid @ModelAttribute FoodProductsRequest request
+            @Valid @ModelAttribute FoodProductsRequest request,
+            Authentication authentication
     ) {
         return openFoodFactsClient.getProductsByCategory(category, request);
     }
@@ -98,8 +104,10 @@ public class NutritionController {
             @ApiResponse(responseCode = "404", description = "Nutrition entry not found")
     })
     @GetMapping("/{nutritionId}")
-    public NutritionResponse getNutritionById(@PathVariable UUID nutritionId) {
-        return nutritionDtoDomain.toResponse(nutritionService.getNutritionById(nutritionId));
+    public NutritionResponse getNutritionById(@PathVariable UUID nutritionId, Authentication authentication) {
+        return nutritionDtoDomain.toResponse(
+                nutritionService.getNutritionById(nutritionId, authentication.getName())
+        );
     }
 
     @Operation(summary = "Create a new nutrition entry for the current user")
@@ -142,7 +150,7 @@ public class NutritionController {
     })
     @DeleteMapping("/{nutritionId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteNutrition(@PathVariable UUID nutritionId) {
-        nutritionService.deleteNutrition(nutritionId);
+    public void deleteNutrition(@PathVariable UUID nutritionId, Authentication authentication) {
+        nutritionService.deleteNutrition(nutritionId, authentication.getName());
     }
 }

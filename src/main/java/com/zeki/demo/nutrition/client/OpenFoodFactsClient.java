@@ -8,7 +8,11 @@ import com.zeki.demo.nutrition.dto.FoodProductSearchRequest;
 import com.zeki.demo.nutrition.dto.FoodProductsRequest;
 import com.zeki.demo.nutrition.dto.FoodProductsResponse;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -19,23 +23,33 @@ import org.springframework.web.util.UriBuilder;
 public class OpenFoodFactsClient {
 
     private final WebClient webClient;
+    private final WebClient officialWebClient;
 
     public OpenFoodFactsClient(
             WebClient.Builder builder,
-            @Value("${openfoodfacts.base-url:https://off.brndndiaz.dev}") String baseUrl
+            @Value("${openfoodfacts.base-url:https://off.brndndiaz.dev}") String baseUrl,
+            @Value("${openfoodfacts.official-base-url:https://world.openfoodfacts.org/api/v2}") String officialBaseUrl
     ) {
         this.webClient = builder
                 .baseUrl(baseUrl)
+                .build();
+        this.officialWebClient = builder
+                .clone()
+                .baseUrl(officialBaseUrl)
                 .build();
     }
 
     public FoodProductResponse getProductByBarcode(String barcode, String lang) {
         try {
-            return webClient.get()
-                    .uri(uriBuilder -> productUri(uriBuilder, barcode, lang))
+            OpenFoodFactsProductResponse response = officialWebClient.get()
+                    .uri(uriBuilder -> officialProductUri(uriBuilder, barcode, lang))
                     .retrieve()
-                    .bodyToMono(FoodProductResponse.class)
+                    .bodyToMono(OpenFoodFactsProductResponse.class)
                     .block();
+            if (response == null || response.status() == null || response.status() == 0 || response.product() == null) {
+                throw new NotFoundException("Food product not found");
+            }
+            return response.product().toFoodProductResponse(response.code());
         } catch (WebClientResponseException ex) {
             throw mapExternalError(ex, "Food product not found");
         }
@@ -77,9 +91,25 @@ public class OpenFoodFactsClient {
         }
     }
 
-    private URI productUri(UriBuilder uriBuilder, String barcode, String lang) {
-        UriBuilder builder = uriBuilder.path("/product/{barcode}");
-        addIfPresent(builder, "lang", lang);
+    private URI officialProductUri(UriBuilder uriBuilder, String barcode, String lang) {
+        UriBuilder builder = uriBuilder
+                .path("/product/{barcode}.json")
+                .queryParam("fields", String.join(",", List.of(
+                        "code",
+                        "product_name",
+                        "nutriments",
+                        "serving_size",
+                        "brands",
+                        "categories",
+                        "categories_tags",
+                        "ingredients_text",
+                        "nutriscore_grade",
+                        "nova_group",
+                        "image_url",
+                        "image_small_url",
+                        "countries_tags"
+                )));
+        addIfPresent(builder, "lc", lang);
         return builder.build(barcode);
     }
 
@@ -139,5 +169,104 @@ public class OpenFoodFactsClient {
             return new BadRequestException(defaultMessage);
         }
         return new ExternalServiceException("OpenFoodFacts service is unavailable");
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private record OpenFoodFactsProductResponse(
+            String code,
+            Integer status,
+            OpenFoodFactsProduct product
+    ) {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private record OpenFoodFactsProduct(
+            String code,
+            @JsonProperty("product_name")
+            String productName,
+            Nutriments nutriments,
+            @JsonProperty("serving_size")
+            String servingSize,
+            String brands,
+            String categories,
+            @JsonProperty("categories_tags")
+            List<String> categoriesTags,
+            @JsonProperty("ingredients_text")
+            String ingredientsText,
+            @JsonProperty("nutriscore_grade")
+            String nutriscoreGrade,
+            @JsonProperty("nova_group")
+            Double novaGroup,
+            @JsonProperty("image_url")
+            String imageUrl,
+            @JsonProperty("image_small_url")
+            String imageSmallUrl,
+            @JsonProperty("countries_tags")
+            List<String> countriesTags
+    ) {
+        FoodProductResponse toFoodProductResponse(String fallbackCode) {
+            Nutriments values = nutriments != null ? nutriments : Nutriments.empty();
+            return new FoodProductResponse(
+                    code != null ? code : fallbackCode,
+                    productName,
+                    values.caloriesPer100g(),
+                    values.caloriesPerServing(),
+                    values.proteins100g(),
+                    values.carbohydrates100g(),
+                    values.fat100g(),
+                    values.sugars100g(),
+                    values.salt100g(),
+                    values.fiber100g(),
+                    values.saturatedFat100g(),
+                    values.sodium100g(),
+                    servingSize,
+                    splitCsv(brands),
+                    categories != null ? splitCsv(categories) : categoriesTags,
+                    ingredientsText,
+                    nutriscoreGrade,
+                    novaGroup,
+                    imageUrl,
+                    imageSmallUrl,
+                    countriesTags
+            );
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private record Nutriments(
+            @JsonProperty("energy-kcal_100g")
+            Double caloriesPer100g,
+            @JsonProperty("energy-kcal_serving")
+            Double caloriesPerServing,
+            @JsonProperty("proteins_100g")
+            Double proteins100g,
+            @JsonProperty("carbohydrates_100g")
+            Double carbohydrates100g,
+            @JsonProperty("fat_100g")
+            Double fat100g,
+            @JsonProperty("sugars_100g")
+            Double sugars100g,
+            @JsonProperty("salt_100g")
+            Double salt100g,
+            @JsonProperty("fiber_100g")
+            Double fiber100g,
+            @JsonProperty("saturated-fat_100g")
+            Double saturatedFat100g,
+            @JsonProperty("sodium_100g")
+            Double sodium100g
+    ) {
+        static Nutriments empty() {
+            return new Nutriments(null, null, null, null, null, null, null, null, null, null);
+        }
+    }
+
+    private static List<String> splitCsv(String value) {
+        if (value == null || value.isBlank()) {
+            return List.of();
+        }
+        return Arrays.stream(value.split(","))
+                .map(String::trim)
+                .filter(item -> !item.isBlank())
+                .toList();
     }
 }

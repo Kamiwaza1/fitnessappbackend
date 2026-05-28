@@ -1,6 +1,5 @@
 package com.zeki.demo.workouts.service;
 
-import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.workouts.WorkoutException.WorkoutExistException;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.dto.UpdateWorkoutRequest;
@@ -26,8 +25,8 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    public Workout getWorkoutById(UUID workoutId) {
-        return workoutRepository.getWorkoutById(workoutId)
+    public Workout getWorkoutById(UUID workoutId, String userEmail) {
+        return workoutRepository.getWorkoutByIdAndUserEmail(workoutId, userEmail)
                 .orElseThrow(() -> new WorkoutExistException("Workout not found"));
     }
 
@@ -43,19 +42,16 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     @Override
     public Workout updateWorkout(UUID workoutId, UpdateWorkoutRequest request, String userEmail) {
-        Workout existingWorkout = workoutRepository.getWorkoutById(workoutId)
+        Workout existingWorkout = workoutRepository.getWorkoutByIdAndUserEmail(workoutId, userEmail)
                 .orElseThrow(() -> new WorkoutExistException("Workout not found"));
-        if (!workoutRepository.isOwnedByUser(workoutId, userEmail)) {
-            throw new UnauthorizedException("You cannot update this workout");
-        }
         Workout updatedWorkout = workoutDtoDomain.toUpdatedDomain(request, existingWorkout);
         updatedWorkout.validate();
         return workoutRepository.save(updatedWorkout);
     }
 
     @Override
-    public void deleteWorkout(UUID workoutId) {
-        workoutRepository.getWorkoutById(workoutId)
+    public void deleteWorkout(UUID workoutId, String userEmail) {
+        workoutRepository.getWorkoutByIdAndUserEmail(workoutId, userEmail)
                 .orElseThrow(() -> new WorkoutExistException("Workout not found"));
         workoutRepository.delete(workoutId);
     }

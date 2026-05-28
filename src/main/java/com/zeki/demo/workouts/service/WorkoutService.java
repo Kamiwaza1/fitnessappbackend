@@ -9,12 +9,12 @@ public interface WorkoutService {
 
     Workout createWorkout(Workout workout);
 
-    Workout getWorkoutById(UUID workoutId);
+    Workout getWorkoutById(UUID workoutId, String userEmail);
 
     List<Workout> getMyWorkouts(String userEmail);
     List<Workout> upcomingWorkouts(String userEmail);
 
     Workout updateWorkout(UUID workoutId, UpdateWorkoutRequest request, String userEmail);
 
-    void deleteWorkout(UUID workoutId);
+    void deleteWorkout(UUID workoutId, String userEmail);
 }

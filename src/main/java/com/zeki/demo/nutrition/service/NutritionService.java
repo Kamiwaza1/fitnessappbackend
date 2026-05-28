@@ -9,11 +9,11 @@ public interface NutritionService {
 
     Nutrition createNutrition(Nutrition nutrition);
 
-    Nutrition getNutritionById(UUID nutritionId);
+    Nutrition getNutritionById(UUID nutritionId, String userEmail);
 
     List<Nutrition> getMyNutritionEntries(String userEmail);
 
     Nutrition updateNutrition(UUID nutritionId, UpdateNutritionRequest request, String userEmail);
 
-    void deleteNutrition(UUID nutritionId);
+    void deleteNutrition(UUID nutritionId, String userEmail);
 }

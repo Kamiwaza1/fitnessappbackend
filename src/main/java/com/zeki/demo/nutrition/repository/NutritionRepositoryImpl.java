@@ -22,8 +22,9 @@ public class NutritionRepositoryImpl implements NutritionRepository {
     private final UserRepoJPA userRepoJPA;
 
     @Override
-    public Optional<Nutrition> getNutritionById(UUID nutritionId) {
-        return nutritionRepoJPA.findById(nutritionId).map(nutritionEntityMapper::toDomain);
+    public Optional<Nutrition> getNutritionByIdAndUserEmail(UUID nutritionId, String userEmail) {
+        return nutritionRepoJPA.findByNutritionIdAndUserEmail(nutritionId, userEmail)
+                .map(nutritionEntityMapper::toDomain);
     }
 
     @Override
@@ -49,8 +50,4 @@ public class NutritionRepositoryImpl implements NutritionRepository {
         nutritionRepoJPA.delete(nutritionEntity);
     }
 
-    @Override
-    public boolean isOwnedByUser(UUID nutritionId, String userEmail) {
-        return nutritionRepoJPA.existsByNutritionIdAndUserEmail(nutritionId, userEmail);
-    }
 }

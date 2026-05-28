@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface NutritionRepository {
 
-    Optional<Nutrition> getNutritionById(UUID nutritionId);
+    Optional<Nutrition> getNutritionByIdAndUserEmail(UUID nutritionId, String userEmail);
 
     Nutrition save(Nutrition nutrition);
 
@@ -15,5 +15,4 @@ public interface NutritionRepository {
 
     void delete(UUID nutritionId);
 
-    boolean isOwnedByUser(UUID nutritionId, String userEmail);
 }
