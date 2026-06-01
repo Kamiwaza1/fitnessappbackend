@@ -8,6 +8,7 @@ variables:
   GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle-home"
   SONAR_USER_HOME: "$CI_PROJECT_DIR/.sonar"
   GIT_DEPTH: "0"
+  COOLIFY_WEBHOOK: "$COOLIFY_WEBHOOK"
 
 before_script:
   - export JAVA_HOME=$(/usr/libexec/java_home -v 21)
@@ -60,6 +61,8 @@ docker:
   script:
     - ./gradlew --no-daemon bootJar
     - docker compose up --build -d
+    - echo "Triggering Coolify deployment"
+    - curl -X GET "$COOLIFY_WEBHOOK"
   artifacts:
     paths:
       - build/libs/
