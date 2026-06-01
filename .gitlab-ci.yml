@@ -62,7 +62,7 @@ docker:
     - ./gradlew --no-daemon bootJar
     - docker compose up --build -d
     - echo "Triggering Coolify deployment"
-    - curl -X GET "$COOLIFY_WEBHOOK"
+    - 'curl -fsSL "$COOLIFY_WEBHOOK" -H "Authorization: Bearer $COOLIFY_TOKEN"'
   artifacts:
     paths:
       - build/libs/
