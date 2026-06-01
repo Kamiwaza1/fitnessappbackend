@@ -153,7 +153,7 @@ class AuthServiceTest {
     }
 
     private User userForAuth(String email, String password) {
-        return new User(null, null, email, password, USER_ROLE, true, null, null);
+        return new User(null, null, email, password, null, USER_ROLE, true, null, null);
     }
 
     private User storedUser(String email) {
@@ -163,6 +163,7 @@ class AuthServiceTest {
                 "Test User",
                 email,
                 "encoded-password",
+                null,
                 USER_ROLE,
                 true,
                 now,

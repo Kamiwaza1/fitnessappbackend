@@ -73,6 +73,7 @@ class UserDomainTest {
                 fullName,
                 email,
                 password,
+                null,
                 "USER",
                 true,
                 LocalDateTime.now().minusDays(2),

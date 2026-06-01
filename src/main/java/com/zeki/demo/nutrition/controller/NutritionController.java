@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/nutrition")
 @RequiredArgsConstructor
 @Tag(name = "Nutrition", description = "Endpoints for managing nutrition entries")
-public class NutritionController {
+public class        NutritionController {
 
     private final NutritionService nutritionService;
     private final NutritionDtoDomain nutritionDtoDomain;

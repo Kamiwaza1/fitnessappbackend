@@ -48,6 +48,9 @@ public class UserServiceImpl implements UserService {
                     updateUserRequest.fullName() != null ? updateUserRequest.fullName() : existingUser.getFullName(),
                     updatedEmail,
                     updateUserRequest.password(),
+                    updateUserRequest.dailyCalorieTarget() != null
+                            ? updateUserRequest.dailyCalorieTarget()
+                            : existingUser.getDailyCalorieTarget(),
                     existingUser.getRole(),
                     existingUser.isActive(),
                     existingUser.getCreatedAt(),

@@ -131,6 +131,19 @@ class UserServiceTest {
     }
 
     @Test
+    void updateUserSavesDailyCalorieTarget() {
+        User existing = activeUser(OWNER_EMAIL);
+        UpdateUserRequest request = new UpdateUserRequest(null, null, null, 2600);
+
+        when(userRepository.findActiveByEmail(OWNER_EMAIL)).thenReturn(Optional.of(existing));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        User updated = userService.updateUser(OWNER_EMAIL, request);
+
+        assertEquals(2600, updated.getDailyCalorieTarget());
+    }
+
+    @Test
     void deleteCurrentUserSoftDeletesAndSaves() {
         User existing = activeUser(OWNER_EMAIL);
         when(userRepository.findActiveByEmail(OWNER_EMAIL)).thenReturn(Optional.of(existing));
@@ -161,6 +174,7 @@ class UserServiceTest {
                 "Test User",
                 email,
                 "EncodedPassword123!",
+                null,
                 "USER",
                 true,
                 now.minusDays(1),
@@ -169,6 +183,6 @@ class UserServiceTest {
     }
 
     private UpdateUserRequest updateRequest(String name, String email, String password) {
-        return new UpdateUserRequest(name, email, password);
+        return new UpdateUserRequest(name, email, password, null);
     }
 }

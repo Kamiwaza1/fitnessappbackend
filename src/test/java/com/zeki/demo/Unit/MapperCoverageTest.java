@@ -124,6 +124,7 @@ class MapperCoverageTest {
                 null,
                 "mapped@example.com",
                 "EncodedPassword123!",
+                2400,
                 "USER",
                 true,
                 null,
@@ -133,6 +134,7 @@ class MapperCoverageTest {
         UserEntity mappedEntity = userDomainEntity.toEntity(userWithoutDates);
 
         assertEquals("mapped", mappedEntity.getFullName());
+        assertEquals(2400, mappedEntity.getDailyCalorieTarget());
         assertNotNull(mappedEntity.getCreatedAt());
         assertNotNull(mappedEntity.getUpdatedAt());
     }

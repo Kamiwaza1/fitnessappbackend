@@ -19,6 +19,7 @@ public class User {
     private String fullName;
     private String email;
     private String password;
+    private Integer dailyCalorieTarget;
     private final String role;
     private boolean active;
     private final LocalDateTime createdAt;
@@ -29,6 +30,7 @@ public class User {
             String fullName,
             String email,
             String password,
+            Integer dailyCalorieTarget,
             String role,
             boolean active,
             LocalDateTime createdAt,
@@ -38,6 +40,7 @@ public class User {
         this.fullName = normalizeNullable(fullName);
         this.email = normalizeEmail(email);
         this.password = password;
+        this.dailyCalorieTarget = dailyCalorieTarget;
         this.role = role;
         this.active = active;
         this.createdAt = createdAt;
@@ -54,6 +57,9 @@ public class User {
         }
         if (password == null || password.isBlank()) {
             throw new BadRequestException("Password is required");
+        }
+        if (dailyCalorieTarget != null && (dailyCalorieTarget < 1 || dailyCalorieTarget > 10000)) {
+            throw new BadRequestException("Daily calorie target must be between 1 and 10000");
         }
         this.fullName = resolvedName;
         this.email = normalizeEmail(email);
