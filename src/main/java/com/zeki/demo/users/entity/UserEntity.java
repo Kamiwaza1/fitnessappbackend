@@ -41,6 +41,9 @@ public class UserEntity {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "daily_calorie_target")
+    private Integer dailyCalorieTarget;
+
     @Column(nullable = false)
     private String role;
 

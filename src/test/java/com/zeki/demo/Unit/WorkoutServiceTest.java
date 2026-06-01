@@ -1,6 +1,5 @@
 package com.zeki.demo.Unit;
 
-import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.workouts.WorkoutException.WorkoutExistException;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.dto.UpdateWorkoutRequest;
@@ -48,17 +47,19 @@ class WorkoutServiceTest {
     @Test
     void getWorkoutByIdWhenMissingThrowsNotFound() {
         UUID workoutId = UUID.randomUUID();
-        when(workoutRepository.getWorkoutById(workoutId)).thenReturn(Optional.empty());
+        when(workoutRepository.getWorkoutByIdAndUserEmail(workoutId, OWNER_EMAIL)).thenReturn(Optional.empty());
 
-        WorkoutExistException ex = assertThrows(WorkoutExistException.class, () -> workoutService.getWorkoutById(workoutId));
+        WorkoutExistException ex = assertThrows(
+                WorkoutExistException.class,
+                () -> workoutService.getWorkoutById(workoutId, OWNER_EMAIL)
+        );
 
         assertEquals("Workout not found", ex.getMessage());
     }
 
     @Test
-    void updateWorkoutWhenNotOwnedByUserThrowsUnauthorized() {
+    void updateWorkoutWhenNotOwnedByUserThrowsNotFound() {
         UUID workoutId = UUID.randomUUID();
-        Workout existing = validWorkout(workoutId, OWNER_EMAIL);
         UpdateWorkoutRequest request = updateRequest(
                 workoutId,
                 LocalDate.now().plusDays(1),
@@ -69,15 +70,14 @@ class WorkoutServiceTest {
                 MuscleType.CORE
         );
 
-        when(workoutRepository.getWorkoutById(workoutId)).thenReturn(Optional.of(existing));
-        when(workoutRepository.isOwnedByUser(workoutId, OTHER_EMAIL)).thenReturn(false);
+        when(workoutRepository.getWorkoutByIdAndUserEmail(workoutId, OTHER_EMAIL)).thenReturn(Optional.empty());
 
-        UnauthorizedException ex = assertThrows(
-                UnauthorizedException.class,
+        WorkoutExistException ex = assertThrows(
+                WorkoutExistException.class,
                 () -> workoutService.updateWorkout(workoutId, request, OTHER_EMAIL)
         );
 
-        assertEquals("You cannot update this workout", ex.getMessage());
+        assertEquals("Workout not found", ex.getMessage());
         verify(workoutRepository, never()).save(any());
     }
 
@@ -95,8 +95,7 @@ class WorkoutServiceTest {
                 MuscleType.CHEST
         );
 
-        when(workoutRepository.getWorkoutById(workoutId)).thenReturn(Optional.of(existing));
-        when(workoutRepository.isOwnedByUser(workoutId, OWNER_EMAIL)).thenReturn(true);
+        when(workoutRepository.getWorkoutByIdAndUserEmail(workoutId, OWNER_EMAIL)).thenReturn(Optional.of(existing));
         when(workoutRepository.save(any(Workout.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Workout updated = workoutService.updateWorkout(workoutId, request, OWNER_EMAIL);
@@ -113,9 +112,9 @@ class WorkoutServiceTest {
     void deleteWorkoutWhenFoundDeletesById() {
         UUID workoutId = UUID.randomUUID();
         Workout existing = validWorkout(workoutId, OWNER_EMAIL);
-        when(workoutRepository.getWorkoutById(workoutId)).thenReturn(Optional.of(existing));
+        when(workoutRepository.getWorkoutByIdAndUserEmail(workoutId, OWNER_EMAIL)).thenReturn(Optional.of(existing));
 
-        workoutService.deleteWorkout(workoutId);
+        workoutService.deleteWorkout(workoutId, OWNER_EMAIL);
 
         verify(workoutRepository).delete(eq(workoutId));
     }

@@ -38,7 +38,7 @@ class ProgressServiceTest {
 
         Workout currentWeekStrength = workout(
                 "Bench Day",
-                weekStart.plusDays(1),
+                weekStart,
                 60,
                 4,
                 8,
@@ -48,7 +48,7 @@ class ProgressServiceTest {
         );
         Workout currentWeekCardio = workout(
                 "Circuit",
-                weekStart.plusDays(2),
+                today,
                 45,
                 3,
                 12,

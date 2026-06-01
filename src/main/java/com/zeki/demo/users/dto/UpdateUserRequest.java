@@ -1,6 +1,8 @@
 package com.zeki.demo.users.dto;
 
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
 public record UpdateUserRequest(
@@ -16,6 +18,9 @@ public record UpdateUserRequest(
                 regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{12,}$",
                 message = "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character"
         )
-        String password
+        String password,
+        @Min(value = 1, message = "Daily calorie target must be at least 1")
+        @Max(value = 10000, message = "Daily calorie target cannot be greater than 10000")
+        Integer dailyCalorieTarget
 ) {
 }

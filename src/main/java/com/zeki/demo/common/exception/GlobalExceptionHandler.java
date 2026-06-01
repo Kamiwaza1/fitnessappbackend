@@ -34,6 +34,11 @@ public class GlobalExceptionHandler {
         return buildSimpleError(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+    @ExceptionHandler(ExternalServiceException.class)
+    public ResponseEntity<Map<String, Object>> handleExternalService(ExternalServiceException ex) {
+        return buildSimpleError(HttpStatus.BAD_GATEWAY, ex.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationException(MethodArgumentNotValidException ex) {
         Map<String, String> fieldErrors = new LinkedHashMap<>();

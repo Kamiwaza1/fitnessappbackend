@@ -6,6 +6,7 @@ public record UserResponse(
         UUID id,
         String fullName,
         String email,
+        Integer dailyCalorieTarget,
         String role
 ) {
 }

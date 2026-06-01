@@ -1,6 +1,5 @@
 package com.zeki.demo.Unit;
 
-import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.nutrition.NutritionException.NutritionExistException;
 import com.zeki.demo.nutrition.domain.Nutrition;
 import com.zeki.demo.nutrition.dto.UpdateNutritionRequest;
@@ -41,11 +40,12 @@ class NutritionServiceTest {
     @Test
     void getNutritionByIdWhenMissingThrowsNotFound() {
         UUID nutritionId = UUID.randomUUID();
-        when(nutritionRepository.getNutritionById(nutritionId)).thenReturn(Optional.empty());
+        when(nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, "owner@example.com"))
+                .thenReturn(Optional.empty());
 
         NutritionExistException ex = assertThrows(
                 NutritionExistException.class,
-                () -> nutritionService.getNutritionById(nutritionId)
+                () -> nutritionService.getNutritionById(nutritionId, "owner@example.com")
         );
 
         assertEquals("Nutrition entry not found", ex.getMessage());
@@ -62,20 +62,19 @@ class NutritionServiceTest {
     }
 
     @Test
-    void updateNutritionWhenNotOwnedThrowsUnauthorized() {
+    void updateNutritionWhenNotOwnedThrowsNotFound() {
         UUID nutritionId = UUID.randomUUID();
-        Nutrition existing = validNutrition(nutritionId, "owner@example.com");
         UpdateNutritionRequest request = updateRequest(nutritionId);
 
-        when(nutritionRepository.getNutritionById(nutritionId)).thenReturn(Optional.of(existing));
-        when(nutritionRepository.isOwnedByUser(nutritionId, "other@example.com")).thenReturn(false);
+        when(nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, "other@example.com"))
+                .thenReturn(Optional.empty());
 
-        UnauthorizedException ex = assertThrows(
-                UnauthorizedException.class,
+        NutritionExistException ex = assertThrows(
+                NutritionExistException.class,
                 () -> nutritionService.updateNutrition(nutritionId, request, "other@example.com")
         );
 
-        assertEquals("You cannot update this nutrition entry", ex.getMessage());
+        assertEquals("Nutrition entry not found", ex.getMessage());
         verify(nutritionRepository, never()).save(any());
     }
 
@@ -85,8 +84,8 @@ class NutritionServiceTest {
         Nutrition existing = validNutrition(nutritionId, "owner@example.com");
         UpdateNutritionRequest request = updateRequest(nutritionId);
 
-        when(nutritionRepository.getNutritionById(nutritionId)).thenReturn(Optional.of(existing));
-        when(nutritionRepository.isOwnedByUser(nutritionId, "owner@example.com")).thenReturn(true);
+        when(nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, "owner@example.com"))
+                .thenReturn(Optional.of(existing));
         when(nutritionRepository.save(any(Nutrition.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Nutrition updated = nutritionService.updateNutrition(nutritionId, request, "owner@example.com");
@@ -99,10 +98,10 @@ class NutritionServiceTest {
     @Test
     void deleteNutritionWhenFoundDeletesById() {
         UUID nutritionId = UUID.randomUUID();
-        when(nutritionRepository.getNutritionById(nutritionId))
+        when(nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, "owner@example.com"))
                 .thenReturn(Optional.of(validNutrition(nutritionId, "owner@example.com")));
 
-        nutritionService.deleteNutrition(nutritionId);
+        nutritionService.deleteNutrition(nutritionId, "owner@example.com");
 
         verify(nutritionRepository).delete(nutritionId);
     }

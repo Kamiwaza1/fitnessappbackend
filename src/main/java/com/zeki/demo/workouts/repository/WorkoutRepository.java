@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface WorkoutRepository {
 
-    Optional<Workout> getWorkoutById(UUID workoutId);
+    Optional<Workout> getWorkoutByIdAndUserEmail(UUID workoutId, String userEmail);
 
     Workout save(Workout workout);
 
@@ -15,6 +15,5 @@ public interface WorkoutRepository {
 
     void delete(UUID workoutId);
 
-    boolean isOwnedByUser(UUID workoutId, String userEmail);
     List<Workout> upcomingWorkouts(String userEmail);
 }

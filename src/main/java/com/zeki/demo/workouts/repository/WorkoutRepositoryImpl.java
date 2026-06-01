@@ -31,8 +31,9 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
     }
 
     @Override
-    public Optional<Workout> getWorkoutById(UUID workoutId) {
-        return workoutRepoJPA.findById(workoutId).map(workoutEntityMapper::toDomain);
+    public Optional<Workout> getWorkoutByIdAndUserEmail(UUID workoutId, String userEmail) {
+        return workoutRepoJPA.findByWorkoutIdAndUserEmail(workoutId, userEmail)
+                .map(workoutEntityMapper::toDomain);
     }
 
     @Override
@@ -48,11 +49,6 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
         WorkoutEntity workoutEntity = workoutRepoJPA.findById(workoutId)
                 .orElseThrow(() -> new NotFoundException("Workout not found"));
         workoutRepoJPA.delete(workoutEntity);
-    }
-
-    @Override
-    public boolean isOwnedByUser(UUID workoutId, String userEmail) {
-        return workoutRepoJPA.existsByWorkoutIdAndUserEmail(workoutId, userEmail);
     }
 
     @Override

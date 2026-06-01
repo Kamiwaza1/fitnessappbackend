@@ -23,7 +23,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     container_name: fitness_backend
     depends_on:
       postgres:
@@ -32,9 +32,10 @@ services:
       SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/fitness_app"
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      JWT_SECRET: ${JWT_SECRET:-your-super-secret-key-that-is-at-least-32-characters}
-      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_FLYWAY_ENABLED: true
+      JWT_SECRET: yJH5yWoXbNWXjfk58wVCXmlIElBYBKJTF0g/YJinueZQLcBAtkkDUgPwBVugh37n1eTUMBKE7R9S6ob7xeyR7Q==
+      JWT_EXPIRATION: 86400000
     ports:
       - "8080:8080"
 

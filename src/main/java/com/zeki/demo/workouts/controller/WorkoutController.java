@@ -60,8 +60,8 @@ public class WorkoutController {
             @ApiResponse(responseCode = "404", description = "Workout not found")
     })
     @GetMapping("/{workoutId}")
-    public WorkoutResponse getWorkoutById(@PathVariable UUID workoutId) {
-        return workoutDtoDomain.toResponse(workoutService.getWorkoutById(workoutId));
+    public WorkoutResponse getWorkoutById(@PathVariable UUID workoutId, Authentication authentication) {
+        return workoutDtoDomain.toResponse(workoutService.getWorkoutById(workoutId, authentication.getName()));
     }
 
     @Operation(summary = "Create a new workout for the current user")
@@ -103,7 +103,7 @@ public class WorkoutController {
     })
     @DeleteMapping("/{workoutId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteWorkout(@PathVariable UUID workoutId) {
-        workoutService.deleteWorkout(workoutId);
+    public void deleteWorkout(@PathVariable UUID workoutId, Authentication authentication) {
+        workoutService.deleteWorkout(workoutId, authentication.getName());
     }
 }

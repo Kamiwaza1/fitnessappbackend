@@ -20,6 +20,7 @@ public class UserDtoDomain {
                 request.fullName(),
                 request.email(),
                 request.password(),
+                null,
                 "USER",
                 true,
                 now,
@@ -33,6 +34,7 @@ public class UserDtoDomain {
                 null,
                 request.email(),
                 request.password(),
+                null,
                 "USER",
                 true,
                 null,
@@ -46,6 +48,7 @@ public class UserDtoDomain {
                 request.fullName() != null ? request.fullName() : existingUser.getFullName(),
                 request.email() != null ? request.email() : existingUser.getEmail(),
                 encodedPassword,
+                request.dailyCalorieTarget() != null ? request.dailyCalorieTarget() : existingUser.getDailyCalorieTarget(),
                 existingUser.getRole(),
                 existingUser.isActive(),
                 existingUser.getCreatedAt(),
@@ -58,6 +61,7 @@ public class UserDtoDomain {
                 user.getUserId(),
                 User.resolveFullName(user.getFullName(), user.getEmail()),
                 user.getEmail(),
+                user.getDailyCalorieTarget(),
                 user.getRole()
         );
     }

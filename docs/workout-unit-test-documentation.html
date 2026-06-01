@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Workout Unit Test Documentation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      line-height: 1.4;
+      color: #111;
+    }
+    h1, h2 {
+      color: #111;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+    h2 {
+      font-size: 16px;
+      margin-top: 24px;
+      margin-bottom: 8px;
+    }
+    p {
+      margin: 8px 0;
+    }
+    pre {
+      background: #f4f4f4;
+      border: 1px solid #ddd;
+      padding: 12px;
+      white-space: pre-wrap;
+      font-family: Menlo, Consolas, monospace;
+      font-size: 11px;
+    }
+    .path {
+      font-family: Menlo, Consolas, monospace;
+      font-size: 11px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Workout Unit Test Documentation</h1>
+
+  <p>This document shows a small selection of workout-related unit tests and briefly explains what each test verifies.</p>
+
+  <h2>1. Mapping request data into a Workout domain object</h2>
+  <p class="path">File: src/test/java/com/zeki/demo/Unit/WorkoutTest.java</p>
+  <pre>@Test
+void toDomainUsesProvidedWorkoutCategory() {
+    CreateWorkoutRequest request = createWorkoutRequest(WorkoutCategory.STRENGTH, MuscleType.LEGS);
+
+    Workout workout = workoutDtoDomain.toDomain(request, TEST_EMAIL);
+
+    assertEquals(WorkoutCategory.STRENGTH, workout.getCategory());
+    assertEquals(MuscleType.LEGS, workout.getMuscleType());
+    assertEquals(TEST_EMAIL, workout.getUserEmail());
+    assertEquals(4, workout.getSets());
+    assertEquals(10, workout.getReps());
+}</pre>
+  <p>This test verifies that request data is mapped correctly into the Workout domain object and that the provided category, muscle type, and user ownership are preserved.</p>
+
+  <h2>2. Mapping a Workout domain object into an API response</h2>
+  <p class="path">File: src/test/java/com/zeki/demo/Unit/WorkoutTest.java</p>
+  <pre>@Test
+void responseExposesEnumCategory() {
+    Workout workout = createWorkout(WorkoutCategory.STRENGTH, MuscleType.LEGS);
+
+    WorkoutResponse response = workoutDtoDomain.toResponse(workout);
+
+    assertEquals(WorkoutCategory.STRENGTH, response.category());
+    assertEquals(MuscleType.LEGS, response.muscleType());
+    assertEquals(5, response.sets());
+    assertEquals(8, response.reps());
+}</pre>
+  <p>This test verifies that the domain object is transformed correctly into the response object returned by the API layer.</p>
+
+  <h2>3. Rejecting invalid workout state in domain validation</h2>
+  <p class="path">File: src/test/java/com/zeki/demo/Unit/WorkoutTest.java</p>
+  <pre>@Test
+void workoutRejectsNullCategory() {
+    Workout workout = createWorkout(null, MuscleType.LEGS);
+
+    assertThrows(IllegalArgumentException.class, workout::validate);
+}</pre>
+  <p>This test verifies that a workout cannot pass validation without a category, which protects domain integrity.</p>
+
+  <h2>4. Blocking unauthorized workout updates</h2>
+  <p class="path">File: src/test/java/com/zeki/demo/Unit/WorkoutServiceTest.java</p>
+  <pre>@Test
+void updateWorkoutWhenNotOwnedByUserThrowsUnauthorized() {
+    UUID workoutId = UUID.randomUUID();
+    Workout existing = validWorkout(workoutId, OWNER_EMAIL);
+    UpdateWorkoutRequest request = updateRequest(
+            workoutId,
+            LocalDate.now().plusDays(1),
+            45,
+            5,
+            12,
+            85.0,
+            MuscleType.CORE
+    );
+
+    when(workoutRepository.getWorkoutById(workoutId)).thenReturn(Optional.of(existing));
+    when(workoutRepository.isOwnedByUser(workoutId, OTHER_EMAIL)).thenReturn(false);
+
+    UnauthorizedException ex = assertThrows(
+            UnauthorizedException.class,
+            () -&gt; workoutService.updateWorkout(workoutId, request, OTHER_EMAIL)
+    );
+
+    assertEquals("You cannot update this workout", ex.getMessage());
+    verify(workoutRepository, never()).save(any());
+}</pre>
+  <p>This test verifies that a user cannot update another user's workout and that the repository save operation is not executed when authorization fails.</p>
+
+  <h2>5. Persisting workout updates for the owner</h2>
+  <p class="path">File: src/test/java/com/zeki/demo/Unit/WorkoutServiceTest.java</p>
+  <pre>@Test
+void updateWorkoutWhenOwnedPersistsUpdatedWorkout() {
+    UUID workoutId = UUID.randomUUID();
+    Workout existing = validWorkout(workoutId, OWNER_EMAIL);
+    UpdateWorkoutRequest request = updateRequest(
+            workoutId,
+            LocalDate.now().plusDays(2),
+            50,
+            6,
+            6,
+            140.0,
+            MuscleType.CHEST
+    );
+
+    when(workoutRepository.getWorkoutById(workoutId)).thenReturn(Optional.of(existing));
+    when(workoutRepository.isOwnedByUser(workoutId, OWNER_EMAIL)).thenReturn(true);
+    when(workoutRepository.save(any(Workout.class))).thenAnswer(invocation -&gt; invocation.getArgument(0));
+
+    Workout updated = workoutService.updateWorkout(workoutId, request, OWNER_EMAIL);
+
+    assertEquals(UPDATED_NAME, updated.getWorkoutName());
+    assertEquals(WorkoutCategory.CARDIO, updated.getCategory());
+    assertEquals(50, updated.getDurationMinutes());
+    assertEquals(6, updated.getSets());
+    assertEquals(6, updated.getReps());
+    verify(workoutRepository).save(any(Workout.class));
+}</pre>
+  <p>This test verifies that a workout owner can update the workout successfully and that the changed values are persisted.</p>
+
+</body>
+</html>

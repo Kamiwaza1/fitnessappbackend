@@ -1,6 +1,5 @@
 package com.zeki.demo.nutrition.service;
 
-import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.nutrition.NutritionException.NutritionExistException;
 import com.zeki.demo.nutrition.domain.Nutrition;
 import com.zeki.demo.nutrition.dto.UpdateNutritionRequest;
@@ -27,8 +26,8 @@ public class NutritionServiceImpl implements NutritionService {
     }
 
     @Override
-    public Nutrition getNutritionById(UUID nutritionId) {
-        return nutritionRepository.getNutritionById(nutritionId)
+    public Nutrition getNutritionById(UUID nutritionId, String userEmail) {
+        return nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, userEmail)
                 .orElseThrow(() -> new NutritionExistException("Nutrition entry not found"));
     }
 
@@ -39,19 +38,16 @@ public class NutritionServiceImpl implements NutritionService {
 
     @Override
     public Nutrition updateNutrition(UUID nutritionId, UpdateNutritionRequest request, String userEmail) {
-        Nutrition existingNutrition = nutritionRepository.getNutritionById(nutritionId)
+        Nutrition existingNutrition = nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, userEmail)
                 .orElseThrow(() -> new NutritionExistException("Nutrition entry not found"));
-        if (!nutritionRepository.isOwnedByUser(nutritionId, userEmail)) {
-            throw new UnauthorizedException("You cannot update this nutrition entry");
-        }
         Nutrition updatedNutrition = nutritionDtoDomain.toUpdatedDomain(request, existingNutrition);
         updatedNutrition.validate();
         return nutritionRepository.save(updatedNutrition);
     }
 
     @Override
-    public void deleteNutrition(UUID nutritionId) {
-        nutritionRepository.getNutritionById(nutritionId)
+    public void deleteNutrition(UUID nutritionId, String userEmail) {
+        nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, userEmail)
                 .orElseThrow(() -> new NutritionExistException("Nutrition entry not found"));
         nutritionRepository.delete(nutritionId);
     }
