@@ -3,12 +3,17 @@ package com.zeki.demo.Unit;
 import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutProgressRequest;
+import com.zeki.demo.liveworkouts.entity.LiveWorkoutRoomEntity;
+import com.zeki.demo.liveworkouts.repository.LiveWorkoutRoomRepoJPA;
 import com.zeki.demo.liveworkouts.service.LiveWorkoutRoomService;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.enums.MuscleType;
 import com.zeki.demo.workouts.enums.WorkoutCategory;
 import com.zeki.demo.workouts.service.WorkoutService;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +27,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class LiveWorkoutRoomServiceTest {
@@ -32,11 +39,29 @@ class LiveWorkoutRoomServiceTest {
     @Mock
     private WorkoutService workoutService;
 
+    @Mock
+    private LiveWorkoutRoomRepoJPA liveWorkoutRoomRepoJPA;
+
+    private Map<String, LiveWorkoutRoomEntity> savedRooms;
     private LiveWorkoutRoomService liveWorkoutRoomService;
 
     @BeforeEach
     void setUp() {
-        liveWorkoutRoomService = new LiveWorkoutRoomService(workoutService);
+        savedRooms = new HashMap<>();
+        lenient().when(liveWorkoutRoomRepoJPA.existsById(any(String.class))).thenAnswer(invocation ->
+                savedRooms.containsKey(invocation.getArgument(0))
+        );
+        lenient().when(liveWorkoutRoomRepoJPA.save(any(LiveWorkoutRoomEntity.class))).thenAnswer(invocation -> {
+            LiveWorkoutRoomEntity entity = invocation.getArgument(0);
+            savedRooms.put(entity.getRoomCode(), entity);
+            return entity;
+        });
+        lenient().when(liveWorkoutRoomRepoJPA.findByRoomCodeAndStatus(any(String.class), any(String.class))).thenAnswer(invocation -> {
+            LiveWorkoutRoomEntity entity = savedRooms.get(invocation.getArgument(0));
+            String status = invocation.getArgument(1);
+            return entity != null && status.equals(entity.getStatus()) ? Optional.of(entity) : Optional.empty();
+        });
+        liveWorkoutRoomService = new LiveWorkoutRoomService(workoutService, liveWorkoutRoomRepoJPA);
     }
 
     @Test

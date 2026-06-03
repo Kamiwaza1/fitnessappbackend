@@ -6,16 +6,22 @@ import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutParticipant;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutProgressRequest;
+import com.zeki.demo.liveworkouts.entity.LiveWorkoutParticipantValue;
+import com.zeki.demo.liveworkouts.entity.LiveWorkoutRoomEntity;
+import com.zeki.demo.liveworkouts.repository.LiveWorkoutRoomRepoJPA;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.service.WorkoutService;
 import java.security.SecureRandom;
+import java.time.Instant;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,27 +29,27 @@ public class LiveWorkoutRoomService {
 
     private static final String CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     private static final int CODE_LENGTH = 6;
+    private static final String ACTIVE = "ACTIVE";
+    private static final String CLOSED = "CLOSED";
 
-    private final Map<String, LiveWorkoutRoom> rooms = new ConcurrentHashMap<>();
     private final SecureRandom secureRandom = new SecureRandom();
     private final WorkoutService workoutService;
+    private final LiveWorkoutRoomRepoJPA liveWorkoutRoomRepoJPA;
 
+    @Transactional
     public LiveWorkoutRoom createRoom(UUID workoutId, String hostEmail) {
         Workout workout = workoutService.getWorkoutById(workoutId, hostEmail);
         String roomCode = generateUniqueRoomCode();
         LiveWorkoutRoom room = LiveWorkoutRoom.create(roomCode, hostEmail, workout.getWorkoutId(), workout.getWorkoutName());
-        rooms.put(roomCode, room);
-        return room;
+        return toDomain(liveWorkoutRoomRepoJPA.save(toEntity(room, ACTIVE, null)));
     }
 
+    @Transactional(readOnly = true)
     public LiveWorkoutRoom getRoom(String roomCode) {
-        LiveWorkoutRoom room = rooms.get(normalizeRoomCode(roomCode));
-        if (room == null) {
-            throw new NotFoundException("Live workout room not found");
-        }
-        return room;
+        return toDomain(getActiveRoomEntity(roomCode));
     }
 
+    @Transactional
     public LiveWorkoutRoom joinRoom(String roomCode, String userEmail) {
         return updateRoom(roomCode, room -> {
             Map<String, LiveWorkoutParticipant> participants = new LinkedHashMap<>(room.participants());
@@ -52,6 +58,7 @@ public class LiveWorkoutRoomService {
         });
     }
 
+    @Transactional
     public LiveWorkoutRoom leaveRoom(String roomCode, String userEmail) {
         return updateRoom(roomCode, room -> {
             Map<String, LiveWorkoutParticipant> participants = new LinkedHashMap<>(room.participants());
@@ -60,6 +67,7 @@ public class LiveWorkoutRoomService {
         });
     }
 
+    @Transactional
     public LiveWorkoutRoom updateProgress(String roomCode, String userEmail, LiveWorkoutProgressRequest request) {
         return updateRoom(roomCode, room -> {
             LiveWorkoutParticipant participant = room.participants().get(userEmail);
@@ -77,33 +85,26 @@ public class LiveWorkoutRoomService {
         });
     }
 
+    @Transactional
     public LiveWorkoutRoom closeRoom(String roomCode, String userEmail) {
-        LiveWorkoutRoom room = getRoom(roomCode);
+        LiveWorkoutRoomEntity entity = getActiveRoomEntity(roomCode);
+        LiveWorkoutRoom room = toDomain(entity);
         if (!room.hostEmail().equals(userEmail)) {
             throw new UnauthorizedException("Only the host can close this live workout room");
         }
-        rooms.remove(room.roomCode());
+        liveWorkoutRoomRepoJPA.save(toEntity(room, CLOSED, Instant.now()));
         return room;
     }
 
     private LiveWorkoutRoom updateRoom(String roomCode, RoomUpdater updater) {
-        String normalizedRoomCode = normalizeRoomCode(roomCode);
-        LiveWorkoutRoom updated = rooms.compute(normalizedRoomCode, (key, currentRoom) -> {
-            if (currentRoom == null) {
-                throw new NotFoundException("Live workout room not found");
-            }
-            return updater.update(currentRoom);
-        });
-        if (updated == null) {
-            throw new NotFoundException("Live workout room not found");
-        }
-        return updated;
+        LiveWorkoutRoom updated = updater.update(toDomain(getActiveRoomEntity(roomCode)));
+        return toDomain(liveWorkoutRoomRepoJPA.save(toEntity(updated, ACTIVE, null)));
     }
 
     private String generateUniqueRoomCode() {
         for (int attempt = 0; attempt < 10; attempt++) {
             String roomCode = generateRoomCode();
-            if (!rooms.containsKey(roomCode)) {
+            if (!liveWorkoutRoomRepoJPA.existsById(roomCode)) {
                 return roomCode;
             }
         }
@@ -123,6 +124,61 @@ public class LiveWorkoutRoomService {
             throw new BadRequestException("Room code is required");
         }
         return roomCode.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private LiveWorkoutRoomEntity getActiveRoomEntity(String roomCode) {
+        return liveWorkoutRoomRepoJPA.findByRoomCodeAndStatus(normalizeRoomCode(roomCode), ACTIVE)
+                .orElseThrow(() -> new NotFoundException("Live workout room not found"));
+    }
+
+    private LiveWorkoutRoom toDomain(LiveWorkoutRoomEntity entity) {
+        Map<String, LiveWorkoutParticipant> participants = new LinkedHashMap<>();
+        entity.getParticipants().stream()
+                .sorted(Comparator.comparing(LiveWorkoutParticipantValue::getJoinedAt))
+                .forEach(participant -> participants.put(
+                        participant.getEmail(),
+                        new LiveWorkoutParticipant(
+                                participant.getEmail(),
+                                participant.getDisplayName(),
+                                participant.getStatus(),
+                                participant.getCurrentExerciseIndex(),
+                                participant.getCompletedSets(),
+                                participant.getJoinedAt()
+                        )
+                ));
+        return new LiveWorkoutRoom(
+                entity.getRoomCode(),
+                entity.getHostEmail(),
+                entity.getWorkoutId(),
+                entity.getWorkoutName(),
+                participants,
+                entity.getCreatedAt(),
+                entity.getLastActivityAt()
+        );
+    }
+
+    private LiveWorkoutRoomEntity toEntity(LiveWorkoutRoom room, String status, Instant closedAt) {
+        List<LiveWorkoutParticipantValue> participants = room.participants().values().stream()
+                .map(participant -> LiveWorkoutParticipantValue.builder()
+                        .email(participant.email())
+                        .displayName(participant.displayName())
+                        .status(participant.status())
+                        .currentExerciseIndex(participant.currentExerciseIndex())
+                        .completedSets(participant.completedSets())
+                        .joinedAt(participant.joinedAt())
+                        .build())
+                .toList();
+        return LiveWorkoutRoomEntity.builder()
+                .roomCode(room.roomCode())
+                .hostEmail(room.hostEmail())
+                .workoutId(room.workoutId())
+                .workoutName(room.workoutName())
+                .status(status)
+                .createdAt(room.createdAt())
+                .lastActivityAt(room.lastActivityAt())
+                .closedAt(closedAt)
+                .participants(participants)
+                .build();
     }
 
     private interface RoomUpdater {
