@@ -6,6 +6,7 @@ import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.users.domain.User;
 import com.zeki.demo.users.repository.UserRepository;
 import com.zeki.demo.users.security.JWTService;
+import io.jsonwebtoken.JwtException;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -38,13 +39,10 @@ public class AuthServiceImpl implements AuthService {
         }
         user.setEncodedPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
-        UserDetails userDetails = org.springframework.security.core.userdetails.User
-                .withUsername(savedUser.getEmail())
-                .password(savedUser.getPassword())
-                .authorities("ROLE_" + savedUser.getRole())
-                .build();
-        String accessToken = jwtService.generateToken(userDetails, savedUser.getRole());
-        return new AuthenticatedUser(savedUser, accessToken, accessToken);
+        UserDetails userDetails = toUserDetails(savedUser);
+        String accessToken = jwtService.generateAccessToken(userDetails, savedUser.getRole());
+        String refreshToken = jwtService.generateRefreshToken(savedUser.getEmail());
+        return new AuthenticatedUser(savedUser, accessToken, refreshToken);
     }
 
     @Override
@@ -62,12 +60,40 @@ public class AuthServiceImpl implements AuthService {
         }
         User existingUser = userRepository.findActiveByEmail(normalizedEmail)
                 .orElseThrow(() -> new UnauthorizedException("No account found with this email"));
-        UserDetails userDetails = org.springframework.security.core.userdetails.User
-                .withUsername(existingUser.getEmail())
-                .password(existingUser.getPassword())
-                .authorities("ROLE_" + existingUser.getRole())
+        UserDetails userDetails = toUserDetails(existingUser);
+        String accessToken = jwtService.generateAccessToken(userDetails, existingUser.getRole());
+        String refreshToken = jwtService.generateRefreshToken(existingUser.getEmail());
+        return new AuthenticatedUser(existingUser, accessToken, refreshToken);
+    }
+
+    @Override
+    public AuthenticatedUser refresh(String refreshToken) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new BadRequestException("Refresh token is required");
+        }
+
+        try {
+            String email = jwtService.extractRefreshUsername(refreshToken);
+            User existingUser = userRepository.findActiveByEmail(email)
+                    .orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));
+            if (!jwtService.isRefreshTokenValid(refreshToken, existingUser.getEmail())) {
+                throw new UnauthorizedException("Invalid refresh token");
+            }
+
+            UserDetails userDetails = toUserDetails(existingUser);
+            String newAccessToken = jwtService.generateAccessToken(userDetails, existingUser.getRole());
+            String newRefreshToken = jwtService.generateRefreshToken(existingUser.getEmail());
+            return new AuthenticatedUser(existingUser, newAccessToken, newRefreshToken);
+        } catch (JwtException | IllegalArgumentException exception) {
+            throw new UnauthorizedException("Invalid refresh token");
+        }
+    }
+
+    private UserDetails toUserDetails(User user) {
+        return org.springframework.security.core.userdetails.User
+                .withUsername(user.getEmail())
+                .password(user.getPassword())
+                .authorities("ROLE_" + user.getRole())
                 .build();
-        String accessToken = jwtService.generateToken(userDetails, existingUser.getRole());
-        return new AuthenticatedUser(existingUser, accessToken, accessToken);
     }
 }

@@ -1,4 +1,4 @@
-package com.zeki.demo.liveworkouts.repository;
+package com.zeki.demo.liveworkouts.repository.jpa;
 
 import com.zeki.demo.liveworkouts.entity.LiveWorkoutRoomEntity;
 import java.util.Optional;

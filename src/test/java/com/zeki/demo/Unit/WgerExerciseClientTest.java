@@ -4,9 +4,9 @@ import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.common.exception.ExternalServiceException;
 import com.zeki.demo.common.exception.NotFoundException;
 import com.zeki.demo.exerciseLibrary.client.WgerExerciseClient;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryItemResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibrarySearchRequest;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrarySearchCriteria;
+import com.zeki.demo.exerciseLibrary.entity.ExerciseLibraryEntity;
+import com.zeki.demo.exerciseLibrary.entity.ExerciseLibraryItemEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,13 +39,13 @@ class WgerExerciseClientTest {
     void searchExercisesBuildsUriFiltersByQueryAndMapsNestedResponse() {
         server.respondWith(path -> ClientTestServer.Response.json(200, exerciseSearchResponse()));
 
-        ExerciseLibraryResponse response = client.searchExercises(filteredSearchRequest());
+        ExerciseLibraryEntity response = client.searchExercises(filteredSearchRequest());
 
         assertEquals("/exerciseinfo/?limit=5&offset=2&language=2&muscles=1&equipment=4&category=1", server.requests().get(0));
         assertEquals(1, response.count());
         assertEquals(2, response.total());
 
-        ExerciseLibraryItemResponse item = response.results().get(0);
+        ExerciseLibraryItemEntity item = response.results().get(0);
         assertEquals(10, item.id());
         assertEquals("Dumbbell Curl", item.name());
         assertEquals("curl source", item.descriptionSource());
@@ -66,7 +66,7 @@ class WgerExerciseClientTest {
                 {"id": 20, "uuid": "minimal", "translations": [{"name": "Plank"}]}
                 """));
 
-        ExerciseLibraryItemResponse item = client.getExerciseById(20);
+        ExerciseLibraryItemEntity item = client.getExerciseById(20);
 
         assertEquals("/exerciseinfo/20/", server.requests().get(0));
         assertEquals("Plank", item.name());
@@ -114,12 +114,12 @@ class WgerExerciseClientTest {
                 () -> client.getCategories(null, null)));
     }
 
-    private ExerciseLibrarySearchRequest emptySearchRequest() {
-        return new ExerciseLibrarySearchRequest(null, null, null, null, null, null, null);
+    private ExerciseLibrarySearchCriteria emptySearchRequest() {
+        return new ExerciseLibrarySearchCriteria(null, null, null, null, null, null, null);
     }
 
-    private ExerciseLibrarySearchRequest filteredSearchRequest() {
-        return new ExerciseLibrarySearchRequest("arm", 5, 2, 2, 1, 4, 1);
+    private ExerciseLibrarySearchCriteria filteredSearchRequest() {
+        return new ExerciseLibrarySearchCriteria("arm", 5, 2, 2, 1, 4, 1);
     }
 
     private String exerciseSearchResponse() {

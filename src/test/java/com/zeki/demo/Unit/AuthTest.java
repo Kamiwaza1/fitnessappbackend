@@ -93,11 +93,13 @@ class AuthServiceTest {
         when(userRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
         when(passwordEncoder.encode(STRONG_PASSWORD)).thenReturn("encoded-password");
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
-        when(jwtService.generateToken(any(UserDetails.class), eq(USER_ROLE))).thenReturn("jwt-token");
+        when(jwtService.generateAccessToken(any(UserDetails.class), eq(USER_ROLE))).thenReturn("access-token");
+        when(jwtService.generateRefreshToken(TEST_EMAIL)).thenReturn("refresh-token");
 
         AuthenticatedUser response = authService.register(user);
 
-        assertEquals("jwt-token", response.accessToken());
+        assertEquals("access-token", response.accessToken());
+        assertEquals("refresh-token", response.refreshToken());
         assertEquals(TEST_EMAIL, response.user().getEmail());
         verify(passwordEncoder).encode(STRONG_PASSWORD);
         verify(userRepository).save(any(User.class));
@@ -141,15 +143,48 @@ class AuthServiceTest {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(mock(Authentication.class));
         when(userRepository.findActiveByEmail(TEST_EMAIL)).thenReturn(Optional.of(storedUser));
-        when(jwtService.generateToken(any(UserDetails.class), eq(USER_ROLE))).thenReturn("jwt-token");
+        when(jwtService.generateAccessToken(any(UserDetails.class), eq(USER_ROLE))).thenReturn("access-token");
+        when(jwtService.generateRefreshToken(TEST_EMAIL)).thenReturn("refresh-token");
 
         AuthenticatedUser response = authService.login(loginUser);
 
-        assertEquals("jwt-token", response.accessToken());
+        assertEquals("access-token", response.accessToken());
+        assertEquals("refresh-token", response.refreshToken());
         assertEquals(TEST_EMAIL, response.user().getEmail());
         verify(authenticationManager).authenticate(
                 argThat(token -> TEST_EMAIL.equals(token.getPrincipal()))
         );
+    }
+
+    @Test
+    void refreshWhenTokenIsValidReturnsNewTokensAndUserInfo() {
+        User storedUser = storedUser(TEST_EMAIL);
+
+        when(jwtService.extractRefreshUsername("old-refresh-token")).thenReturn(TEST_EMAIL);
+        when(userRepository.findActiveByEmail(TEST_EMAIL)).thenReturn(Optional.of(storedUser));
+        when(jwtService.isRefreshTokenValid("old-refresh-token", TEST_EMAIL)).thenReturn(true);
+        when(jwtService.generateAccessToken(any(UserDetails.class), eq(USER_ROLE))).thenReturn("new-access-token");
+        when(jwtService.generateRefreshToken(TEST_EMAIL)).thenReturn("new-refresh-token");
+
+        AuthenticatedUser response = authService.refresh("old-refresh-token");
+
+        assertEquals("new-access-token", response.accessToken());
+        assertEquals("new-refresh-token", response.refreshToken());
+        assertEquals(TEST_EMAIL, response.user().getEmail());
+    }
+
+    @Test
+    void refreshWhenTokenIsInvalidThrowsUnauthorized() {
+        when(jwtService.extractRefreshUsername("bad-refresh-token")).thenReturn(TEST_EMAIL);
+        when(userRepository.findActiveByEmail(TEST_EMAIL)).thenReturn(Optional.of(storedUser(TEST_EMAIL)));
+        when(jwtService.isRefreshTokenValid("bad-refresh-token", TEST_EMAIL)).thenReturn(false);
+
+        UnauthorizedException ex = assertThrows(
+                UnauthorizedException.class,
+                () -> authService.refresh("bad-refresh-token")
+        );
+
+        assertEquals("Invalid refresh token", ex.getMessage());
     }
 
     private User userForAuth(String email, String password) {

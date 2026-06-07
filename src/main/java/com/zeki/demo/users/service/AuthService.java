@@ -6,4 +6,6 @@ public interface AuthService {
     AuthenticatedUser register(User user);
 
     AuthenticatedUser login(User user);
+
+    AuthenticatedUser refresh(String refreshToken);
 }

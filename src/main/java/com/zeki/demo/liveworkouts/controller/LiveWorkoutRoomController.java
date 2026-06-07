@@ -5,7 +5,7 @@ import com.zeki.demo.liveworkouts.dto.CreateLiveWorkoutRoomRequest;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutEventResponse;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutProgressRequest;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutRoomResponse;
-import com.zeki.demo.liveworkouts.mapper.LiveWorkoutRoomMapper;
+import com.zeki.demo.liveworkouts.mapperDtoDomain.LiveWorkoutRoomMapper;
 import com.zeki.demo.liveworkouts.service.LiveWorkoutRoomService;
 import jakarta.validation.Valid;
 import java.security.Principal;

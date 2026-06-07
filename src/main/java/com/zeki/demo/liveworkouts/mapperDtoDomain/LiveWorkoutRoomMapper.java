@@ -1,4 +1,4 @@
-package com.zeki.demo.liveworkouts.mapper;
+package com.zeki.demo.liveworkouts.mapperDtoDomain;
 
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutParticipant;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;

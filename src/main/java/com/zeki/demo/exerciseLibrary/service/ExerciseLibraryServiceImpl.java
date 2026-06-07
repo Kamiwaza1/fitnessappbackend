@@ -1,11 +1,12 @@
 package com.zeki.demo.exerciseLibrary.service;
 
-import com.zeki.demo.exerciseLibrary.client.WgerExerciseClient;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryItemResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibrarySearchRequest;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseMuscleResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseReferenceResponse;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrary;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibraryItem;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibraryListCriteria;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrarySearchCriteria;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseMuscle;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseReference;
+import com.zeki.demo.exerciseLibrary.repository.ExerciseLibraryRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,30 +15,30 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ExerciseLibraryServiceImpl implements ExerciseLibraryService {
 
-    private final WgerExerciseClient wgerExerciseClient;
+    private final ExerciseLibraryRepository exerciseLibraryRepository;
 
     @Override
-    public ExerciseLibraryResponse searchExercises(ExerciseLibrarySearchRequest request) {
-        return wgerExerciseClient.searchExercises(request);
+    public ExerciseLibrary searchExercises(ExerciseLibrarySearchCriteria criteria) {
+        return exerciseLibraryRepository.searchExercises(criteria);
     }
 
     @Override
-    public ExerciseLibraryItemResponse getExerciseById(Integer exerciseId) {
-        return wgerExerciseClient.getExerciseById(exerciseId);
+    public ExerciseLibraryItem getExerciseById(Integer exerciseId) {
+        return exerciseLibraryRepository.getExerciseById(exerciseId);
     }
 
     @Override
-    public List<ExerciseMuscleResponse> getMuscles(Integer limit, Integer offset) {
-        return wgerExerciseClient.getMuscles(limit, offset);
+    public List<ExerciseMuscle> getMuscles(ExerciseLibraryListCriteria criteria) {
+        return exerciseLibraryRepository.getMuscles(criteria);
     }
 
     @Override
-    public List<ExerciseReferenceResponse> getEquipment(Integer limit, Integer offset) {
-        return wgerExerciseClient.getEquipment(limit, offset);
+    public List<ExerciseReference> getEquipment(ExerciseLibraryListCriteria criteria) {
+        return exerciseLibraryRepository.getEquipment(criteria);
     }
 
     @Override
-    public List<ExerciseReferenceResponse> getCategories(Integer limit, Integer offset) {
-        return wgerExerciseClient.getCategories(limit, offset);
+    public List<ExerciseReference> getCategories(ExerciseLibraryListCriteria criteria) {
+        return exerciseLibraryRepository.getCategories(criteria);
     }
 }

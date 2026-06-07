@@ -5,12 +5,19 @@ import com.zeki.demo.WorkoutHistory.dto.WorkoutHistoryResponse;
 import com.zeki.demo.WorkoutHistory.mapperDtoDomain.WorkoutHistoryDtoDomain;
 import com.zeki.demo.WorkoutHistory.service.WorkoutHistoryService;
 import com.zeki.demo.exerciseLibrary.controller.ExerciseLibraryController;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrary;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibraryItem;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibraryListCriteria;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrarySearchCriteria;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseMuscle;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseReference;
 import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryItemResponse;
 import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryListRequest;
 import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryResponse;
 import com.zeki.demo.exerciseLibrary.dto.ExerciseLibrarySearchRequest;
 import com.zeki.demo.exerciseLibrary.dto.ExerciseMuscleResponse;
 import com.zeki.demo.exerciseLibrary.dto.ExerciseReferenceResponse;
+import com.zeki.demo.exerciseLibrary.mapperDtoDomain.ExerciseLibraryDtoDomain;
 import com.zeki.demo.exerciseLibrary.service.ExerciseLibraryService;
 import com.zeki.demo.liveworkouts.controller.LiveWorkoutRoomController;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutEventType;
@@ -19,9 +26,8 @@ import com.zeki.demo.liveworkouts.dto.CreateLiveWorkoutRoomRequest;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutEventResponse;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutProgressRequest;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutRoomResponse;
-import com.zeki.demo.liveworkouts.mapper.LiveWorkoutRoomMapper;
+import com.zeki.demo.liveworkouts.mapperDtoDomain.LiveWorkoutRoomMapper;
 import com.zeki.demo.liveworkouts.service.LiveWorkoutRoomService;
-import com.zeki.demo.nutrition.client.OpenFoodFactsClient;
 import com.zeki.demo.nutrition.controller.NutritionController;
 import com.zeki.demo.nutrition.domain.Nutrition;
 import com.zeki.demo.nutrition.dto.CreateNutritionRequest;
@@ -44,6 +50,7 @@ import com.zeki.demo.users.controller.UserController;
 import com.zeki.demo.users.domain.User;
 import com.zeki.demo.users.dto.AuthResponse;
 import com.zeki.demo.users.dto.LoginRequest;
+import com.zeki.demo.users.dto.RefreshTokenRequest;
 import com.zeki.demo.users.dto.RegisterRequest;
 import com.zeki.demo.users.dto.UpdateUserRequest;
 import com.zeki.demo.users.dto.UserResponse;
@@ -91,7 +98,6 @@ class ControllerCoverageTest {
 
     private NutritionService nutritionService;
     private NutritionDtoDomain nutritionMapper;
-    private OpenFoodFactsClient foodClient;
     private NutritionController nutritionController;
 
     private LiveWorkoutRoomService liveWorkoutService;
@@ -100,6 +106,7 @@ class ControllerCoverageTest {
     private LiveWorkoutRoomController liveWorkoutController;
 
     private ExerciseLibraryService exerciseService;
+    private ExerciseLibraryDtoDomain exerciseMapper;
     private ExerciseLibraryController exerciseController;
 
     private UserService userService;
@@ -127,8 +134,7 @@ class ControllerCoverageTest {
 
         nutritionService = mock(NutritionService.class);
         nutritionMapper = mock(NutritionDtoDomain.class);
-        foodClient = mock(OpenFoodFactsClient.class);
-        nutritionController = new NutritionController(nutritionService, nutritionMapper, foodClient);
+        nutritionController = new NutritionController(nutritionService, nutritionMapper);
 
         liveWorkoutService = mock(LiveWorkoutRoomService.class);
         liveWorkoutMapper = mock(LiveWorkoutRoomMapper.class);
@@ -136,7 +142,8 @@ class ControllerCoverageTest {
         liveWorkoutController = new LiveWorkoutRoomController(liveWorkoutService, liveWorkoutMapper, messagingTemplate);
 
         exerciseService = mock(ExerciseLibraryService.class);
-        exerciseController = new ExerciseLibraryController(exerciseService);
+        exerciseMapper = mock(ExerciseLibraryDtoDomain.class);
+        exerciseController = new ExerciseLibraryController(exerciseService, exerciseMapper);
 
         userService = mock(UserService.class);
         authService = mock(AuthService.class);
@@ -195,10 +202,10 @@ class ControllerCoverageTest {
         when(nutritionMapper.toDomain(createRequest, EMAIL)).thenReturn(nutrition);
         when(nutritionService.createNutrition(nutrition)).thenReturn(nutrition);
         when(nutritionService.updateNutrition(id, updateRequest, EMAIL)).thenReturn(nutrition);
-        when(foodClient.searchProducts(searchRequest)).thenReturn(foods);
-        when(foodClient.getProductByBarcode("123", "nl")).thenReturn(food);
-        when(foodClient.getProductsByBrand("fitco", productsRequest)).thenReturn(foods);
-        when(foodClient.getProductsByCategory("bars", productsRequest)).thenReturn(foods);
+        when(nutritionService.searchFoodProducts(searchRequest)).thenReturn(foods);
+        when(nutritionService.getFoodProductByBarcode("123", "nl")).thenReturn(food);
+        when(nutritionService.getFoodProductsByBrand("fitco", productsRequest)).thenReturn(foods);
+        when(nutritionService.getFoodProductsByCategory("bars", productsRequest)).thenReturn(foods);
 
         assertEquals(List.of(response), nutritionController.getMyNutritionEntries(auth));
         assertEquals(foods, nutritionController.searchFoodProducts(searchRequest, auth));
@@ -253,14 +260,31 @@ class ControllerCoverageTest {
     private void assertExerciseLibraryControllerDelegates() {
         ExerciseLibrarySearchRequest searchRequest = exerciseSearchRequest();
         ExerciseLibraryListRequest listRequest = exerciseListRequest();
+        ExerciseLibrarySearchCriteria searchCriteria = mock(ExerciseLibrarySearchCriteria.class);
+        ExerciseLibraryListCriteria listCriteria = mock(ExerciseLibraryListCriteria.class);
+        ExerciseLibrary library = mock(ExerciseLibrary.class);
+        ExerciseLibraryItem exerciseItem = mock(ExerciseLibraryItem.class);
+        ExerciseMuscle muscle = mock(ExerciseMuscle.class);
+        ExerciseReference equipment = mock(ExerciseReference.class);
+        ExerciseReference category = mock(ExerciseReference.class);
         ExerciseLibraryResponse exerciseResponse = exerciseLibraryResponse();
         ExerciseLibraryItemResponse exercise = mock(ExerciseLibraryItemResponse.class);
+        List<ExerciseMuscleResponse> muscleResponses = List.of(exerciseMuscleResponse());
+        List<ExerciseReferenceResponse> equipmentResponses = List.of(exerciseEquipmentResponse());
+        List<ExerciseReferenceResponse> categoryResponses = List.of(exerciseCategoryResponse());
 
-        when(exerciseService.searchExercises(searchRequest)).thenReturn(exerciseResponse);
-        when(exerciseService.getExerciseById(1)).thenReturn(exercise);
-        when(exerciseService.getMuscles(10, 0)).thenReturn(List.of(exerciseMuscleResponse()));
-        when(exerciseService.getEquipment(10, 0)).thenReturn(List.of(exerciseEquipmentResponse()));
-        when(exerciseService.getCategories(10, 0)).thenReturn(List.of(exerciseCategoryResponse()));
+        when(exerciseMapper.toDomain(searchRequest)).thenReturn(searchCriteria);
+        when(exerciseMapper.toDomain(listRequest)).thenReturn(listCriteria);
+        when(exerciseService.searchExercises(searchCriteria)).thenReturn(library);
+        when(exerciseService.getExerciseById(1)).thenReturn(exerciseItem);
+        when(exerciseService.getMuscles(listCriteria)).thenReturn(List.of(muscle));
+        when(exerciseService.getEquipment(listCriteria)).thenReturn(List.of(equipment));
+        when(exerciseService.getCategories(listCriteria)).thenReturn(List.of(category));
+        when(exerciseMapper.toResponse(library)).thenReturn(exerciseResponse);
+        when(exerciseMapper.toResponse(exerciseItem)).thenReturn(exercise);
+        when(exerciseMapper.toMuscleResponses(List.of(muscle))).thenReturn(muscleResponses);
+        when(exerciseMapper.toReferenceResponses(List.of(equipment))).thenReturn(equipmentResponses);
+        when(exerciseMapper.toReferenceResponses(List.of(category))).thenReturn(categoryResponses);
 
         assertEquals(exerciseResponse, exerciseController.searchExercises(searchRequest, auth));
         assertEquals(exercise, exerciseController.getExerciseById(1, auth));
@@ -293,10 +317,12 @@ class ControllerCoverageTest {
         when(userMapper.toDomain(any(LoginRequest.class))).thenReturn(user);
         when(authService.register(user)).thenReturn(authenticatedUser);
         when(authService.login(user)).thenReturn(authenticatedUser);
+        when(authService.refresh("refresh-token")).thenReturn(authenticatedUser);
         when(userMapper.toAuthResponse(authenticatedUser)).thenReturn(response);
 
         assertEquals(response, authController.register(registerRequest()));
         assertEquals(response, authController.login(loginRequest()));
+        assertEquals(response, authController.refresh(refreshTokenRequest()));
     }
 
     private void assertProgressControllerDelegates() {
@@ -435,6 +461,10 @@ class ControllerCoverageTest {
 
     private LoginRequest loginRequest() {
         return new LoginRequest(EMAIL, "Password123!");
+    }
+
+    private RefreshTokenRequest refreshTokenRequest() {
+        return new RefreshTokenRequest("refresh-token");
     }
 
     private ProgressResponse progressResponse() {

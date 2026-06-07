@@ -1,6 +1,5 @@
 package com.zeki.demo.nutrition.controller;
 
-import com.zeki.demo.nutrition.client.OpenFoodFactsClient;
 import com.zeki.demo.nutrition.dto.CreateNutritionRequest;
 import com.zeki.demo.nutrition.dto.FoodProductResponse;
 import com.zeki.demo.nutrition.dto.FoodProductSearchRequest;
@@ -40,7 +39,6 @@ public class        NutritionController {
 
     private final NutritionService nutritionService;
     private final NutritionDtoDomain nutritionDtoDomain;
-    private final OpenFoodFactsClient openFoodFactsClient;
 
     @Operation(summary = "Get all nutrition entries for the current user")
     @ApiResponse(responseCode = "200", description = "List of nutrition entries for the current user")
@@ -59,7 +57,7 @@ public class        NutritionController {
             @Valid @ModelAttribute FoodProductSearchRequest request,
             Authentication authentication
     ) {
-        return openFoodFactsClient.searchProducts(request);
+        return nutritionService.searchFoodProducts(request);
     }
 
     @Operation(summary = "Get a food product by barcode from OpenFoodFacts")
@@ -73,7 +71,7 @@ public class        NutritionController {
             @RequestParam(required = false) String lang,
             Authentication authentication
     ) {
-        return openFoodFactsClient.getProductByBarcode(barcode, lang);
+        return nutritionService.getFoodProductByBarcode(barcode, lang);
     }
 
     @Operation(summary = "Get food products by brand from OpenFoodFacts")
@@ -84,7 +82,7 @@ public class        NutritionController {
             @Valid @ModelAttribute FoodProductsRequest request,
             Authentication authentication
     ) {
-        return openFoodFactsClient.getProductsByBrand(brand, request);
+        return nutritionService.getFoodProductsByBrand(brand, request);
     }
 
     @Operation(summary = "Get food products by category from OpenFoodFacts")
@@ -95,7 +93,7 @@ public class        NutritionController {
             @Valid @ModelAttribute FoodProductsRequest request,
             Authentication authentication
     ) {
-        return openFoodFactsClient.getProductsByCategory(category, request);
+        return nutritionService.getFoodProductsByCategory(category, request);
     }
 
     @Operation(summary = "Get a nutrition entry by ID for the current user")
