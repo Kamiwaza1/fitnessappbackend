@@ -20,15 +20,21 @@ public class LiveWorkoutRoomRepositoryImpl implements LiveWorkoutRoomRepository 
 
     @Override
     public LiveWorkoutRoom saveActive(LiveWorkoutRoom room) {
-        return liveWorkoutRoomEntityMapper.toDomain(
-                liveWorkoutRoomRepoJPA.save(liveWorkoutRoomEntityMapper.toEntity(room, ACTIVE, null))
-        );
+        return save(room, ACTIVE, null);
     }
 
     @Override
     public LiveWorkoutRoom saveClosed(LiveWorkoutRoom room, Instant closedAt) {
+        return save(room, CLOSED, closedAt);
+    }
+
+    private LiveWorkoutRoom save(LiveWorkoutRoom room, String status, Instant closedAt) {
+        if (liveWorkoutRoomRepoJPA.existsById(room.roomCode())) {
+            liveWorkoutRoomRepoJPA.deleteParticipantsByRoomCode(room.roomCode());
+            liveWorkoutRoomRepoJPA.flush();
+        }
         return liveWorkoutRoomEntityMapper.toDomain(
-                liveWorkoutRoomRepoJPA.save(liveWorkoutRoomEntityMapper.toEntity(room, CLOSED, closedAt))
+                liveWorkoutRoomRepoJPA.save(liveWorkoutRoomEntityMapper.toEntity(room, status, closedAt))
         );
     }
 

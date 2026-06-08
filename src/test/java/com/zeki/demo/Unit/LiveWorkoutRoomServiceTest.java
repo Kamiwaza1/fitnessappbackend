@@ -93,6 +93,8 @@ class LiveWorkoutRoomServiceTest {
 
         assertTrue(updated.participants().containsKey(HOST_EMAIL));
         assertTrue(updated.participants().containsKey(GUEST_EMAIL));
+        verify(liveWorkoutRoomRepoJPA).deleteParticipantsByRoomCode(room.roomCode());
+        verify(liveWorkoutRoomRepoJPA).flush();
     }
 
     @Test

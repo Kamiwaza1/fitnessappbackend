@@ -63,12 +63,12 @@ class WgerExerciseClientTest {
     @Test
     void getExerciseByIdMapsNullCollectionsToEmptyValues() {
         server.respondWith(path -> ClientTestServer.Response.json(200, """
-                {"id": 20, "uuid": "minimal", "translations": [{"name": "Plank"}]}
+                {"id": 20, "uuid": "minimal", "translations": [{"name": "Plank", "language": 2}]}
                 """));
 
         ExerciseLibraryItemEntity item = client.getExerciseById(20);
 
-        assertEquals("/exerciseinfo/20/", server.requests().get(0));
+        assertEquals("/exerciseinfo/20/?language=2", server.requests().get(0));
         assertEquals("Plank", item.name());
         assertTrue(item.muscles().isEmpty());
         assertTrue(item.secondaryMuscles().isEmpty());
@@ -76,6 +76,36 @@ class WgerExerciseClientTest {
         assertTrue(item.aliases().isEmpty());
         assertTrue(item.images().isEmpty());
         assertTrue(item.videos().isEmpty());
+    }
+
+    @Test
+    void searchExercisesUsesOnlyEnglishTranslations() {
+        server.respondWith(path -> ClientTestServer.Response.json(200, """
+                {
+                  "count": 2,
+                  "results": [
+                    {
+                      "id": 30,
+                      "uuid": "multi-language",
+                      "translations": [
+                        {"name": "Sentadilla", "description_source": "Spanish", "language": 4},
+                        {"name": "Squat", "description_source": "English", "language": 2}
+                      ]
+                    },
+                    {
+                      "id": 31,
+                      "uuid": "non-english",
+                      "translations": [{"name": "Flexiones", "language": 4}]
+                    }
+                  ]
+                }
+                """));
+
+        ExerciseLibraryEntity response = client.searchExercises(emptySearchRequest());
+
+        assertEquals(1, response.count());
+        assertEquals("Squat", response.results().get(0).name());
+        assertEquals("English", response.results().get(0).descriptionSource());
     }
 
     @Test
@@ -115,11 +145,11 @@ class WgerExerciseClientTest {
     }
 
     private ExerciseLibrarySearchCriteria emptySearchRequest() {
-        return new ExerciseLibrarySearchCriteria(null, null, null, null, null, null, null);
+        return new ExerciseLibrarySearchCriteria(null, null, null, null, null, null);
     }
 
     private ExerciseLibrarySearchCriteria filteredSearchRequest() {
-        return new ExerciseLibrarySearchCriteria("arm", 5, 2, 2, 1, 4, 1);
+        return new ExerciseLibrarySearchCriteria("arm", 5, 2, 1, 4, 1);
     }
 
     private String exerciseSearchResponse() {
@@ -139,12 +169,12 @@ class WgerExerciseClientTest {
                       "license_author": "wger",
                       "images": [{"id": 6, "image": "curl.png", "is_main": true}],
                       "videos": [{"id": 7, "video": "curl.mp4", "is_main": false, "duration": "00:30"}],
-                      "translations": [{"name": "Dumbbell Curl", "description": "Lift the weight",
+                      "translations": [{"name": "Dumbbell Curl", "description": "Lift the weight", "language": 2,
                         "description_source": "curl source", "aliases": [{"alias": "Arm curl"}]}]
                     },
                     {
                       "id": 11,
-                      "translations": [{"name": "Squat", "description_source": "legs"}]
+                      "translations": [{"name": "Squat", "description_source": "legs", "language": 2}]
                     }
                   ]
                 }

@@ -10,8 +10,6 @@ public record ExerciseLibrarySearchRequest(
         Integer limit,
         @Min(value = 0, message = "Offset must be at least 0")
         Integer offset,
-        @Min(value = 1, message = "Language must be at least 1")
-        Integer language,
         @Min(value = 1, message = "Muscle ID must be at least 1")
         Integer muscleId,
         @Min(value = 1, message = "Equipment ID must be at least 1")

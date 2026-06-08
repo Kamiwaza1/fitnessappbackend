@@ -25,6 +25,8 @@ import org.springframework.web.util.UriBuilder;
 @Component
 public class WgerExerciseClient {
 
+    private static final int ENGLISH_LANGUAGE_ID = 2;
+
     private final WebClient webClient;
 
     public WgerExerciseClient(
@@ -46,6 +48,7 @@ public class WgerExerciseClient {
 
             List<ExerciseLibraryItemEntity> results = response != null && response.results() != null
                     ? filterByQuery(response.results(), criteria.q()).stream()
+                            .filter(WgerExercise::hasEnglishTranslation)
                             .map(WgerExercise::toExerciseLibraryItemEntity)
                             .toList()
                     : List.of();
@@ -59,12 +62,18 @@ public class WgerExerciseClient {
     public ExerciseLibraryItemEntity getExerciseById(Integer exerciseId) {
         try {
             WgerExercise response = webClient.get()
-                    .uri("/exerciseinfo/{exerciseId}/", exerciseId)
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/exerciseinfo/{exerciseId}/")
+                            .queryParam("language", ENGLISH_LANGUAGE_ID)
+                            .build(exerciseId))
                     .retrieve()
                     .bodyToMono(WgerExercise.class)
                     .block();
             if (response == null) {
                 throw new NotFoundException("Exercise not found");
+            }
+            if (!response.hasEnglishTranslation()) {
+                throw new NotFoundException("English exercise translation not found");
             }
             return response.toExerciseLibraryItemEntity();
         } catch (WebClientResponseException ex) {
@@ -114,7 +123,7 @@ public class WgerExerciseClient {
         UriBuilder builder = uriBuilder.path("/exerciseinfo/");
         addIfPresent(builder, "limit", criteria.limit() != null ? criteria.limit() : 20);
         addIfPresent(builder, "offset", criteria.offset());
-        addIfPresent(builder, "language", criteria.language() != null ? criteria.language() : 2);
+        addIfPresent(builder, "language", ENGLISH_LANGUAGE_ID);
         addIfPresent(builder, "muscles", criteria.muscleId());
         addIfPresent(builder, "equipment", criteria.equipmentId());
         addIfPresent(builder, "category", criteria.categoryId());
@@ -190,7 +199,7 @@ public class WgerExerciseClient {
             List<WgerVideo> videos
     ) {
         ExerciseLibraryItemEntity toExerciseLibraryItemEntity() {
-            WgerTranslation translation = firstTranslation();
+            WgerTranslation translation = englishTranslation();
             return new ExerciseLibraryItemEntity(
                     id,
                     uuid,
@@ -212,7 +221,7 @@ public class WgerExerciseClient {
         }
 
         boolean matches(String query) {
-            WgerTranslation translation = firstTranslation();
+            WgerTranslation translation = englishTranslation();
             if (translation == null) {
                 return false;
             }
@@ -221,8 +230,18 @@ public class WgerExerciseClient {
                     || translation.aliasValues().stream().anyMatch(alias -> contains(alias, query));
         }
 
-        private WgerTranslation firstTranslation() {
-            return translations != null && !translations.isEmpty() ? translations.get(0) : null;
+        boolean hasEnglishTranslation() {
+            return englishTranslation() != null;
+        }
+
+        private WgerTranslation englishTranslation() {
+            return translations != null
+                    ? translations.stream()
+                            .filter(translation -> translation.language() != null
+                                    && translation.language() == ENGLISH_LANGUAGE_ID)
+                            .findFirst()
+                            .orElse(null)
+                    : null;
         }
 
         private boolean contains(String value, String query) {
@@ -236,6 +255,7 @@ public class WgerExerciseClient {
             String description,
             @JsonProperty("description_source")
             String descriptionSource,
+            Integer language,
             List<WgerAlias> aliases
     ) {
         List<String> aliasValues() {

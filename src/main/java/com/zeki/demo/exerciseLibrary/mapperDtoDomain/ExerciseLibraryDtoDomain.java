@@ -29,7 +29,6 @@ public class ExerciseLibraryDtoDomain {
                 request.q(),
                 request.limit(),
                 request.offset(),
-                request.language(),
                 request.muscleId(),
                 request.equipmentId(),
                 request.categoryId()
