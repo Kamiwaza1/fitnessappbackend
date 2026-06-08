@@ -30,7 +30,7 @@ build:
 test:
   stage: test
   script:
-    - ./gradlew --no-daemon test jacocoTestReport
+    - ./gradlew --no-daemon test jacocoTestReport jacocoTestCoverageVerification
   artifacts:
     when: always
     paths:
@@ -58,7 +58,7 @@ build-sonar:
   script:
     - echo "SONAR_TOKEN exists? ${SONAR_TOKEN:+yes}"
     - ls -la build/reports/jacoco/test/
-    - ./gradlew --no-daemon test jacocoTestReport sonar -Dsonar.token="$SONAR_TOKEN" -Dsonar.qualitygate.wait=true
+    - ./gradlew --no-daemon test jacocoTestReport jacocoTestCoverageVerification sonar -Dsonar.token="$SONAR_TOKEN" -Dsonar.qualitygate.wait=true
   allow_failure: true
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'

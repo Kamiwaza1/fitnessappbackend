@@ -78,6 +78,19 @@ tasks.named('jacocoTestReport') {
 	}
 }
 
+tasks.named('jacocoTestCoverageVerification') {
+	dependsOn tasks.named('test')
+	violationRules {
+		rule {
+			limit {
+				counter = 'LINE'
+				value = 'COVEREDRATIO'
+				minimum = 0.81
+			}
+		}
+	}
+}
+
 sonar {
     properties{
         def sonarHostUrl = findProperty("sonar.host.url") ?: System.getenv("SONAR_HOST_URL") ?: "http://localhost:9000"

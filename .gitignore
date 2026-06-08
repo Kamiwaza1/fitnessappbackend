@@ -53,3 +53,5 @@ logs/
 compose.override.yaml
 docker-compose.override.yml
 .gradle/buildOutputCleanup/buildOutputCleanup.lock
+.gradle/buildOutputCleanup/buildOutputCleanup.lock
+.gradle/buildOutputCleanup/outputFiles.bin
