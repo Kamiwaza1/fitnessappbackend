@@ -50,4 +50,17 @@ public class AuthController {
         AuthenticatedUser authenticatedUser = authService.login(userDtoDomain.toDomain(request));
         return userDtoDomain.toAuthResponse(authenticatedUser);
     }
+
+    @Operation(summary = "Refresh tokens", description = "Uses a refresh token to issue new access and refresh tokens")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Tokens refreshed successfully"),
+            @ApiResponse(responseCode = "400", description = "Refresh token is missing"),
+            @ApiResponse(responseCode = "401", description = "Refresh token is invalid or expired")
+    })
+    @PostMapping("/refresh")
+    @ResponseStatus(HttpStatus.OK)
+    public AuthResponse refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        AuthenticatedUser authenticatedUser = authService.refresh(request.refreshToken());
+        return userDtoDomain.toAuthResponse(authenticatedUser);
+    }
 }

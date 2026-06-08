@@ -5,5 +5,6 @@ public enum LiveWorkoutEventType {
     USER_JOINED,
     USER_LEFT,
     PROGRESS_UPDATED,
-    ROOM_CLOSED
+    ROOM_CLOSED,
+    MESSAGE_SENT
 }

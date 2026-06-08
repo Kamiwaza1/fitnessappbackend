@@ -6,6 +6,7 @@ import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryResponse;
 import com.zeki.demo.exerciseLibrary.dto.ExerciseLibrarySearchRequest;
 import com.zeki.demo.exerciseLibrary.dto.ExerciseMuscleResponse;
 import com.zeki.demo.exerciseLibrary.dto.ExerciseReferenceResponse;
+import com.zeki.demo.exerciseLibrary.mapperDtoDomain.ExerciseLibraryDtoDomain;
 import com.zeki.demo.exerciseLibrary.service.ExerciseLibraryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ExerciseLibraryController {
 
     private final ExerciseLibraryService exerciseLibraryService;
+    private final ExerciseLibraryDtoDomain exerciseLibraryDtoDomain;
 
     @Operation(summary = "Search exercises from the exercise library")
     @ApiResponse(responseCode = "200", description = "Exercise search results")
@@ -36,7 +38,9 @@ public class ExerciseLibraryController {
             @Valid @ModelAttribute ExerciseLibrarySearchRequest request,
             Authentication authentication
     ) {
-        return exerciseLibraryService.searchExercises(request);
+        return exerciseLibraryDtoDomain.toResponse(
+                exerciseLibraryService.searchExercises(exerciseLibraryDtoDomain.toDomain(request))
+        );
     }
 
     @Operation(summary = "Get an exercise by ID from the exercise library")
@@ -49,7 +53,7 @@ public class ExerciseLibraryController {
             @PathVariable Integer exerciseId,
             Authentication authentication
     ) {
-        return exerciseLibraryService.getExerciseById(exerciseId);
+        return exerciseLibraryDtoDomain.toResponse(exerciseLibraryService.getExerciseById(exerciseId));
     }
 
     @Operation(summary = "Get exercise muscles")
@@ -59,7 +63,9 @@ public class ExerciseLibraryController {
             @Valid @ModelAttribute ExerciseLibraryListRequest request,
             Authentication authentication
     ) {
-        return exerciseLibraryService.getMuscles(request.limit(), request.offset());
+        return exerciseLibraryDtoDomain.toMuscleResponses(
+                exerciseLibraryService.getMuscles(exerciseLibraryDtoDomain.toDomain(request))
+        );
     }
 
     @Operation(summary = "Get exercise equipment")
@@ -69,7 +75,9 @@ public class ExerciseLibraryController {
             @Valid @ModelAttribute ExerciseLibraryListRequest request,
             Authentication authentication
     ) {
-        return exerciseLibraryService.getEquipment(request.limit(), request.offset());
+        return exerciseLibraryDtoDomain.toReferenceResponses(
+                exerciseLibraryService.getEquipment(exerciseLibraryDtoDomain.toDomain(request))
+        );
     }
 
     @Operation(summary = "Get exercise categories")
@@ -79,6 +87,8 @@ public class ExerciseLibraryController {
             @Valid @ModelAttribute ExerciseLibraryListRequest request,
             Authentication authentication
     ) {
-        return exerciseLibraryService.getCategories(request.limit(), request.offset());
+        return exerciseLibraryDtoDomain.toReferenceResponses(
+                exerciseLibraryService.getCategories(exerciseLibraryDtoDomain.toDomain(request))
+        );
     }
 }

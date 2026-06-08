@@ -20,24 +20,27 @@ class JWTServiceTest {
     @BeforeEach
     void setUp() {
         jwtService = new JWTService();
-        ReflectionTestUtils.setField(jwtService, "secret", "12345678901234567890123456789012");
-        ReflectionTestUtils.setField(jwtService, "jwtExpiration", 3_600_000L);
+        ReflectionTestUtils.setField(jwtService, "accessSecret", "12345678901234567890123456789012");
+        ReflectionTestUtils.setField(jwtService, "accessExpiration", 3_600_000L);
+        ReflectionTestUtils.setField(jwtService, "refreshSecret", "abcdefghijklmnopqrstuvwxyz123456");
+        ReflectionTestUtils.setField(jwtService, "refreshExpiration", 604_800_000L);
         userDetails = User.withUsername("user@example.com").password("encoded").authorities("ROLE_USER").build();
     }
 
     @Test
-    void generateTokenIncludesUsernameAndRole() {
-        String token = jwtService.generateToken(userDetails, "USER");
+    void generateAccessTokenIncludesUsernameRoleAndType() {
+        String token = jwtService.generateAccessToken(userDetails, "USER");
 
         assertEquals("user@example.com", jwtService.extractUsername(token));
         assertEquals("USER", jwtService.extractClaim(token, claims -> claims.get("role", String.class)));
+        assertEquals("access", jwtService.extractClaim(token, claims -> claims.get("type", String.class)));
         assertTrue(jwtService.isTokenValid(token, userDetails));
         assertFalse(jwtService.isTokenExpired(token));
     }
 
     @Test
-    void generateTokenWithoutRoleKeepsTokenValid() {
-        String token = jwtService.generateToken(userDetails);
+    void generateAccessTokenWithoutRoleKeepsTokenValid() {
+        String token = jwtService.generateAccessToken("user@example.com");
 
         assertEquals("user@example.com", jwtService.extractUsername(token));
         assertTrue(jwtService.isTokenValid(token, userDetails));
@@ -46,9 +49,19 @@ class JWTServiceTest {
 
     @Test
     void isTokenValidReturnsFalseForDifferentUser() {
-        String token = jwtService.generateToken(userDetails, "USER");
+        String token = jwtService.generateAccessToken(userDetails, "USER");
         UserDetails otherUser = User.withUsername("other@example.com").password("encoded").authorities("ROLE_USER").build();
 
         assertFalse(jwtService.isTokenValid(token, otherUser));
+    }
+
+    @Test
+    void generateRefreshTokenIncludesUsernameAndRefreshType() {
+        String token = jwtService.generateRefreshToken("user@example.com");
+
+        assertEquals("user@example.com", jwtService.extractRefreshUsername(token));
+        assertEquals("refresh", jwtService.extractRefreshClaim(token, claims -> claims.get("type", String.class)));
+        assertTrue(jwtService.isRefreshTokenValid(token, "user@example.com"));
+        assertFalse(jwtService.isRefreshTokenExpired(token));
     }
 }

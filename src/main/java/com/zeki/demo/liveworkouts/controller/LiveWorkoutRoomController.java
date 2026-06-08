@@ -1,20 +1,24 @@
 package com.zeki.demo.liveworkouts.controller;
 
-import com.zeki.demo.liveworkouts.domain.LiveWorkoutEventType;
 import com.zeki.demo.liveworkouts.dto.CreateLiveWorkoutRoomRequest;
-import com.zeki.demo.liveworkouts.dto.LiveWorkoutEventResponse;
+import com.zeki.demo.liveworkouts.dto.LiveWorkoutMessageRequest;
+import com.zeki.demo.liveworkouts.dto.LiveWorkoutMessageResponse;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutProgressRequest;
+import com.zeki.demo.liveworkouts.dto.LiveWorkoutRoomDetailResponse;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutRoomResponse;
-import com.zeki.demo.liveworkouts.mapper.LiveWorkoutRoomMapper;
+import com.zeki.demo.liveworkouts.mapperDtoDomain.LiveWorkoutMessageMapper;
+import com.zeki.demo.liveworkouts.mapperDtoDomain.LiveWorkoutRoomMapper;
+import com.zeki.demo.liveworkouts.service.LiveWorkoutEventPublisher;
+import com.zeki.demo.liveworkouts.service.LiveWorkoutMessageService;
 import com.zeki.demo.liveworkouts.service.LiveWorkoutRoomService;
 import jakarta.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,8 +35,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class LiveWorkoutRoomController {
 
     private final LiveWorkoutRoomService liveWorkoutRoomService;
+    private final LiveWorkoutMessageService liveWorkoutMessageService;
     private final LiveWorkoutRoomMapper liveWorkoutRoomMapper;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final LiveWorkoutMessageMapper liveWorkoutMessageMapper;
+    private final LiveWorkoutEventPublisher liveWorkoutEventPublisher;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -50,12 +56,37 @@ public class LiveWorkoutRoomController {
         return liveWorkoutRoomMapper.toResponse(liveWorkoutRoomService.getRoom(roomCode));
     }
 
+    @GetMapping("/{roomCode}/details")
+    public LiveWorkoutRoomDetailResponse getRoomDetails(
+            @PathVariable String roomCode,
+            Authentication authentication
+    ) {
+        return liveWorkoutRoomMapper.toDetailResponse(
+                liveWorkoutRoomService.getRoom(roomCode),
+                liveWorkoutMessageService.getRecentMessages(roomCode, authentication.getName())
+                        .stream()
+                        .map(liveWorkoutMessageMapper::toResponse)
+                        .toList()
+        );
+    }
+
+    @GetMapping("/{roomCode}/messages")
+    public List<LiveWorkoutMessageResponse> getMessages(
+            @PathVariable String roomCode,
+            Authentication authentication
+    ) {
+        return liveWorkoutMessageService.getRecentMessages(roomCode, authentication.getName())
+                .stream()
+                .map(liveWorkoutMessageMapper::toResponse)
+                .toList();
+    }
+
     @DeleteMapping("/{roomCode}")
     public LiveWorkoutRoomResponse closeRoom(@PathVariable String roomCode, Authentication authentication) {
         LiveWorkoutRoomResponse room = liveWorkoutRoomMapper.toResponse(
                 liveWorkoutRoomService.closeRoom(roomCode, authentication.getName())
         );
-        broadcast(roomCode, new LiveWorkoutEventResponse(LiveWorkoutEventType.ROOM_CLOSED, authentication.getName(), room));
+        liveWorkoutEventPublisher.publishRoomClosed(roomCode, authentication.getName(), room);
         return room;
     }
 
@@ -64,7 +95,7 @@ public class LiveWorkoutRoomController {
         LiveWorkoutRoomResponse room = liveWorkoutRoomMapper.toResponse(
                 liveWorkoutRoomService.joinRoom(roomCode, principal.getName())
         );
-        broadcast(roomCode, new LiveWorkoutEventResponse(LiveWorkoutEventType.USER_JOINED, principal.getName(), room));
+        liveWorkoutEventPublisher.publishUserJoined(roomCode, principal.getName(), room);
     }
 
     @MessageMapping("/live-workouts/{roomCode}/leave")
@@ -72,7 +103,7 @@ public class LiveWorkoutRoomController {
         LiveWorkoutRoomResponse room = liveWorkoutRoomMapper.toResponse(
                 liveWorkoutRoomService.leaveRoom(roomCode, principal.getName())
         );
-        broadcast(roomCode, new LiveWorkoutEventResponse(LiveWorkoutEventType.USER_LEFT, principal.getName(), room));
+        liveWorkoutEventPublisher.publishUserLeft(roomCode, principal.getName(), room);
     }
 
     @MessageMapping("/live-workouts/{roomCode}/progress")
@@ -84,10 +115,18 @@ public class LiveWorkoutRoomController {
         LiveWorkoutRoomResponse room = liveWorkoutRoomMapper.toResponse(
                 liveWorkoutRoomService.updateProgress(roomCode, principal.getName(), request)
         );
-        broadcast(roomCode, new LiveWorkoutEventResponse(LiveWorkoutEventType.PROGRESS_UPDATED, principal.getName(), room));
+        liveWorkoutEventPublisher.publishProgressUpdated(roomCode, principal.getName(), room);
     }
 
-    private void broadcast(String roomCode, LiveWorkoutEventResponse event) {
-        messagingTemplate.convertAndSend("/topic/live-workouts/" + roomCode.toUpperCase(), event);
+    @MessageMapping("/live-workouts/{roomCode}/messages")
+    public void sendMessage(
+            @DestinationVariable String roomCode,
+            @Valid @Payload LiveWorkoutMessageRequest request,
+            Principal principal
+    ) {
+        LiveWorkoutMessageResponse message = liveWorkoutMessageMapper.toResponse(
+                liveWorkoutMessageService.sendMessage(roomCode, principal.getName(), request.text())
+        );
+        liveWorkoutEventPublisher.publishMessageSent(roomCode, principal.getName(), message);
     }
 }

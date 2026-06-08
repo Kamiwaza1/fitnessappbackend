@@ -5,6 +5,7 @@ import com.zeki.demo.nutrition.domain.Nutrition;
 import com.zeki.demo.nutrition.dto.UpdateNutritionRequest;
 import com.zeki.demo.nutrition.enums.NutritionCategory;
 import com.zeki.demo.nutrition.mapperDtoDomain.NutritionDtoDomain;
+import com.zeki.demo.nutrition.repository.FoodProductRepository;
 import com.zeki.demo.nutrition.repository.NutritionRepository;
 import com.zeki.demo.nutrition.service.NutritionServiceImpl;
 import java.time.LocalDate;
@@ -30,11 +31,14 @@ class NutritionServiceTest {
     @Mock
     private NutritionRepository nutritionRepository;
 
+    @Mock
+    private FoodProductRepository foodProductRepository;
+
     private NutritionServiceImpl nutritionService;
 
     @BeforeEach
     void setUp() {
-        nutritionService = new NutritionServiceImpl(nutritionRepository, new NutritionDtoDomain());
+        nutritionService = new NutritionServiceImpl(nutritionRepository, foodProductRepository, new NutritionDtoDomain());
     }
 
     @Test

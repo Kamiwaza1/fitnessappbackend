@@ -5,14 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.common.exception.ExternalServiceException;
 import com.zeki.demo.common.exception.NotFoundException;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseImageResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryItemResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibrarySearchRequest;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLicenseResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseMuscleResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseReferenceResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseVideoResponse;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrarySearchCriteria;
+import com.zeki.demo.exerciseLibrary.entity.ExerciseImageEntity;
+import com.zeki.demo.exerciseLibrary.entity.ExerciseLibraryEntity;
+import com.zeki.demo.exerciseLibrary.entity.ExerciseLibraryItemEntity;
+import com.zeki.demo.exerciseLibrary.entity.ExerciseLicenseEntity;
+import com.zeki.demo.exerciseLibrary.entity.ExerciseMuscleEntity;
+import com.zeki.demo.exerciseLibrary.entity.ExerciseReferenceEntity;
+import com.zeki.demo.exerciseLibrary.entity.ExerciseVideoEntity;
 import java.net.URI;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +25,8 @@ import org.springframework.web.util.UriBuilder;
 @Component
 public class WgerExerciseClient {
 
+    private static final int ENGLISH_LANGUAGE_ID = 2;
+
     private final WebClient webClient;
 
     public WgerExerciseClient(
@@ -36,43 +38,50 @@ public class WgerExerciseClient {
                 .build();
     }
 
-    public ExerciseLibraryResponse searchExercises(ExerciseLibrarySearchRequest request) {
+    public ExerciseLibraryEntity searchExercises(ExerciseLibrarySearchCriteria criteria) {
         try {
             WgerExerciseListResponse response = webClient.get()
-                    .uri(uriBuilder -> exerciseListUri(uriBuilder, request))
+                    .uri(uriBuilder -> exerciseListUri(uriBuilder, criteria))
                     .retrieve()
                     .bodyToMono(WgerExerciseListResponse.class)
                     .block();
 
-            List<ExerciseLibraryItemResponse> results = response != null && response.results() != null
-                    ? filterByQuery(response.results(), request.q()).stream()
-                            .map(WgerExercise::toExerciseLibraryItemResponse)
+            List<ExerciseLibraryItemEntity> results = response != null && response.results() != null
+                    ? filterByQuery(response.results(), criteria.q()).stream()
+                            .filter(WgerExercise::hasEnglishTranslation)
+                            .map(WgerExercise::toExerciseLibraryItemEntity)
                             .toList()
                     : List.of();
 
-            return new ExerciseLibraryResponse(results, results.size(), response != null ? response.count() : 0);
+            return new ExerciseLibraryEntity(results, results.size(), response != null ? response.count() : 0);
         } catch (WebClientResponseException ex) {
             throw mapExternalError(ex, "Exercise search failed");
         }
     }
 
-    public ExerciseLibraryItemResponse getExerciseById(Integer exerciseId) {
+    public ExerciseLibraryItemEntity getExerciseById(Integer exerciseId) {
         try {
             WgerExercise response = webClient.get()
-                    .uri("/exerciseinfo/{exerciseId}/", exerciseId)
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/exerciseinfo/{exerciseId}/")
+                            .queryParam("language", ENGLISH_LANGUAGE_ID)
+                            .build(exerciseId))
                     .retrieve()
                     .bodyToMono(WgerExercise.class)
                     .block();
             if (response == null) {
                 throw new NotFoundException("Exercise not found");
             }
-            return response.toExerciseLibraryItemResponse();
+            if (!response.hasEnglishTranslation()) {
+                throw new NotFoundException("English exercise translation not found");
+            }
+            return response.toExerciseLibraryItemEntity();
         } catch (WebClientResponseException ex) {
             throw mapExternalError(ex, "Exercise not found");
         }
     }
 
-    public List<ExerciseMuscleResponse> getMuscles(Integer limit, Integer offset) {
+    public List<ExerciseMuscleEntity> getMuscles(Integer limit, Integer offset) {
         try {
             WgerMuscleListResponse response = webClient.get()
                     .uri(uriBuilder -> referenceListUri(uriBuilder, "/muscle/", limit, offset))
@@ -80,22 +89,22 @@ public class WgerExerciseClient {
                     .bodyToMono(WgerMuscleListResponse.class)
                     .block();
             return response != null && response.results() != null
-                    ? response.results().stream().map(WgerMuscle::toExerciseMuscleResponse).toList()
+                    ? response.results().stream().map(WgerMuscle::toExerciseMuscleEntity).toList()
                     : List.of();
         } catch (WebClientResponseException ex) {
             throw mapExternalError(ex, "Exercise muscles could not be loaded");
         }
     }
 
-    public List<ExerciseReferenceResponse> getEquipment(Integer limit, Integer offset) {
+    public List<ExerciseReferenceEntity> getEquipment(Integer limit, Integer offset) {
         return getReferences("/equipment/", limit, offset, "Exercise equipment could not be loaded");
     }
 
-    public List<ExerciseReferenceResponse> getCategories(Integer limit, Integer offset) {
+    public List<ExerciseReferenceEntity> getCategories(Integer limit, Integer offset) {
         return getReferences("/exercisecategory/", limit, offset, "Exercise categories could not be loaded");
     }
 
-    private List<ExerciseReferenceResponse> getReferences(String path, Integer limit, Integer offset, String errorMessage) {
+    private List<ExerciseReferenceEntity> getReferences(String path, Integer limit, Integer offset, String errorMessage) {
         try {
             WgerReferenceListResponse response = webClient.get()
                     .uri(uriBuilder -> referenceListUri(uriBuilder, path, limit, offset))
@@ -103,21 +112,21 @@ public class WgerExerciseClient {
                     .bodyToMono(WgerReferenceListResponse.class)
                     .block();
             return response != null && response.results() != null
-                    ? response.results().stream().map(WgerReference::toExerciseReferenceResponse).toList()
+                    ? response.results().stream().map(WgerReference::toExerciseReferenceEntity).toList()
                     : List.of();
         } catch (WebClientResponseException ex) {
             throw mapExternalError(ex, errorMessage);
         }
     }
 
-    private URI exerciseListUri(UriBuilder uriBuilder, ExerciseLibrarySearchRequest request) {
+    private URI exerciseListUri(UriBuilder uriBuilder, ExerciseLibrarySearchCriteria criteria) {
         UriBuilder builder = uriBuilder.path("/exerciseinfo/");
-        addIfPresent(builder, "limit", request.limit() != null ? request.limit() : 20);
-        addIfPresent(builder, "offset", request.offset());
-        addIfPresent(builder, "language", request.language() != null ? request.language() : 2);
-        addIfPresent(builder, "muscles", request.muscleId());
-        addIfPresent(builder, "equipment", request.equipmentId());
-        addIfPresent(builder, "category", request.categoryId());
+        addIfPresent(builder, "limit", criteria.limit() != null ? criteria.limit() : 20);
+        addIfPresent(builder, "offset", criteria.offset());
+        addIfPresent(builder, "language", ENGLISH_LANGUAGE_ID);
+        addIfPresent(builder, "muscles", criteria.muscleId());
+        addIfPresent(builder, "equipment", criteria.equipmentId());
+        addIfPresent(builder, "category", criteria.categoryId());
         return builder.build();
     }
 
@@ -189,30 +198,30 @@ public class WgerExerciseClient {
             List<WgerTranslation> translations,
             List<WgerVideo> videos
     ) {
-        ExerciseLibraryItemResponse toExerciseLibraryItemResponse() {
-            WgerTranslation translation = firstTranslation();
-            return new ExerciseLibraryItemResponse(
+        ExerciseLibraryItemEntity toExerciseLibraryItemEntity() {
+            WgerTranslation translation = englishTranslation();
+            return new ExerciseLibraryItemEntity(
                     id,
                     uuid,
                     translation != null ? translation.name() : null,
                     translation != null ? translation.description() : null,
                     translation != null ? translation.descriptionSource() : null,
-                    category != null ? category.toExerciseReferenceResponse() : null,
-                    muscles != null ? muscles.stream().map(WgerMuscle::toExerciseMuscleResponse).toList() : List.of(),
+                    category != null ? category.toExerciseReferenceEntity() : null,
+                    muscles != null ? muscles.stream().map(WgerMuscle::toExerciseMuscleEntity).toList() : List.of(),
                     musclesSecondary != null
-                            ? musclesSecondary.stream().map(WgerMuscle::toExerciseMuscleResponse).toList()
+                            ? musclesSecondary.stream().map(WgerMuscle::toExerciseMuscleEntity).toList()
                             : List.of(),
-                    equipment != null ? equipment.stream().map(WgerReference::toExerciseReferenceResponse).toList() : List.of(),
+                    equipment != null ? equipment.stream().map(WgerReference::toExerciseReferenceEntity).toList() : List.of(),
                     translation != null ? translation.aliasValues() : List.of(),
-                    images != null ? images.stream().map(WgerImage::toExerciseImageResponse).toList() : List.of(),
-                    videos != null ? videos.stream().map(WgerVideo::toExerciseVideoResponse).toList() : List.of(),
-                    license != null ? license.toExerciseLicenseResponse() : null,
+                    images != null ? images.stream().map(WgerImage::toExerciseImageEntity).toList() : List.of(),
+                    videos != null ? videos.stream().map(WgerVideo::toExerciseVideoEntity).toList() : List.of(),
+                    license != null ? license.toExerciseLicenseEntity() : null,
                     licenseAuthor
             );
         }
 
         boolean matches(String query) {
-            WgerTranslation translation = firstTranslation();
+            WgerTranslation translation = englishTranslation();
             if (translation == null) {
                 return false;
             }
@@ -221,8 +230,18 @@ public class WgerExerciseClient {
                     || translation.aliasValues().stream().anyMatch(alias -> contains(alias, query));
         }
 
-        private WgerTranslation firstTranslation() {
-            return translations != null && !translations.isEmpty() ? translations.get(0) : null;
+        boolean hasEnglishTranslation() {
+            return englishTranslation() != null;
+        }
+
+        private WgerTranslation englishTranslation() {
+            return translations != null
+                    ? translations.stream()
+                            .filter(translation -> translation.language() != null
+                                    && translation.language() == ENGLISH_LANGUAGE_ID)
+                            .findFirst()
+                            .orElse(null)
+                    : null;
         }
 
         private boolean contains(String value, String query) {
@@ -236,6 +255,7 @@ public class WgerExerciseClient {
             String description,
             @JsonProperty("description_source")
             String descriptionSource,
+            Integer language,
             List<WgerAlias> aliases
     ) {
         List<String> aliasValues() {
@@ -249,8 +269,8 @@ public class WgerExerciseClient {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private record WgerReference(Integer id, String name) {
-        ExerciseReferenceResponse toExerciseReferenceResponse() {
-            return new ExerciseReferenceResponse(id, name);
+        ExerciseReferenceEntity toExerciseReferenceEntity() {
+            return new ExerciseReferenceEntity(id, name);
         }
     }
 
@@ -267,8 +287,8 @@ public class WgerExerciseClient {
             @JsonProperty("image_url_secondary")
             String imageUrlSecondary
     ) {
-        ExerciseMuscleResponse toExerciseMuscleResponse() {
-            return new ExerciseMuscleResponse(id, name, nameEn, isFront, imageUrlMain, imageUrlSecondary);
+        ExerciseMuscleEntity toExerciseMuscleEntity() {
+            return new ExerciseMuscleEntity(id, name, nameEn, isFront, imageUrlMain, imageUrlSecondary);
         }
     }
 
@@ -279,8 +299,8 @@ public class WgerExerciseClient {
             @JsonProperty("is_main")
             Boolean isMain
     ) {
-        ExerciseImageResponse toExerciseImageResponse() {
-            return new ExerciseImageResponse(id, image, isMain);
+        ExerciseImageEntity toExerciseImageEntity() {
+            return new ExerciseImageEntity(id, image, isMain);
         }
     }
 
@@ -292,8 +312,8 @@ public class WgerExerciseClient {
             Boolean isMain,
             String duration
     ) {
-        ExerciseVideoResponse toExerciseVideoResponse() {
-            return new ExerciseVideoResponse(id, video, isMain, duration);
+        ExerciseVideoEntity toExerciseVideoEntity() {
+            return new ExerciseVideoEntity(id, video, isMain, duration);
         }
     }
 
@@ -306,8 +326,8 @@ public class WgerExerciseClient {
             String shortName,
             String url
     ) {
-        ExerciseLicenseResponse toExerciseLicenseResponse() {
-            return new ExerciseLicenseResponse(id, fullName, shortName, url);
+        ExerciseLicenseEntity toExerciseLicenseEntity() {
+            return new ExerciseLicenseEntity(id, fullName, shortName, url);
         }
     }
 }

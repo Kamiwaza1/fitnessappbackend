@@ -5,23 +5,34 @@ import com.zeki.demo.WorkoutHistory.dto.WorkoutHistoryResponse;
 import com.zeki.demo.WorkoutHistory.mapperDtoDomain.WorkoutHistoryDtoDomain;
 import com.zeki.demo.WorkoutHistory.service.WorkoutHistoryService;
 import com.zeki.demo.exerciseLibrary.controller.ExerciseLibraryController;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrary;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibraryItem;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibraryListCriteria;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrarySearchCriteria;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseMuscle;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseReference;
 import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryItemResponse;
 import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryListRequest;
 import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryResponse;
 import com.zeki.demo.exerciseLibrary.dto.ExerciseLibrarySearchRequest;
 import com.zeki.demo.exerciseLibrary.dto.ExerciseMuscleResponse;
 import com.zeki.demo.exerciseLibrary.dto.ExerciseReferenceResponse;
+import com.zeki.demo.exerciseLibrary.mapperDtoDomain.ExerciseLibraryDtoDomain;
 import com.zeki.demo.exerciseLibrary.service.ExerciseLibraryService;
 import com.zeki.demo.liveworkouts.controller.LiveWorkoutRoomController;
-import com.zeki.demo.liveworkouts.domain.LiveWorkoutEventType;
+import com.zeki.demo.liveworkouts.domain.LiveWorkoutMessage;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
 import com.zeki.demo.liveworkouts.dto.CreateLiveWorkoutRoomRequest;
-import com.zeki.demo.liveworkouts.dto.LiveWorkoutEventResponse;
+import com.zeki.demo.liveworkouts.dto.LiveWorkoutMessageRequest;
+import com.zeki.demo.liveworkouts.dto.LiveWorkoutMessageResponse;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutProgressRequest;
+import com.zeki.demo.liveworkouts.dto.LiveWorkoutRoomDetailResponse;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutRoomResponse;
-import com.zeki.demo.liveworkouts.mapper.LiveWorkoutRoomMapper;
+import com.zeki.demo.liveworkouts.mapperDtoDomain.LiveWorkoutMessageMapper;
+import com.zeki.demo.liveworkouts.mapperDtoDomain.LiveWorkoutRoomMapper;
+import com.zeki.demo.liveworkouts.service.LiveWorkoutEventPublisher;
+import com.zeki.demo.liveworkouts.service.LiveWorkoutMessageService;
 import com.zeki.demo.liveworkouts.service.LiveWorkoutRoomService;
-import com.zeki.demo.nutrition.client.OpenFoodFactsClient;
 import com.zeki.demo.nutrition.controller.NutritionController;
 import com.zeki.demo.nutrition.domain.Nutrition;
 import com.zeki.demo.nutrition.dto.CreateNutritionRequest;
@@ -44,6 +55,7 @@ import com.zeki.demo.users.controller.UserController;
 import com.zeki.demo.users.domain.User;
 import com.zeki.demo.users.dto.AuthResponse;
 import com.zeki.demo.users.dto.LoginRequest;
+import com.zeki.demo.users.dto.RefreshTokenRequest;
 import com.zeki.demo.users.dto.RegisterRequest;
 import com.zeki.demo.users.dto.UpdateUserRequest;
 import com.zeki.demo.users.dto.UserResponse;
@@ -62,7 +74,6 @@ import com.zeki.demo.workouts.mapperDtoDomain.WorkoutDtoDomain;
 import com.zeki.demo.workouts.service.WorkoutService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 
 import java.security.Principal;
@@ -73,7 +84,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -91,15 +101,17 @@ class ControllerCoverageTest {
 
     private NutritionService nutritionService;
     private NutritionDtoDomain nutritionMapper;
-    private OpenFoodFactsClient foodClient;
     private NutritionController nutritionController;
 
     private LiveWorkoutRoomService liveWorkoutService;
+    private LiveWorkoutMessageService liveWorkoutMessageService;
     private LiveWorkoutRoomMapper liveWorkoutMapper;
-    private SimpMessagingTemplate messagingTemplate;
+    private LiveWorkoutMessageMapper liveWorkoutMessageMapper;
+    private LiveWorkoutEventPublisher liveWorkoutEventPublisher;
     private LiveWorkoutRoomController liveWorkoutController;
 
     private ExerciseLibraryService exerciseService;
+    private ExerciseLibraryDtoDomain exerciseMapper;
     private ExerciseLibraryController exerciseController;
 
     private UserService userService;
@@ -127,16 +139,24 @@ class ControllerCoverageTest {
 
         nutritionService = mock(NutritionService.class);
         nutritionMapper = mock(NutritionDtoDomain.class);
-        foodClient = mock(OpenFoodFactsClient.class);
-        nutritionController = new NutritionController(nutritionService, nutritionMapper, foodClient);
+        nutritionController = new NutritionController(nutritionService, nutritionMapper);
 
         liveWorkoutService = mock(LiveWorkoutRoomService.class);
+        liveWorkoutMessageService = mock(LiveWorkoutMessageService.class);
         liveWorkoutMapper = mock(LiveWorkoutRoomMapper.class);
-        messagingTemplate = mock(SimpMessagingTemplate.class);
-        liveWorkoutController = new LiveWorkoutRoomController(liveWorkoutService, liveWorkoutMapper, messagingTemplate);
+        liveWorkoutMessageMapper = mock(LiveWorkoutMessageMapper.class);
+        liveWorkoutEventPublisher = mock(LiveWorkoutEventPublisher.class);
+        liveWorkoutController = new LiveWorkoutRoomController(
+                liveWorkoutService,
+                liveWorkoutMessageService,
+                liveWorkoutMapper,
+                liveWorkoutMessageMapper,
+                liveWorkoutEventPublisher
+        );
 
         exerciseService = mock(ExerciseLibraryService.class);
-        exerciseController = new ExerciseLibraryController(exerciseService);
+        exerciseMapper = mock(ExerciseLibraryDtoDomain.class);
+        exerciseController = new ExerciseLibraryController(exerciseService, exerciseMapper);
 
         userService = mock(UserService.class);
         authService = mock(AuthService.class);
@@ -195,10 +215,10 @@ class ControllerCoverageTest {
         when(nutritionMapper.toDomain(createRequest, EMAIL)).thenReturn(nutrition);
         when(nutritionService.createNutrition(nutrition)).thenReturn(nutrition);
         when(nutritionService.updateNutrition(id, updateRequest, EMAIL)).thenReturn(nutrition);
-        when(foodClient.searchProducts(searchRequest)).thenReturn(foods);
-        when(foodClient.getProductByBarcode("123", "nl")).thenReturn(food);
-        when(foodClient.getProductsByBrand("fitco", productsRequest)).thenReturn(foods);
-        when(foodClient.getProductsByCategory("bars", productsRequest)).thenReturn(foods);
+        when(nutritionService.searchFoodProducts(searchRequest)).thenReturn(foods);
+        when(nutritionService.getFoodProductByBarcode("123", "nl")).thenReturn(food);
+        when(nutritionService.getFoodProductsByBrand("fitco", productsRequest)).thenReturn(foods);
+        when(nutritionService.getFoodProductsByCategory("bars", productsRequest)).thenReturn(foods);
 
         assertEquals(List.of(response), nutritionController.getMyNutritionEntries(auth));
         assertEquals(foods, nutritionController.searchFoodProducts(searchRequest, auth));
@@ -217,8 +237,15 @@ class ControllerCoverageTest {
     void liveWorkoutControllerBroadcastsRoomEvents() {
         Principal principal = principal();
         LiveWorkoutRoom room = LiveWorkoutRoom.create("room1", EMAIL, id, "Workout");
+        LiveWorkoutMessage message = mock(LiveWorkoutMessage.class);
         LiveWorkoutRoomResponse response = liveWorkoutRoomResponse();
+        LiveWorkoutMessageResponse messageResponse = liveWorkoutMessageResponse();
+        LiveWorkoutRoomDetailResponse detailResponse = new LiveWorkoutRoomDetailResponse(
+                response,
+                List.of(messageResponse)
+        );
         LiveWorkoutProgressRequest progress = liveWorkoutProgressRequest();
+        LiveWorkoutMessageRequest messageRequest = new LiveWorkoutMessageRequest("Nice set");
 
         when(liveWorkoutService.createRoom(id, EMAIL)).thenReturn(room);
         when(liveWorkoutService.getRoom("room1")).thenReturn(room);
@@ -226,19 +253,27 @@ class ControllerCoverageTest {
         when(liveWorkoutService.joinRoom("room1", EMAIL)).thenReturn(room);
         when(liveWorkoutService.leaveRoom("room1", EMAIL)).thenReturn(room);
         when(liveWorkoutService.updateProgress("room1", EMAIL, progress)).thenReturn(room);
+        when(liveWorkoutMessageService.getRecentMessages("room1", EMAIL)).thenReturn(List.of(message));
+        when(liveWorkoutMessageService.sendMessage("room1", EMAIL, "Nice set")).thenReturn(message);
         when(liveWorkoutMapper.toResponse(room)).thenReturn(response);
+        when(liveWorkoutMessageMapper.toResponse(message)).thenReturn(messageResponse);
+        when(liveWorkoutMapper.toDetailResponse(room, List.of(messageResponse))).thenReturn(detailResponse);
 
         assertEquals(response, liveWorkoutController.createRoom(createLiveWorkoutRoomRequest(), auth));
         assertEquals(response, liveWorkoutController.getRoom("room1"));
+        assertEquals(detailResponse, liveWorkoutController.getRoomDetails("room1", auth));
+        assertEquals(List.of(messageResponse), liveWorkoutController.getMessages("room1", auth));
         assertEquals(response, liveWorkoutController.closeRoom("room1", auth));
         liveWorkoutController.joinRoom("room1", principal);
         liveWorkoutController.leaveRoom("room1", principal);
         liveWorkoutController.updateProgress("room1", progress, principal);
+        liveWorkoutController.sendMessage("room1", messageRequest, principal);
 
-        verifyRoomEvent(LiveWorkoutEventType.ROOM_CLOSED, response);
-        verifyRoomEvent(LiveWorkoutEventType.USER_JOINED, response);
-        verifyRoomEvent(LiveWorkoutEventType.USER_LEFT, response);
-        verifyRoomEvent(LiveWorkoutEventType.PROGRESS_UPDATED, response);
+        verify(liveWorkoutEventPublisher).publishRoomClosed("room1", EMAIL, response);
+        verify(liveWorkoutEventPublisher).publishUserJoined("room1", EMAIL, response);
+        verify(liveWorkoutEventPublisher).publishUserLeft("room1", EMAIL, response);
+        verify(liveWorkoutEventPublisher).publishProgressUpdated("room1", EMAIL, response);
+        verify(liveWorkoutEventPublisher).publishMessageSent("room1", EMAIL, messageResponse);
     }
 
     @Test
@@ -253,14 +288,31 @@ class ControllerCoverageTest {
     private void assertExerciseLibraryControllerDelegates() {
         ExerciseLibrarySearchRequest searchRequest = exerciseSearchRequest();
         ExerciseLibraryListRequest listRequest = exerciseListRequest();
+        ExerciseLibrarySearchCriteria searchCriteria = mock(ExerciseLibrarySearchCriteria.class);
+        ExerciseLibraryListCriteria listCriteria = mock(ExerciseLibraryListCriteria.class);
+        ExerciseLibrary library = mock(ExerciseLibrary.class);
+        ExerciseLibraryItem exerciseItem = mock(ExerciseLibraryItem.class);
+        ExerciseMuscle muscle = mock(ExerciseMuscle.class);
+        ExerciseReference equipment = mock(ExerciseReference.class);
+        ExerciseReference category = mock(ExerciseReference.class);
         ExerciseLibraryResponse exerciseResponse = exerciseLibraryResponse();
         ExerciseLibraryItemResponse exercise = mock(ExerciseLibraryItemResponse.class);
+        List<ExerciseMuscleResponse> muscleResponses = List.of(exerciseMuscleResponse());
+        List<ExerciseReferenceResponse> equipmentResponses = List.of(exerciseEquipmentResponse());
+        List<ExerciseReferenceResponse> categoryResponses = List.of(exerciseCategoryResponse());
 
-        when(exerciseService.searchExercises(searchRequest)).thenReturn(exerciseResponse);
-        when(exerciseService.getExerciseById(1)).thenReturn(exercise);
-        when(exerciseService.getMuscles(10, 0)).thenReturn(List.of(exerciseMuscleResponse()));
-        when(exerciseService.getEquipment(10, 0)).thenReturn(List.of(exerciseEquipmentResponse()));
-        when(exerciseService.getCategories(10, 0)).thenReturn(List.of(exerciseCategoryResponse()));
+        when(exerciseMapper.toDomain(searchRequest)).thenReturn(searchCriteria);
+        when(exerciseMapper.toDomain(listRequest)).thenReturn(listCriteria);
+        when(exerciseService.searchExercises(searchCriteria)).thenReturn(library);
+        when(exerciseService.getExerciseById(1)).thenReturn(exerciseItem);
+        when(exerciseService.getMuscles(listCriteria)).thenReturn(List.of(muscle));
+        when(exerciseService.getEquipment(listCriteria)).thenReturn(List.of(equipment));
+        when(exerciseService.getCategories(listCriteria)).thenReturn(List.of(category));
+        when(exerciseMapper.toResponse(library)).thenReturn(exerciseResponse);
+        when(exerciseMapper.toResponse(exerciseItem)).thenReturn(exercise);
+        when(exerciseMapper.toMuscleResponses(List.of(muscle))).thenReturn(muscleResponses);
+        when(exerciseMapper.toReferenceResponses(List.of(equipment))).thenReturn(equipmentResponses);
+        when(exerciseMapper.toReferenceResponses(List.of(category))).thenReturn(categoryResponses);
 
         assertEquals(exerciseResponse, exerciseController.searchExercises(searchRequest, auth));
         assertEquals(exercise, exerciseController.getExerciseById(1, auth));
@@ -293,10 +345,12 @@ class ControllerCoverageTest {
         when(userMapper.toDomain(any(LoginRequest.class))).thenReturn(user);
         when(authService.register(user)).thenReturn(authenticatedUser);
         when(authService.login(user)).thenReturn(authenticatedUser);
+        when(authService.refresh("refresh-token")).thenReturn(authenticatedUser);
         when(userMapper.toAuthResponse(authenticatedUser)).thenReturn(response);
 
         assertEquals(response, authController.register(registerRequest()));
         assertEquals(response, authController.login(loginRequest()));
+        assertEquals(response, authController.refresh(refreshTokenRequest()));
     }
 
     private void assertProgressControllerDelegates() {
@@ -319,13 +373,6 @@ class ControllerCoverageTest {
 
         assertEquals(List.of(response), historyController.getWorkoutHistory(auth));
         assertEquals(response, historyController.getWorkoutHistoryById(id, auth));
-    }
-
-    private void verifyRoomEvent(LiveWorkoutEventType type, LiveWorkoutRoomResponse room) {
-        verify(messagingTemplate).convertAndSend(
-                eq("/topic/live-workouts/ROOM1"),
-                eq(new LiveWorkoutEventResponse(type, EMAIL, room))
-        );
     }
 
     private Authentication authentication() {
@@ -394,7 +441,7 @@ class ControllerCoverageTest {
     }
 
     private ExerciseLibrarySearchRequest exerciseSearchRequest() {
-        return new ExerciseLibrarySearchRequest("push", 10, 0, 2, null, null, null);
+        return new ExerciseLibrarySearchRequest("push", 10, 0, null, null, null);
     }
 
     private ExerciseLibraryListRequest exerciseListRequest() {
@@ -437,6 +484,10 @@ class ControllerCoverageTest {
         return new LoginRequest(EMAIL, "Password123!");
     }
 
+    private RefreshTokenRequest refreshTokenRequest() {
+        return new RefreshTokenRequest("refresh-token");
+    }
+
     private ProgressResponse progressResponse() {
         return new ProgressResponse(LocalDate.now(), LocalDate.now(), 1.0, 1, 1,
                 List.of(), List.of(), List.of(), null);
@@ -449,5 +500,9 @@ class ControllerCoverageTest {
 
     private LiveWorkoutRoomResponse liveWorkoutRoomResponse() {
         return new LiveWorkoutRoomResponse("room1", EMAIL, id, "Workout", List.of(), Instant.now(), Instant.now());
+    }
+
+    private LiveWorkoutMessageResponse liveWorkoutMessageResponse() {
+        return new LiveWorkoutMessageResponse("message-1", "ROOM1", EMAIL, "owner", "Nice set", Instant.now());
     }
 }

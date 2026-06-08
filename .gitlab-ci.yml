@@ -22,6 +22,10 @@ build:
   stage: build
   script:
     - ./gradlew --no-daemon classes
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "development"'
+    - if: '$CI_COMMIT_BRANCH == "Development"'
 
 test:
   stage: test
@@ -36,6 +40,10 @@ test:
       - build/reports/jacoco/test/html/
       - build/reports/jacoco/test/jacocoTestReport.xml
     expire_in: 4 weeks
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "development"'
+    - if: '$CI_COMMIT_BRANCH == "Development"'
 
 build-sonar:
   stage: build-sonar
@@ -54,6 +62,7 @@ build-sonar:
   allow_failure: true
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "development"'
     - if: '$CI_COMMIT_BRANCH == "Development"'
 
 docker:
@@ -67,3 +76,5 @@ docker:
     paths:
       - build/libs/
     expire_in: 4 weeks
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'

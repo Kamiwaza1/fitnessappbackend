@@ -1,21 +1,22 @@
 package com.zeki.demo.exerciseLibrary.service;
 
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryItemResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibrarySearchRequest;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseMuscleResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseReferenceResponse;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrary;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibraryItem;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibraryListCriteria;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrarySearchCriteria;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseMuscle;
+import com.zeki.demo.exerciseLibrary.domain.ExerciseReference;
 import java.util.List;
 
 public interface ExerciseLibraryService {
 
-    ExerciseLibraryResponse searchExercises(ExerciseLibrarySearchRequest request);
+    ExerciseLibrary searchExercises(ExerciseLibrarySearchCriteria criteria);
 
-    ExerciseLibraryItemResponse getExerciseById(Integer exerciseId);
+    ExerciseLibraryItem getExerciseById(Integer exerciseId);
 
-    List<ExerciseMuscleResponse> getMuscles(Integer limit, Integer offset);
+    List<ExerciseMuscle> getMuscles(ExerciseLibraryListCriteria criteria);
 
-    List<ExerciseReferenceResponse> getEquipment(Integer limit, Integer offset);
+    List<ExerciseReference> getEquipment(ExerciseLibraryListCriteria criteria);
 
-    List<ExerciseReferenceResponse> getCategories(Integer limit, Integer offset);
+    List<ExerciseReference> getCategories(ExerciseLibraryListCriteria criteria);
 }

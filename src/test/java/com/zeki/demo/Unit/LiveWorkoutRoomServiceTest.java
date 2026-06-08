@@ -4,8 +4,12 @@ import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutProgressRequest;
 import com.zeki.demo.liveworkouts.entity.LiveWorkoutRoomEntity;
-import com.zeki.demo.liveworkouts.repository.LiveWorkoutRoomRepoJPA;
+import com.zeki.demo.liveworkouts.mapperEntityDomain.LiveWorkoutRoomEntityMapper;
+import com.zeki.demo.liveworkouts.repository.LiveWorkoutRoomRepository;
+import com.zeki.demo.liveworkouts.repository.LiveWorkoutRoomRepositoryImpl;
+import com.zeki.demo.liveworkouts.repository.jpa.LiveWorkoutRoomRepoJPA;
 import com.zeki.demo.liveworkouts.service.LiveWorkoutRoomService;
+import com.zeki.demo.liveworkouts.service.LiveWorkoutRoomServiceImpl;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.enums.MuscleType;
 import com.zeki.demo.workouts.enums.WorkoutCategory;
@@ -61,7 +65,11 @@ class LiveWorkoutRoomServiceTest {
             String status = invocation.getArgument(1);
             return entity != null && status.equals(entity.getStatus()) ? Optional.of(entity) : Optional.empty();
         });
-        liveWorkoutRoomService = new LiveWorkoutRoomService(workoutService, liveWorkoutRoomRepoJPA);
+        LiveWorkoutRoomRepository liveWorkoutRoomRepository = new LiveWorkoutRoomRepositoryImpl(
+                liveWorkoutRoomRepoJPA,
+                new LiveWorkoutRoomEntityMapper()
+        );
+        liveWorkoutRoomService = new LiveWorkoutRoomServiceImpl(workoutService, liveWorkoutRoomRepository);
     }
 
     @Test
@@ -85,6 +93,8 @@ class LiveWorkoutRoomServiceTest {
 
         assertTrue(updated.participants().containsKey(HOST_EMAIL));
         assertTrue(updated.participants().containsKey(GUEST_EMAIL));
+        verify(liveWorkoutRoomRepoJPA).deleteParticipantsByRoomCode(room.roomCode());
+        verify(liveWorkoutRoomRepoJPA).flush();
     }
 
     @Test
