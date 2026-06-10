@@ -1,4 +1,4 @@
-package com.zeki.demo.liveworkouts.domain;
+package com.zeki.demo.liveworkouts.enums;
 
 public enum LiveWorkoutEventType {
     ROOM_SNAPSHOT,

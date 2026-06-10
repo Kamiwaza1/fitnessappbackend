@@ -1,6 +1,6 @@
 package com.zeki.demo.liveworkouts.dto;
 
-import com.zeki.demo.liveworkouts.domain.LiveWorkoutEventType;
+import com.zeki.demo.liveworkouts.enums.LiveWorkoutEventType;
 
 public record LiveWorkoutEventResponse(
         LiveWorkoutEventType type,

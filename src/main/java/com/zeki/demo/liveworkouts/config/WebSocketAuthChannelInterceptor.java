@@ -2,6 +2,7 @@ package com.zeki.demo.liveworkouts.config;
 
 import com.zeki.demo.users.security.JWTService;
 import io.jsonwebtoken.JwtException;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -30,13 +31,12 @@ public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
             return message;
         }
 
-        String authHeader = accessor.getFirstNativeHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        String jwt = resolveToken(accessor);
+        if (jwt == null) {
             throw new BadCredentialsException("Missing WebSocket authorization token");
         }
 
         try {
-            String jwt = authHeader.substring(7);
             String userEmail = jwtService.extractUsername(jwt);
             UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
             if (!jwtService.isTokenValid(jwt, userDetails)) {
@@ -52,5 +52,18 @@ public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
         } catch (JwtException | IllegalArgumentException | UsernameNotFoundException ex) {
             throw new BadCredentialsException("Invalid WebSocket authorization token", ex);
         }
+    }
+
+    private String resolveToken(StompHeaderAccessor accessor) {
+        String authHeader = accessor.getFirstNativeHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
+        if (sessionAttributes == null) {
+            return null;
+        }
+        Object token = sessionAttributes.get(WebSocketCookieAuthHandshakeInterceptor.ACCESS_TOKEN_ATTRIBUTE);
+        return token instanceof String tokenValue && !tokenValue.isBlank() ? tokenValue : null;
     }
 }

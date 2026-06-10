@@ -2,17 +2,27 @@ package com.zeki.demo.Unit;
 
 import com.zeki.demo.common.exception.ConflictException;
 import com.zeki.demo.common.exception.UnauthorizedException;
+import com.zeki.demo.mail.EmailService;
 import com.zeki.demo.users.domain.User;
+import com.zeki.demo.users.entity.PasswordResetTokenEntity;
+import com.zeki.demo.users.entity.UserEntity;
 import com.zeki.demo.users.repository.UserRepository;
+import com.zeki.demo.users.repository.jpa.PasswordResetTokenRepoJPA;
+import com.zeki.demo.users.repository.jpa.UserRepoJPA;
 import com.zeki.demo.users.security.JWTService;
 import com.zeki.demo.users.service.AuthenticatedUser;
 import com.zeki.demo.users.service.AuthServiceImpl;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
+import java.util.HexFormat;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -51,6 +62,15 @@ class AuthServiceTest {
     @Mock
     private AuthenticationManager authenticationManager;
 
+    @Mock
+    private EmailService emailService;
+
+    @Mock
+    private PasswordResetTokenRepoJPA passwordResetTokenRepoJPA;
+
+    @Mock
+    private UserRepoJPA userRepoJPA;
+
     private AuthServiceImpl authService;
 
     @BeforeEach
@@ -59,7 +79,10 @@ class AuthServiceTest {
                 passwordEncoder,
                 jwtService,
                 authenticationManager,
-                userRepository
+                userRepository,
+                emailService,
+                passwordResetTokenRepoJPA,
+                userRepoJPA
         );
     }
 
@@ -103,6 +126,7 @@ class AuthServiceTest {
         assertEquals(TEST_EMAIL, response.user().getEmail());
         verify(passwordEncoder).encode(STRONG_PASSWORD);
         verify(userRepository).save(any(User.class));
+        verify(emailService).sendWelcomeEmail(savedUser);
     }
 
     @Test
@@ -187,6 +211,83 @@ class AuthServiceTest {
         assertEquals("Invalid refresh token", ex.getMessage());
     }
 
+    @Test
+    void requestPasswordResetWhenEmailExistsStoresHashedTokenAndSendsEmail() {
+        User storedUser = storedUser(TEST_EMAIL);
+
+        when(userRepository.findActiveByEmail(TEST_EMAIL)).thenReturn(Optional.of(storedUser));
+        when(userRepoJPA.getReferenceById(storedUser.getUserId())).thenReturn(toUserEntity(storedUser));
+
+        authService.requestPasswordReset(TEST_EMAIL);
+
+        ArgumentCaptor<PasswordResetTokenEntity> tokenCaptor =
+                ArgumentCaptor.forClass(PasswordResetTokenEntity.class);
+        verify(passwordResetTokenRepoJPA).save(tokenCaptor.capture());
+        PasswordResetTokenEntity savedToken = tokenCaptor.getValue();
+
+        Assertions.assertNotNull(savedToken.getTokenHash());
+        assertEquals(64, savedToken.getTokenHash().length());
+        Assertions.assertNotNull(savedToken.getCodeHash());
+        assertEquals(64, savedToken.getCodeHash().length());
+        assertEquals(storedUser.getUserId(), savedToken.getUser().getUserId());
+        verify(emailService).sendPasswordResetEmail(
+                eq(storedUser),
+                org.mockito.ArgumentMatchers.contains("/reset-password?token="),
+                org.mockito.ArgumentMatchers.matches("\\d{6}"),
+                anyLong()
+        );
+    }
+
+    @Test
+    void requestPasswordResetWhenEmailIsMissingReturnsWithoutEmail() {
+        when(userRepository.findActiveByEmail("missing@example.com")).thenReturn(Optional.empty());
+
+        authService.requestPasswordReset("missing@example.com");
+
+        verify(passwordResetTokenRepoJPA, never()).save(any());
+        verify(emailService, never()).sendPasswordResetEmail(any(), any(), any(), anyLong());
+    }
+
+    @Test
+    void resetPasswordWhenTokenIsValidUpdatesPasswordAndMarksTokenUsed() throws Exception {
+        User storedUser = storedUser(TEST_EMAIL);
+        PasswordResetTokenEntity tokenEntity = PasswordResetTokenEntity.builder()
+                .user(toUserEntity(storedUser))
+                .tokenHash(sha256("raw-reset-token"))
+                .codeHash(sha256("123456"))
+                .expiresAt(LocalDateTime.now().plusMinutes(20))
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        when(passwordResetTokenRepoJPA.findByTokenHash(sha256("raw-reset-token"))).thenReturn(Optional.of(tokenEntity));
+        when(userRepository.findActiveByEmail(TEST_EMAIL)).thenReturn(Optional.of(storedUser));
+        when(passwordEncoder.encode("NewStrongPassword123!")).thenReturn("new-encoded-password");
+
+        authService.resetPassword("raw-reset-token", "123456", "NewStrongPassword123!");
+
+        assertEquals("new-encoded-password", storedUser.getPassword());
+        Assertions.assertNotNull(tokenEntity.getUsedAt());
+        verify(userRepository).save(storedUser);
+        verify(passwordResetTokenRepoJPA).save(tokenEntity);
+    }
+
+    @Test
+    void resetPasswordWhenTokenIsExpiredThrowsBadRequest() throws Exception {
+        PasswordResetTokenEntity tokenEntity = PasswordResetTokenEntity.builder()
+                .user(toUserEntity(storedUser(TEST_EMAIL)))
+                .tokenHash(sha256("expired-token"))
+                .expiresAt(LocalDateTime.now().minusMinutes(1))
+                .createdAt(LocalDateTime.now().minusMinutes(40))
+                .build();
+
+        when(passwordResetTokenRepoJPA.findByTokenHash(sha256("expired-token"))).thenReturn(Optional.of(tokenEntity));
+
+        Exception ex = assertThrows(Exception.class, () -> authService.resetPassword("expired-token", "123456", STRONG_PASSWORD));
+
+        assertEquals("Password reset link is invalid or expired", ex.getMessage());
+        verify(userRepository, never()).save(any());
+    }
+
     private User userForAuth(String email, String password) {
         return new User(null, null, email, password, null, USER_ROLE, true, null, null);
     }
@@ -204,5 +305,23 @@ class AuthServiceTest {
                 now,
                 now
         );
+    }
+
+    private UserEntity toUserEntity(User user) {
+        return UserEntity.builder()
+                .userId(user.getUserId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .role(user.getRole())
+                .isActive(user.isActive())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .build();
+    }
+
+    private String sha256(String value) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        return HexFormat.of().formatHex(digest.digest(value.getBytes(StandardCharsets.UTF_8)));
     }
 }

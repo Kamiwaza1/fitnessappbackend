@@ -213,8 +213,8 @@ class ControllerCoverageTest {
         when(nutritionService.getNutritionById(id, EMAIL)).thenReturn(nutrition);
         when(nutritionMapper.toResponse(nutrition)).thenReturn(response);
         when(nutritionMapper.toDomain(createRequest, EMAIL)).thenReturn(nutrition);
-        when(nutritionService.createNutrition(nutrition)).thenReturn(nutrition);
-        when(nutritionService.updateNutrition(id, updateRequest, EMAIL)).thenReturn(nutrition);
+        when(nutritionService.createNutrition(nutrition, "Europe/Istanbul")).thenReturn(nutrition);
+        when(nutritionService.updateNutrition(id, updateRequest, EMAIL, "Europe/Istanbul")).thenReturn(nutrition);
         when(nutritionService.searchFoodProducts(searchRequest)).thenReturn(foods);
         when(nutritionService.getFoodProductByBarcode("123", "nl")).thenReturn(food);
         when(nutritionService.getFoodProductsByBrand("fitco", productsRequest)).thenReturn(foods);
@@ -226,11 +226,11 @@ class ControllerCoverageTest {
         assertEquals(foods, nutritionController.getFoodProductsByBrand("fitco", productsRequest, auth));
         assertEquals(foods, nutritionController.getFoodProductsByCategory("bars", productsRequest, auth));
         assertEquals(response, nutritionController.getNutritionById(id, auth));
-        assertEquals(response, nutritionController.createNutrition(createRequest, auth));
-        assertEquals(response, nutritionController.updateNutrition(id, updateRequest, auth));
-        nutritionController.deleteNutrition(id, auth);
+        assertEquals(response, nutritionController.createNutrition(createRequest, auth, "Europe/Istanbul"));
+        assertEquals(response, nutritionController.updateNutrition(id, updateRequest, auth, "Europe/Istanbul"));
+        nutritionController.deleteNutrition(id, auth, "Europe/Istanbul");
 
-        verify(nutritionService).deleteNutrition(id, EMAIL);
+        verify(nutritionService).deleteNutrition(id, EMAIL, "Europe/Istanbul");
     }
 
     @Test
@@ -473,7 +473,7 @@ class ControllerCoverageTest {
     }
 
     private AuthResponse authResponse() {
-        return new AuthResponse("access", "refresh", userResponse());
+        return new AuthResponse(userResponse());
     }
 
     private RegisterRequest registerRequest() {

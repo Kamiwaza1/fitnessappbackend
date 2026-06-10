@@ -1,6 +1,7 @@
 package com.zeki.demo.Unit;
 
 import com.zeki.demo.nutrition.NutritionException.NutritionExistException;
+import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.nutrition.domain.Nutrition;
 import com.zeki.demo.nutrition.dto.UpdateNutritionRequest;
 import com.zeki.demo.nutrition.enums.NutritionCategory;
@@ -75,7 +76,7 @@ class NutritionServiceTest {
 
         NutritionExistException ex = assertThrows(
                 NutritionExistException.class,
-                () -> nutritionService.updateNutrition(nutritionId, request, "other@example.com")
+                () -> nutritionService.updateNutrition(nutritionId, request, "other@example.com", null)
         );
 
         assertEquals("Nutrition entry not found", ex.getMessage());
@@ -92,11 +93,67 @@ class NutritionServiceTest {
                 .thenReturn(Optional.of(existing));
         when(nutritionRepository.save(any(Nutrition.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Nutrition updated = nutritionService.updateNutrition(nutritionId, request, "owner@example.com");
+        Nutrition updated = nutritionService.updateNutrition(nutritionId, request, "owner@example.com", null);
 
         assertEquals("Updated meal", updated.getMealName());
         assertEquals(700, updated.getCalories());
         assertEquals(NutritionCategory.DINNER, updated.getCategory());
+    }
+
+    @Test
+    void createNutritionRejectsPastMealDate() {
+        Nutrition pastNutrition = nutritionWithDate(UUID.randomUUID(), "owner@example.com", LocalDate.now().minusDays(1));
+
+        BadRequestException ex = assertThrows(
+                BadRequestException.class,
+                () -> nutritionService.createNutrition(pastNutrition, null)
+        );
+
+        assertEquals("Food cannot be added to a past day", ex.getMessage());
+        verify(nutritionRepository, never()).save(any());
+    }
+
+    @Test
+    void updateNutritionRejectsPastExistingEntry() {
+        UUID nutritionId = UUID.randomUUID();
+        Nutrition existing = nutritionWithDate(nutritionId, "owner@example.com", LocalDate.now().minusDays(1));
+        when(nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, "owner@example.com"))
+                .thenReturn(Optional.of(existing));
+
+        BadRequestException ex = assertThrows(
+                BadRequestException.class,
+                () -> nutritionService.updateNutrition(nutritionId, updateRequest(nutritionId), "owner@example.com", null)
+        );
+
+        assertEquals("Past nutrition entries cannot be changed", ex.getMessage());
+        verify(nutritionRepository, never()).save(any());
+    }
+
+    @Test
+    void updateNutritionRejectsMovingEntryToPastDate() {
+        UUID nutritionId = UUID.randomUUID();
+        Nutrition existing = validNutrition(nutritionId, "owner@example.com");
+        UpdateNutritionRequest request = new UpdateNutritionRequest(
+                nutritionId,
+                "Updated meal",
+                LocalDate.now().minusDays(1),
+                700,
+                50,
+                55,
+                15,
+                "updated notes",
+                NutritionCategory.DINNER
+        );
+        when(nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, "owner@example.com"))
+                .thenReturn(Optional.of(existing));
+
+        BadRequestException ex = assertThrows(
+                BadRequestException.class,
+                () -> nutritionService.updateNutrition(nutritionId, request, "owner@example.com", null)
+        );
+
+        assertEquals("Food cannot be added to a past day", ex.getMessage());
+        verify(nutritionRepository, never()).save(any());
     }
 
     @Test
@@ -105,17 +162,36 @@ class NutritionServiceTest {
         when(nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, "owner@example.com"))
                 .thenReturn(Optional.of(validNutrition(nutritionId, "owner@example.com")));
 
-        nutritionService.deleteNutrition(nutritionId, "owner@example.com");
+        nutritionService.deleteNutrition(nutritionId, "owner@example.com", null);
 
         verify(nutritionRepository).delete(nutritionId);
     }
 
+    @Test
+    void deleteNutritionRejectsPastExistingEntry() {
+        UUID nutritionId = UUID.randomUUID();
+        when(nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, "owner@example.com"))
+                .thenReturn(Optional.of(nutritionWithDate(nutritionId, "owner@example.com", LocalDate.now().minusDays(1))));
+
+        BadRequestException ex = assertThrows(
+                BadRequestException.class,
+                () -> nutritionService.deleteNutrition(nutritionId, "owner@example.com", null)
+        );
+
+        assertEquals("Past nutrition entries cannot be changed", ex.getMessage());
+        verify(nutritionRepository, never()).delete(nutritionId);
+    }
+
     private Nutrition validNutrition(UUID id, String userEmail) {
+        return nutritionWithDate(id, userEmail, LocalDate.now());
+    }
+
+    private Nutrition nutritionWithDate(UUID id, String userEmail, LocalDate mealDate) {
         LocalDate now = LocalDate.now();
         return new Nutrition(
                 id,
                 "Chicken Bowl",
-                now,
+                mealDate,
                 650,
                 45,
                 50,

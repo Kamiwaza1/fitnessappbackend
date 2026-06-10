@@ -68,8 +68,6 @@ public class UserDtoDomain {
 
     public AuthResponse toAuthResponse(AuthenticatedUser authenticatedUser) {
         return new AuthResponse(
-                authenticatedUser.accessToken(),
-                authenticatedUser.refreshToken(),
                 toResponse(authenticatedUser.user())
         );
     }

@@ -22,21 +22,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OpenFoodFactsClientTest {
 
-    private ClientTestServer liteApi;
     private ClientTestServer officialApi;
+    private ClientTestServer searchApi;
     private OpenFoodFactsClient client;
 
     @BeforeEach
     void setUp() {
-        liteApi = new ClientTestServer();
         officialApi = new ClientTestServer();
-        client = new OpenFoodFactsClient(WebClient.builder(), liteApi.baseUrl(), officialApi.baseUrl());
+        searchApi = new ClientTestServer();
+        client = new OpenFoodFactsClient(WebClient.builder(), officialApi.baseUrl(), searchApi.baseUrl(), "DarkLiftTest/1.0");
     }
 
     @AfterEach
     void tearDown() {
-        liteApi.close();
         officialApi.close();
+        searchApi.close();
     }
 
     @Test
@@ -73,9 +73,12 @@ class OpenFoodFactsClientTest {
     }
 
     @Test
-    void searchBrandAndCategoryUseLiteApiQueryParameters() {
-        liteApi.respondWith(path -> ClientTestServer.Response.json(200, """
-                {"results": [], "count": 0, "total": 10}
+    void searchBrandAndCategoryUseOfficialApiQueryParameters() {
+        searchApi.respondWith(path -> ClientTestServer.Response.json(200, """
+                {"hits": [{"code":"1","product_name":"Rice","brands":["FoodCo","MarketCo"]}], "count": 10}
+                """));
+        officialApi.respondWith(path -> ClientTestServer.Response.json(200, """
+                {"products": [{"code":"1","product_name":"Rice"}], "count": 10}
                 """));
 
         FoodProductsResponse search = client.searchProducts(searchRequest());
@@ -83,11 +86,12 @@ class OpenFoodFactsClientTest {
         FoodProductsResponse category = client.getProductsByCategory("bars", emptyProductsRequest());
 
         assertEquals(10, search.total());
-        assertEquals(0, brand.count());
-        assertTrue(category.results().isEmpty());
-        assertEquals("/search?q=rice&limit=10&offset=5&lang=en&countries=nl&has_nutrition=false", liteApi.requests().get(0));
-        assertEquals("/brands/fitco?limit=20&offset=0&lang=nl&countries=be&has_nutrition=true", liteApi.requests().get(1));
-        assertEquals("/categories/bars?has_nutrition=true", liteApi.requests().get(2));
+        assertEquals(List.of("FoodCo", "MarketCo"), search.results().get(0).brands());
+        assertEquals(1, brand.count());
+        assertEquals("Rice", category.results().get(0).productName());
+        assertEquals("/search?q=rice&page_size=10&page=1&lc=en&countries_tags=nl", searchApi.requests().get(0));
+        assertEquals("/cgi/search.pl?brands_tags=fitco&json=1&fields=code,product_name,nutriments,serving_size,brands,categories,categories_tags,ingredients_text,nutriscore_grade,nova_group,image_url,image_small_url,countries_tags&page_size=20&page=1&lc=nl&countries_tags=be&nutrition_data=on", officialApi.requests().get(0));
+        assertEquals("/cgi/search.pl?categories_tags=bars&json=1&fields=code,product_name,nutriments,serving_size,brands,categories,categories_tags,ingredients_text,nutriscore_grade,nova_group,image_url,image_small_url,countries_tags&page_size=20&page=1&nutrition_data=on", officialApi.requests().get(1));
     }
 
     @Test
@@ -96,11 +100,11 @@ class OpenFoodFactsClientTest {
         assertInstanceOf(NotFoundException.class, assertThrows(RuntimeException.class,
                 () -> client.getProductByBarcode("missing", null)));
 
-        liteApi.respondWith(path -> ClientTestServer.Response.json(422, "{}"));
+        searchApi.respondWith(path -> ClientTestServer.Response.json(422, "{}"));
         assertInstanceOf(BadRequestException.class, assertThrows(RuntimeException.class,
                 () -> client.searchProducts(minimalSearchRequest())));
 
-        liteApi.respondWith(path -> ClientTestServer.Response.json(503, "{}"));
+        officialApi.respondWith(path -> ClientTestServer.Response.json(503, "{}"));
         assertInstanceOf(ExternalServiceException.class, assertThrows(RuntimeException.class,
                 () -> client.getProductsByBrand("x", emptyProductsRequest())));
     }

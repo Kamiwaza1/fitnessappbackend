@@ -1,6 +1,6 @@
 package com.zeki.demo.Unit;
 
-import com.zeki.demo.liveworkouts.domain.LiveWorkoutEventType;
+import com.zeki.demo.liveworkouts.enums.LiveWorkoutEventType;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutEventResponse;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutMessageResponse;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutRoomResponse;

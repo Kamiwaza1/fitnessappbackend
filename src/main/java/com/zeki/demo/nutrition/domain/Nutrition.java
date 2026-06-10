@@ -61,9 +61,6 @@ public class Nutrition {
         if (mealDate == null) {
             throw new IllegalArgumentException("Meal date is required");
         }
-        if (mealDate.isBefore(LocalDate.now().minusYears(1))) {
-            throw new IllegalArgumentException("Meal date cannot be older than one year");
-        }
         if (mealDate.isAfter(LocalDate.now().plusDays(30))) {
             throw new IllegalArgumentException("Meal date cannot be more than 30 days ahead");
         }
