@@ -18,6 +18,7 @@ public class WorkoutEntityMapper {
                 .description(workout.getDescription())
                 .category(workout.getCategory())
                 .muscleType(workout.getMuscleType())
+                .difficulty(workout.getDifficulty())
                 .createdAt(workout.getCreatedAt())
                 .updatedAt(workout.getUpdatedAt())
                 .workoutDate(workout.getWorkoutDate())
@@ -49,6 +50,7 @@ public class WorkoutEntityMapper {
                 entity.getDescription(),
                 entity.getCategory(),
                 entity.getMuscleType(),
+                entity.getDifficulty(),
                 toExercises(entity.getExercises()),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),

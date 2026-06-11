@@ -1,6 +1,8 @@
 package com.zeki.demo.users.domain;
 
 import com.zeki.demo.common.exception.BadRequestException;
+import com.zeki.demo.users.enums.ExperienceLevel;
+import com.zeki.demo.workouts.enums.WorkoutCategory;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +22,8 @@ public class User {
     private String email;
     private String password;
     private Integer dailyCalorieTarget;
+    private WorkoutCategory fitnessGoal;
+    private ExperienceLevel experienceLevel;
     private final String role;
     private boolean active;
     private final LocalDateTime createdAt;
@@ -44,6 +48,8 @@ public class User {
                 email,
                 password,
                 dailyCalorieTarget,
+                WorkoutCategory.GENERAL,
+                ExperienceLevel.BEGINNER,
                 role,
                 active,
                 createdAt,
@@ -66,11 +72,45 @@ public class User {
             LocalDateTime deletionRequestedAt,
             LocalDateTime deletionScheduledFor
     ) {
+        this(
+                userId,
+                fullName,
+                email,
+                password,
+                dailyCalorieTarget,
+                WorkoutCategory.GENERAL,
+                ExperienceLevel.BEGINNER,
+                role,
+                active,
+                createdAt,
+                updatedAt,
+                deletionRequestedAt,
+                deletionScheduledFor
+        );
+    }
+
+    public User(
+            UUID userId,
+            String fullName,
+            String email,
+            String password,
+            Integer dailyCalorieTarget,
+            WorkoutCategory fitnessGoal,
+            ExperienceLevel experienceLevel,
+            String role,
+            boolean active,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
+            LocalDateTime deletionRequestedAt,
+            LocalDateTime deletionScheduledFor
+    ) {
         this.userId = userId;
         this.fullName = normalizeNullable(fullName);
         this.email = normalizeEmail(email);
         this.password = password;
         this.dailyCalorieTarget = dailyCalorieTarget;
+        this.fitnessGoal = fitnessGoal == null ? WorkoutCategory.GENERAL : fitnessGoal;
+        this.experienceLevel = experienceLevel == null ? ExperienceLevel.BEGINNER : experienceLevel;
         this.role = role;
         this.active = active;
         this.createdAt = createdAt;

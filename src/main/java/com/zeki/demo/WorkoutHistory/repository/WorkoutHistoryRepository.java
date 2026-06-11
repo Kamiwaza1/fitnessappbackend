@@ -8,5 +8,9 @@ import java.util.UUID;
 public interface WorkoutHistoryRepository {
     List<WorkoutHistory> findAllByUserEmail(String userEmail);
 
+    List<WorkoutHistory> findAllByUserEmailSince(String userEmail, java.time.LocalDate since);
+
+    long countByWorkoutId(UUID workoutId);
+
     Optional<WorkoutHistory> getByWorkoutIdAndUserEmail(UUID workoutId, String userEmail);
 }

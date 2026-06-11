@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 		"com.zeki.demo.WorkoutHistory.repository.jpa",
 		"com.zeki.demo.liveworkouts.repository.jpa",
 		"com.zeki.demo.nutrition.repository.jpa",
+		"com.zeki.demo.recommendations.repository.jpa",
 		"com.zeki.demo.users.repository.jpa",
 		"com.zeki.demo.workouts.repository.jpa"
 })

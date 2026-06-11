@@ -3,6 +3,7 @@ package com.zeki.demo.workouts.entity;
 import com.zeki.demo.users.entity.UserEntity;
 import com.zeki.demo.workouts.enums.WorkoutCategory;
 import com.zeki.demo.workouts.enums.MuscleType;
+import com.zeki.demo.workouts.enums.WorkoutDifficulty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -54,6 +55,10 @@ public class WorkoutEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "muscle_type", nullable = false)
     private MuscleType muscleType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "difficulty", nullable = false)
+    private WorkoutDifficulty difficulty;
 
     @Column(name = "created_at", nullable = false)
     private LocalDate createdAt;

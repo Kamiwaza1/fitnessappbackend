@@ -2,6 +2,7 @@ package com.zeki.demo.workouts.domain;
 
 import com.zeki.demo.workouts.enums.WorkoutCategory;
 import com.zeki.demo.workouts.enums.MuscleType;
+import com.zeki.demo.workouts.enums.WorkoutDifficulty;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ public class Workout {
     private String description;
     private WorkoutCategory category;
     private MuscleType muscleType;
+    private WorkoutDifficulty difficulty;
     private final LocalDate createdAt;
     private LocalDate updatedAt;
     private final LocalDate workoutDate;
@@ -43,6 +45,44 @@ public class Workout {
             LocalDate updatedAt,
             String userEmail
     ) {
+        this(
+                workoutName,
+                workoutDate,
+                durationMinutes,
+                sets,
+                reps,
+                weightKg,
+                notes,
+                workoutId,
+                description,
+                category,
+                muscleType,
+                WorkoutDifficulty.BEGINNER,
+                exercises,
+                createdAt,
+                updatedAt,
+                userEmail
+        );
+    }
+
+    public Workout(
+            String workoutName,
+            LocalDate workoutDate,
+            Integer durationMinutes,
+            Integer sets,
+            Integer reps,
+            Double weightKg,
+            String notes,
+            UUID workoutId,
+            String description,
+            WorkoutCategory category,
+            MuscleType muscleType,
+            WorkoutDifficulty difficulty,
+            List<WorkoutExercise> exercises,
+            LocalDate createdAt,
+            LocalDate updatedAt,
+            String userEmail
+    ) {
         this.workoutId = workoutId;
         this.workoutName = normalize(workoutName);
         this.workoutDate = workoutDate;
@@ -54,6 +94,7 @@ public class Workout {
         this.description = normalizeNullable(description);
         this.category = category;
         this.muscleType = muscleType;
+        this.difficulty = difficulty == null ? WorkoutDifficulty.BEGINNER : difficulty;
         this.exercises = exercises == null ? List.of() : new ArrayList<>(exercises);
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -103,6 +144,9 @@ public class Workout {
         }
         if (muscleType == null) {
             throw new IllegalArgumentException("Muscle type is required");
+        }
+        if (difficulty == null) {
+            throw new IllegalArgumentException("Workout difficulty is required");
         }
         if (!exercises.isEmpty()) {
             for (WorkoutExercise exercise : exercises) {

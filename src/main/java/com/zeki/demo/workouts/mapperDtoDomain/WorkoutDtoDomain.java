@@ -9,6 +9,7 @@ import com.zeki.demo.workouts.dto.WorkoutExerciseResponse;
 import com.zeki.demo.workouts.dto.WorkoutResponse;
 import com.zeki.demo.workouts.enums.WorkoutCategory;
 import com.zeki.demo.workouts.enums.MuscleType;
+import com.zeki.demo.workouts.enums.WorkoutDifficulty;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ public class WorkoutDtoDomain {
 
     private static final WorkoutCategory DEFAULT_CATEGORY = WorkoutCategory.GENERAL;
     private static final MuscleType DEFAULT_MUSCLE_TYPE = MuscleType.FULL_BODY;
+    private static final WorkoutDifficulty DEFAULT_DIFFICULTY = WorkoutDifficulty.BEGINNER;
 
     public Workout toDomain(CreateWorkoutRequest request, String userEmail) {
         LocalDate now = LocalDate.now();
@@ -34,6 +36,7 @@ public class WorkoutDtoDomain {
                 request.description(),
                 request.category() != null ? request.category() : DEFAULT_CATEGORY,
                 request.muscleType() != null ? request.muscleType() : DEFAULT_MUSCLE_TYPE,
+                request.difficulty() != null ? request.difficulty() : DEFAULT_DIFFICULTY,
                 exercises,
                 now,
                 now,
@@ -57,6 +60,7 @@ public class WorkoutDtoDomain {
                 request.description() != null ? request.description() : existingWorkout.getDescription(),
                 request.category() != null ? request.category() : existingWorkout.getCategory(),
                 request.muscleType() != null ? request.muscleType() : existingWorkout.getMuscleType(),
+                request.difficulty() != null ? request.difficulty() : existingWorkout.getDifficulty(),
                 exercises,
                 existingWorkout.getCreatedAt(),
                 LocalDate.now(),
@@ -77,6 +81,7 @@ public class WorkoutDtoDomain {
                 workout.getDescription(),
                 workout.getCategory(),
                 workout.getMuscleType(),
+                workout.getDifficulty(),
                 workout.getExercises().stream().map(this::toExerciseResponse).toList(),
                 workout.getUpdatedAt(),
                 workout.getCreatedAt()

@@ -13,6 +13,10 @@ public interface WorkoutRepository {
 
     List<Workout> findAllByUserEmail(String userEmail);
 
+    List<Workout> findAll();
+
+    Optional<Workout> getWorkoutById(UUID workoutId);
+
     void delete(UUID workoutId);
 
     List<Workout> upcomingWorkouts(String userEmail);

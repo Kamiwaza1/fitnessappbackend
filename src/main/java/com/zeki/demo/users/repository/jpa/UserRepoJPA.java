@@ -33,4 +33,8 @@ public interface UserRepoJPA extends JpaRepository<UserEntity, UUID> {
     @Modifying
     @Query(value = "DELETE FROM workouts WHERE user_id = :userId", nativeQuery = true)
     void deleteWorkoutsByUserId(@Param("userId") UUID userId);
+
+    @Modifying
+    @Query(value = "DELETE FROM recommendation_feedback WHERE user_id = :userId", nativeQuery = true)
+    void deleteRecommendationFeedbackByUserId(@Param("userId") UUID userId);
 }

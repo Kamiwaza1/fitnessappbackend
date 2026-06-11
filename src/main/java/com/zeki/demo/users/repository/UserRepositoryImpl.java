@@ -53,6 +53,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public void hardDeleteById(UUID userId, String email) {
         userRepoJPA.deleteLiveWorkoutParticipantsByEmail(email);
+        userRepoJPA.deleteRecommendationFeedbackByUserId(userId);
         userRepoJPA.deleteWorkoutHistoryByUserEmail(email);
         userRepoJPA.deleteNutritionEntriesByUserId(userId);
         userRepoJPA.deleteWorkoutsByUserId(userId);

@@ -15,6 +15,8 @@ public class UserDomainEntity {
                 entity.getEmail(),
                 entity.getPassword(),
                 entity.getDailyCalorieTarget(),
+                entity.getFitnessGoal(),
+                entity.getExperienceLevel(),
                 entity.getRole(),
                 Boolean.TRUE.equals(entity.getIsActive()),
                 entity.getCreatedAt(),
@@ -32,6 +34,8 @@ public class UserDomainEntity {
                 .email(user.getEmail())
                 .password(user.getPassword())
                 .dailyCalorieTarget(user.getDailyCalorieTarget())
+                .fitnessGoal(user.getFitnessGoal())
+                .experienceLevel(user.getExperienceLevel())
                 .role(user.getRole())
                 .isActive(user.isActive())
                 .createdAt(user.getCreatedAt() != null ? user.getCreatedAt() : now)

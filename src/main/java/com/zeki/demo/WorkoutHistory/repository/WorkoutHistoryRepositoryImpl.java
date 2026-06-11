@@ -25,6 +25,19 @@ public class WorkoutHistoryRepositoryImpl implements WorkoutHistoryRepository {
     }
 
     @Override
+    public List<WorkoutHistory> findAllByUserEmailSince(String userEmail, java.time.LocalDate since) {
+        return workoutHistoryRepoJPA.findAllByUserEmailAndWorkoutDateGreaterThanEqualOrderByWorkoutDateDescWorkoutIdDesc(userEmail, since)
+                .stream()
+                .map(workoutHistoryEntityMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public long countByWorkoutId(UUID workoutId) {
+        return workoutHistoryRepoJPA.countByWorkoutId(workoutId);
+    }
+
+    @Override
     public Optional<WorkoutHistory> getByWorkoutIdAndUserEmail(UUID workoutId, String userEmail) {
         return workoutHistoryRepoJPA.findByWorkoutIdAndUserEmail(workoutId, userEmail)
                 .map(workoutHistoryEntityMapper::toDomain);

@@ -20,6 +20,7 @@ public class WorkoutHistoryEntityMapper {
                 entity.getDescription(),
                 entity.getCategory(),
                 entity.getMuscleType(),
+                entity.getDifficulty(),
                 entity.getUpdatedAt(),
                 entity.getCreatedAt(),
                 entity.getUserEmail()

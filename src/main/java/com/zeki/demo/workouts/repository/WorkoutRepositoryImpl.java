@@ -45,6 +45,19 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
     }
 
     @Override
+    public List<Workout> findAll() {
+        return workoutRepoJPA.findAll()
+                .stream()
+                .map(workoutEntityMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public Optional<Workout> getWorkoutById(UUID workoutId) {
+        return workoutRepoJPA.findById(workoutId).map(workoutEntityMapper::toDomain);
+    }
+
+    @Override
     public void delete(UUID workoutId) {
         WorkoutEntity workoutEntity = workoutRepoJPA.findById(workoutId)
                 .orElseThrow(() -> new NotFoundException("Workout not found"));

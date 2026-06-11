@@ -1,7 +1,11 @@
 package com.zeki.demo.users.entity;
 
+import com.zeki.demo.users.enums.ExperienceLevel;
+import com.zeki.demo.workouts.enums.WorkoutCategory;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -44,6 +48,14 @@ public class UserEntity {
     @Column(name = "daily_calorie_target")
     private Integer dailyCalorieTarget;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "fitness_goal", nullable = false)
+    private WorkoutCategory fitnessGoal;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "experience_level", nullable = false)
+    private ExperienceLevel experienceLevel;
+
     @Column(nullable = false)
     private String role;
 
@@ -67,6 +79,12 @@ public class UserEntity {
         LocalDateTime now = LocalDateTime.now();
         if (isActive == null) {
             isActive = true;
+        }
+        if (fitnessGoal == null) {
+            fitnessGoal = WorkoutCategory.GENERAL;
+        }
+        if (experienceLevel == null) {
+            experienceLevel = ExperienceLevel.BEGINNER;
         }
         if (createdAt == null) {
             createdAt = now;
