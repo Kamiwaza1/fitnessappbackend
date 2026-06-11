@@ -72,6 +72,7 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
                 )
                 .stream()
                 .map(workoutEntityMapper::toDomain)
+                .filter(workout -> !workout.isCompleted())
                 .toList();
     }
 

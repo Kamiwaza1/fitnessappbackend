@@ -26,6 +26,7 @@ public class WorkoutEntityMapper {
                 .sets(workout.getSets())
                 .reps(workout.getReps())
                 .weightKg(workout.getWeightKg())
+                .completed(workout.isCompleted())
                 .notes(workout.getNotes())
                 .exercises(
                         workout.getExercises().stream()
@@ -51,6 +52,7 @@ public class WorkoutEntityMapper {
                 entity.getCategory(),
                 entity.getMuscleType(),
                 entity.getDifficulty(),
+                entity.isCompleted(),
                 toExercises(entity.getExercises()),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),

@@ -1,5 +1,7 @@
 package com.zeki.demo.Unit;
 
+import com.zeki.demo.WorkoutHistory.domain.WorkoutHistory;
+import com.zeki.demo.WorkoutHistory.repository.WorkoutHistoryRepository;
 import com.zeki.demo.recommendations.domain.RecommendationFeedback;
 import com.zeki.demo.recommendations.domain.WorkoutRecommendation;
 import com.zeki.demo.recommendations.repository.RecommendationFeedbackRepository;
@@ -36,6 +38,7 @@ class RecommendationEngineServiceTest {
     @Test
     void engineExcludesIgnoredWorkoutsSortsByScoreAndLimitsToFive() {
         WorkoutRepository workoutRepository = mock(WorkoutRepository.class);
+        WorkoutHistoryRepository workoutHistoryRepository = mock(WorkoutHistoryRepository.class);
         RecommendationFeedbackRepository feedbackRepository = mock(RecommendationFeedbackRepository.class);
         User user = user();
         Workout ignored = workout("Ignored", WorkoutCategory.STRENGTH, MuscleType.LEGS, "other@example.com");
@@ -45,15 +48,72 @@ class RecommendationEngineServiceTest {
         when(feedbackRepository.findIgnoredByUserId(user.getUserId()))
                 .thenReturn(List.of(new RecommendationFeedback(null, user.getUserId(), ignored.getWorkoutId(), true, null, null)));
         when(workoutRepository.findAll()).thenReturn(List.of(nonMatching, ignored, matching));
+        when(workoutHistoryRepository.findAllByUserEmailSince(any(), any())).thenReturn(List.of());
 
         List<WeightedRecommendationRule> rules = List.of(new GoalMatchRule());
-        RecommendationEngine engine = new RecommendationEngine(workoutRepository, feedbackRepository, rules);
+        RecommendationEngine engine = new RecommendationEngine(workoutRepository, workoutHistoryRepository, feedbackRepository, rules);
 
         List<WorkoutRecommendation> recommendations = engine.recommend(user);
 
         assertEquals(2, recommendations.size());
         assertEquals(matching.getWorkoutId(), recommendations.get(0).getWorkout().getWorkoutId());
         assertTrue(recommendations.stream().noneMatch(item -> item.getWorkout().getWorkoutId().equals(ignored.getWorkoutId())));
+    }
+
+    @Test
+    void engineSkipsRecentlyTrainedMusclesBeforeScoring() {
+        WorkoutRepository workoutRepository = mock(WorkoutRepository.class);
+        WorkoutHistoryRepository workoutHistoryRepository = mock(WorkoutHistoryRepository.class);
+        RecommendationFeedbackRepository feedbackRepository = mock(RecommendationFeedbackRepository.class);
+        User user = user();
+        Workout chest = workout("Chest Again", WorkoutCategory.STRENGTH, MuscleType.CHEST, "other@example.com");
+        Workout legs = workout("Legs Instead", WorkoutCategory.STRENGTH, MuscleType.LEGS, "other@example.com");
+
+        when(feedbackRepository.findIgnoredByUserId(user.getUserId())).thenReturn(List.of());
+        when(workoutRepository.findAll()).thenReturn(List.of(chest, legs));
+        when(workoutHistoryRepository.findAllByUserEmailSince(any(), any()))
+                .thenReturn(List.of(history(chest.getWorkoutId(), MuscleType.CHEST)));
+
+        RecommendationEngine engine = new RecommendationEngine(
+                workoutRepository,
+                workoutHistoryRepository,
+                feedbackRepository,
+                List.of(new GoalMatchRule())
+        );
+
+        List<WorkoutRecommendation> recommendations = engine.recommend(user);
+
+        assertEquals(1, recommendations.size());
+        assertEquals(legs.getWorkoutId(), recommendations.get(0).getWorkout().getWorkoutId());
+    }
+
+    @Test
+    void engineFallbackDoesNotRecommendExactRecentlyCompletedWorkout() {
+        WorkoutRepository workoutRepository = mock(WorkoutRepository.class);
+        WorkoutHistoryRepository workoutHistoryRepository = mock(WorkoutHistoryRepository.class);
+        RecommendationFeedbackRepository feedbackRepository = mock(RecommendationFeedbackRepository.class);
+        User user = user();
+        Workout chest = workout("Chest Press", WorkoutCategory.STRENGTH, MuscleType.CHEST, "other@example.com");
+        Workout fullBody = workout("Push", WorkoutCategory.GENERAL, MuscleType.FULL_BODY, "other@example.com");
+
+        when(feedbackRepository.findIgnoredByUserId(user.getUserId())).thenReturn(List.of());
+        when(workoutRepository.findAll()).thenReturn(List.of(chest, fullBody));
+        when(workoutHistoryRepository.findAllByUserEmailSince(any(), any()))
+                .thenReturn(List.of(
+                        history(chest.getWorkoutId(), MuscleType.CHEST),
+                        history(fullBody.getWorkoutId(), MuscleType.FULL_BODY)
+                ));
+
+        RecommendationEngine engine = new RecommendationEngine(
+                workoutRepository,
+                workoutHistoryRepository,
+                feedbackRepository,
+                List.of(new GoalMatchRule())
+        );
+
+        List<WorkoutRecommendation> recommendations = engine.recommend(user);
+
+        assertTrue(recommendations.isEmpty());
     }
 
     @Test
@@ -129,6 +189,27 @@ class RecommendationEngineServiceTest {
                 now,
                 now,
                 userEmail
+        );
+    }
+
+    private WorkoutHistory history(UUID workoutId, MuscleType muscleType) {
+        LocalDate now = LocalDate.now();
+        return new WorkoutHistory(
+                workoutId,
+                now,
+                30,
+                3,
+                10,
+                20.0,
+                "Completed",
+                "",
+                "",
+                WorkoutCategory.STRENGTH,
+                muscleType,
+                WorkoutDifficulty.BEGINNER,
+                now,
+                now,
+                EMAIL
         );
     }
 }

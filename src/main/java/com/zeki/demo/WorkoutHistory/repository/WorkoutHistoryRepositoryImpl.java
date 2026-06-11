@@ -17,6 +17,13 @@ public class WorkoutHistoryRepositoryImpl implements WorkoutHistoryRepository {
     private final WorkoutHistoryEntityMapper workoutHistoryEntityMapper;
 
     @Override
+    public WorkoutHistory save(WorkoutHistory workoutHistory) {
+        return workoutHistoryEntityMapper.toDomain(
+                workoutHistoryRepoJPA.save(workoutHistoryEntityMapper.toEntity(workoutHistory))
+        );
+    }
+
+    @Override
     public List<WorkoutHistory> findAllByUserEmail(String userEmail) {
         return workoutHistoryRepoJPA.findAllByUserEmailOrderByWorkoutDateDescWorkoutIdDesc(userEmail)
                 .stream()

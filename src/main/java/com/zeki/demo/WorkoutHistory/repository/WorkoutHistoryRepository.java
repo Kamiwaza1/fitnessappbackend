@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface WorkoutHistoryRepository {
+    WorkoutHistory save(WorkoutHistory workoutHistory);
+
     List<WorkoutHistory> findAllByUserEmail(String userEmail);
 
     List<WorkoutHistory> findAllByUserEmailSince(String userEmail, java.time.LocalDate since);

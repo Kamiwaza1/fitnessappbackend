@@ -84,6 +84,9 @@ public class WorkoutEntity {
     @Column(name = "weight_kg", nullable = false)
     private Double weightKg;
 
+    @Column(name = "completed", nullable = false)
+    private boolean completed;
+
     @Column(name = "notes")
     private String notes;
 

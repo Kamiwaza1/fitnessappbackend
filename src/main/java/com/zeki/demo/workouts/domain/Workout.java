@@ -24,6 +24,7 @@ public class Workout {
     private final Integer sets;
     private final Integer reps;
     private final Double weightKg;
+    private final boolean completed;
     private String notes;
     private final List<WorkoutExercise> exercises;
     private final String userEmail;
@@ -58,6 +59,7 @@ public class Workout {
                 category,
                 muscleType,
                 WorkoutDifficulty.BEGINNER,
+                false,
                 exercises,
                 createdAt,
                 updatedAt,
@@ -83,6 +85,46 @@ public class Workout {
             LocalDate updatedAt,
             String userEmail
     ) {
+        this(
+                workoutName,
+                workoutDate,
+                durationMinutes,
+                sets,
+                reps,
+                weightKg,
+                notes,
+                workoutId,
+                description,
+                category,
+                muscleType,
+                difficulty,
+                false,
+                exercises,
+                createdAt,
+                updatedAt,
+                userEmail
+        );
+    }
+
+    public Workout(
+            String workoutName,
+            LocalDate workoutDate,
+            Integer durationMinutes,
+            Integer sets,
+            Integer reps,
+            Double weightKg,
+            String notes,
+            UUID workoutId,
+            String description,
+            WorkoutCategory category,
+            MuscleType muscleType,
+            WorkoutDifficulty difficulty,
+            boolean completed,
+            List<WorkoutExercise> exercises,
+            LocalDate createdAt,
+            LocalDate updatedAt,
+            String userEmail
+    ) {
         this.workoutId = workoutId;
         this.workoutName = normalize(workoutName);
         this.workoutDate = workoutDate;
@@ -90,6 +132,7 @@ public class Workout {
         this.sets = sets;
         this.reps = reps;
         this.weightKg = weightKg;
+        this.completed = completed;
         this.notes = normalizeNullable(notes);
         this.description = normalizeNullable(description);
         this.category = category;
@@ -99,6 +142,28 @@ public class Workout {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.userEmail = normalize(userEmail);
+    }
+
+    public Workout markCompleted() {
+        return new Workout(
+                workoutName,
+                workoutDate,
+                durationMinutes,
+                sets,
+                reps,
+                weightKg,
+                notes,
+                workoutId,
+                description,
+                category,
+                muscleType,
+                difficulty,
+                true,
+                exercises,
+                createdAt,
+                LocalDate.now(),
+                userEmail
+        );
     }
 
     public void validate() {
