@@ -3,22 +3,37 @@ package com.zeki.demo.users.service;
 import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.common.exception.ConflictException;
 import com.zeki.demo.common.exception.UnauthorizedException;
+import com.zeki.demo.mail.EmailService;
 import com.zeki.demo.users.domain.User;
 import com.zeki.demo.users.dto.UpdateUserRequest;
 import com.zeki.demo.users.mapperDtoDomain.UserDtoDomain;
 import com.zeki.demo.users.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
+
+    private static final long ACCOUNT_DELETION_GRACE_PERIOD_DAYS = 7;
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserDtoDomain userDtoDomain;
+    private final EmailService emailService;
+
+    @Value("${app.public-frontend-url:https://darklift.app}")
+    private String publicFrontendUrl;
+
+    @Value("${app.local-frontend-url:http://localhost:3000}")
+    private String localFrontendUrl;
 
     @Override
     public User getCurrentUser(String email) {
@@ -54,7 +69,9 @@ public class UserServiceImpl implements UserService {
                     existingUser.getRole(),
                     existingUser.isActive(),
                     existingUser.getCreatedAt(),
-                    existingUser.getUpdatedAt()
+                    existingUser.getUpdatedAt(),
+                    existingUser.getDeletionRequestedAt(),
+                    existingUser.getDeletionScheduledFor()
             );
             List<String> passwordIssues = passwordCandidate.getPasswordIssues();
             if (!passwordIssues.isEmpty()) {
@@ -69,10 +86,48 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteCurrentUser(String email) {
+    public void deleteCurrentUser(String email, String password) {
+        if (password == null || password.isBlank()) {
+            throw new BadRequestException("Password is required");
+        }
         User existingUser = userRepository.findActiveByEmail(User.normalizeEmail(email))
                 .orElseThrow(() -> new UnauthorizedException("User not found"));
-        existingUser.deactivate();
+        if (!passwordEncoder.matches(password, existingUser.getPassword())) {
+            throw new UnauthorizedException("Invalid password");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        existingUser.requestDeletion(now, now.plusDays(ACCOUNT_DELETION_GRACE_PERIOD_DAYS));
         userRepository.save(existingUser);
+        emailService.sendAccountDeletionEmail(
+                existingUser,
+                buildLoginUrl(publicFrontendUrl),
+                buildLoginUrl(localFrontendUrl),
+                ACCOUNT_DELETION_GRACE_PERIOD_DAYS
+        );
+    }
+
+    @Override
+    public void cancelDeletion(String email) {
+        User existingUser = userRepository.findActiveByEmail(User.normalizeEmail(email))
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
+        if (existingUser.isDeletionPending()) {
+            existingUser.cancelDeletion();
+            userRepository.save(existingUser);
+        }
+    }
+
+    @Override
+    @Scheduled(cron = "${auth.account-deletion.purge-cron:0 0 3 * * *}")
+    public void hardDeleteExpiredAccounts() {
+        LocalDateTime now = LocalDateTime.now();
+        userRepository.findUsersReadyForHardDelete(now)
+                .forEach(user -> userRepository.hardDeleteById(user.getUserId(), user.getEmail()));
+    }
+
+    private String buildLoginUrl(String frontendUrl) {
+        String normalizedFrontendUrl = frontendUrl == null || frontendUrl.isBlank()
+                ? "http://localhost:3000"
+                : frontendUrl.trim().replaceAll("/+$", "");
+        return normalizedFrontendUrl + "/login";
     }
 }

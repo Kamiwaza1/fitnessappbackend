@@ -73,6 +73,29 @@ public class ResendEmailService implements EmailService {
         );
     }
 
+    @Override
+    public void sendAccountDeletionEmail(User user, String publicLoginUrl, String localLoginUrl, long gracePeriodDays) {
+        if (debug) {
+            LOGGER.info(
+                    "MAIL_DEBUG account deletion for {}: publicLoginUrl={} localLoginUrl={} gracePeriodDays={}",
+                    user.getEmail(),
+                    publicLoginUrl,
+                    localLoginUrl,
+                    gracePeriodDays
+            );
+        }
+        sendEmail(
+                new EmailRequest(
+                        from,
+                        List.of(user.getEmail()),
+                        "Your DarkLift account is scheduled for deletion",
+                        emailTemplateRenderer.accountDeletion(user, publicLoginUrl, localLoginUrl, gracePeriodDays)
+                ),
+                user.getEmail(),
+                "Account deletion"
+        );
+    }
+
     private void sendEmail(EmailRequest request, String recipient, String purpose) {
         if (!enabled || apiKey == null || apiKey.isBlank()) {
             LOGGER.info("{} email skipped because mail is disabled or RESEND_API_KEY is missing", purpose);

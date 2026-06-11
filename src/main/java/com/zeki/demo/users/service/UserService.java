@@ -8,5 +8,9 @@ public interface UserService {
 
     User updateUser(String email, UpdateUserRequest updateUserRequest);
 
-    void deleteCurrentUser(String email);
+    void deleteCurrentUser(String email, String password);
+
+    void cancelDeletion(String email);
+
+    void hardDeleteExpiredAccounts();
 }

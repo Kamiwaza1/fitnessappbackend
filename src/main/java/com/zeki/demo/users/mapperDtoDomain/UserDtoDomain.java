@@ -52,7 +52,9 @@ public class UserDtoDomain {
                 existingUser.getRole(),
                 existingUser.isActive(),
                 existingUser.getCreatedAt(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                existingUser.getDeletionRequestedAt(),
+                existingUser.getDeletionScheduledFor()
         );
     }
 

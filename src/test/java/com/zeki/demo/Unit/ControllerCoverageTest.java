@@ -53,6 +53,7 @@ import com.zeki.demo.progress.service.ProgressService;
 import com.zeki.demo.users.controller.AuthController;
 import com.zeki.demo.users.controller.UserController;
 import com.zeki.demo.users.domain.User;
+import com.zeki.demo.users.dto.AccountDeletionRequest;
 import com.zeki.demo.users.dto.AuthResponse;
 import com.zeki.demo.users.dto.LoginRequest;
 import com.zeki.demo.users.dto.RefreshTokenRequest;
@@ -60,6 +61,7 @@ import com.zeki.demo.users.dto.RegisterRequest;
 import com.zeki.demo.users.dto.UpdateUserRequest;
 import com.zeki.demo.users.dto.UserResponse;
 import com.zeki.demo.users.mapperDtoDomain.UserDtoDomain;
+import com.zeki.demo.users.security.JwtCookieService;
 import com.zeki.demo.users.service.AuthService;
 import com.zeki.demo.users.service.AuthenticatedUser;
 import com.zeki.demo.users.service.UserService;
@@ -76,6 +78,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -116,6 +119,7 @@ class ControllerCoverageTest {
 
     private UserService userService;
     private AuthService authService;
+    private JwtCookieService jwtCookieService;
     private UserDtoDomain userMapper;
     private UserController userController;
     private AuthController authController;
@@ -161,7 +165,8 @@ class ControllerCoverageTest {
         userService = mock(UserService.class);
         authService = mock(AuthService.class);
         userMapper = mock(UserDtoDomain.class);
-        userController = new UserController(userService, userMapper);
+        jwtCookieService = mock(JwtCookieService.class);
+        userController = new UserController(userService, userMapper, jwtCookieService);
         authController = new AuthController(authService, userMapper);
 
         progressService = mock(ProgressService.class);
@@ -325,15 +330,18 @@ class ControllerCoverageTest {
         User user = mock(User.class);
         UserResponse response = userResponse();
         UpdateUserRequest request = updateUserRequest();
+        AccountDeletionRequest deletionRequest = new AccountDeletionRequest("StrongPassword123!");
+        HttpServletRequest httpRequest = mock(HttpServletRequest.class);
 
         when(userService.getCurrentUser(EMAIL)).thenReturn(user);
         when(userService.updateUser(EMAIL, request)).thenReturn(user);
         when(userMapper.toResponse(user)).thenReturn(response);
+        when(httpRequest.getHeader("Authorization")).thenReturn("Bearer access-token");
 
         assertEquals(response, userController.getCurrentUser(auth));
         assertEquals(response, userController.updateUser(request, auth));
-        userController.deleteCurrentUser(auth);
-        verify(userService).deleteCurrentUser(EMAIL);
+        userController.deleteCurrentUser(deletionRequest, auth, httpRequest);
+        verify(userService).deleteCurrentUser(EMAIL, "StrongPassword123!");
     }
 
     private void assertAuthControllerDelegates() {

@@ -24,6 +24,8 @@ public class User {
     private boolean active;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime deletionRequestedAt;
+    private LocalDateTime deletionScheduledFor;
 
     public User(
             UUID userId,
@@ -36,6 +38,34 @@ public class User {
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
+        this(
+                userId,
+                fullName,
+                email,
+                password,
+                dailyCalorieTarget,
+                role,
+                active,
+                createdAt,
+                updatedAt,
+                null,
+                null
+        );
+    }
+
+    public User(
+            UUID userId,
+            String fullName,
+            String email,
+            String password,
+            Integer dailyCalorieTarget,
+            String role,
+            boolean active,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
+            LocalDateTime deletionRequestedAt,
+            LocalDateTime deletionScheduledFor
+    ) {
         this.userId = userId;
         this.fullName = normalizeNullable(fullName);
         this.email = normalizeEmail(email);
@@ -45,6 +75,8 @@ public class User {
         this.active = active;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.deletionRequestedAt = deletionRequestedAt;
+        this.deletionScheduledFor = deletionScheduledFor;
     }
 
     public void validate() {
@@ -100,6 +132,29 @@ public class User {
         this.active = false;
         this.email = "deleted+" + userId + "-" + email;
         touch();
+    }
+
+    public void requestDeletion(LocalDateTime requestedAt, LocalDateTime scheduledFor) {
+        if (requestedAt == null || scheduledFor == null || !scheduledFor.isAfter(requestedAt)) {
+            throw new BadRequestException("Deletion expiry must be after the request time");
+        }
+        this.deletionRequestedAt = requestedAt;
+        this.deletionScheduledFor = scheduledFor;
+        touch();
+    }
+
+    public void cancelDeletion() {
+        this.deletionRequestedAt = null;
+        this.deletionScheduledFor = null;
+        touch();
+    }
+
+    public boolean isDeletionPending() {
+        return deletionRequestedAt != null && deletionScheduledFor != null;
+    }
+
+    public boolean isDeletionExpired(LocalDateTime now) {
+        return isDeletionPending() && !deletionScheduledFor.isAfter(now);
     }
 
     public static String normalizeEmail(String email) {

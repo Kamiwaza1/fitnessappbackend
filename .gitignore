@@ -1,6 +1,7 @@
 HELP.md
 .gradle
 build/
+*.class
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
@@ -44,18 +45,25 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+src/main/resources/application-local.properties
+src/main/resources/application-local.yml
+src/main/resources/application-local.yaml
 
 ### Logs ###
 *.log
 logs/
 
+### Runtime dumps / temp ###
+*.hprof
+hs_err_pid*
+replay_pid*
+*.swp
+*.tmp
+*.bak
+
+### Accidental Node files in backend ###
+package-lock.json
+
 ### Local Docker Compose overrides ###
 compose.override.yaml
 docker-compose.override.yml
-.gradle/buildOutputCleanup/buildOutputCleanup.lock
-.gradle/buildOutputCleanup/buildOutputCleanup.lock
-.gradle/buildOutputCleanup/outputFiles.bin
-.gradle/file-system.probe
-.gradle/file-system.probe
-.gradle/buildOutputCleanup/buildOutputCleanup.lock
-.gradle/buildOutputCleanup/outputFiles.bin

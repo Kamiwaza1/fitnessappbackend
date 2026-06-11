@@ -3,6 +3,7 @@ package com.zeki.demo.Unit;
 import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.common.exception.ConflictException;
 import com.zeki.demo.common.exception.UnauthorizedException;
+import com.zeki.demo.mail.EmailService;
 import com.zeki.demo.users.domain.User;
 import com.zeki.demo.users.dto.UpdateUserRequest;
 import com.zeki.demo.users.mapperDtoDomain.UserDtoDomain;
@@ -19,8 +20,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -39,11 +41,14 @@ class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private EmailService emailService;
+
     private UserServiceImpl userService;
 
     @BeforeEach
     void setUp() {
-        userService = new UserServiceImpl(userRepository, passwordEncoder, new UserDtoDomain());
+        userService = new UserServiceImpl(userRepository, passwordEncoder, new UserDtoDomain(), emailService);
     }
 
     @Test
@@ -144,15 +149,24 @@ class UserServiceTest {
     }
 
     @Test
-    void deleteCurrentUserSoftDeletesAndSaves() {
+    void deleteCurrentUserSchedulesDeletionAndSendsEmail() {
         User existing = activeUser(OWNER_EMAIL);
         when(userRepository.findActiveByEmail(OWNER_EMAIL)).thenReturn(Optional.of(existing));
+        when(passwordEncoder.matches(STRONG_PASSWORD, existing.getPassword())).thenReturn(true);
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        userService.deleteCurrentUser(OWNER_EMAIL);
+        userService.deleteCurrentUser(OWNER_EMAIL, STRONG_PASSWORD);
 
-        assertFalse(existing.isActive());
+        assertTrue(existing.isActive());
+        assertNotNull(existing.getDeletionRequestedAt());
+        assertNotNull(existing.getDeletionScheduledFor());
         verify(userRepository).save(existing);
+        verify(emailService).sendAccountDeletionEmail(
+                org.mockito.ArgumentMatchers.eq(existing),
+                org.mockito.ArgumentMatchers.endsWith("/login"),
+                org.mockito.ArgumentMatchers.eq("http://localhost:3000/login"),
+                org.mockito.ArgumentMatchers.eq(7L)
+        );
     }
 
     @Test
@@ -161,7 +175,7 @@ class UserServiceTest {
 
         UnauthorizedException ex = assertThrows(
                 UnauthorizedException.class,
-                () -> userService.deleteCurrentUser("missing@example.com")
+                () -> userService.deleteCurrentUser("missing@example.com", STRONG_PASSWORD)
         );
 
         assertEquals("User not found", ex.getMessage());

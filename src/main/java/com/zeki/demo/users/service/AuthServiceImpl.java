@@ -91,6 +91,14 @@ public class AuthServiceImpl implements AuthService {
         }
         User existingUser = userRepository.findActiveByEmail(normalizedEmail)
                 .orElseThrow(() -> new UnauthorizedException("No account found with this email"));
+        if (existingUser.isDeletionExpired(LocalDateTime.now())) {
+            userRepository.hardDeleteById(existingUser.getUserId(), existingUser.getEmail());
+            throw new UnauthorizedException("No account found with this email");
+        }
+        if (existingUser.isDeletionPending()) {
+            existingUser.cancelDeletion();
+            existingUser = userRepository.save(existingUser);
+        }
         UserDetails userDetails = toUserDetails(existingUser);
         String accessToken = jwtService.generateAccessToken(userDetails, existingUser.getRole());
         String refreshToken = jwtService.generateRefreshToken(existingUser.getEmail());
@@ -107,6 +115,10 @@ public class AuthServiceImpl implements AuthService {
             String email = jwtService.extractRefreshUsername(refreshToken);
             User existingUser = userRepository.findActiveByEmail(email)
                     .orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));
+            if (existingUser.isDeletionExpired(LocalDateTime.now())) {
+                userRepository.hardDeleteById(existingUser.getUserId(), existingUser.getEmail());
+                throw new UnauthorizedException("Invalid refresh token");
+            }
             if (!jwtService.isRefreshTokenValid(refreshToken, existingUser.getEmail())) {
                 throw new UnauthorizedException("Invalid refresh token");
             }

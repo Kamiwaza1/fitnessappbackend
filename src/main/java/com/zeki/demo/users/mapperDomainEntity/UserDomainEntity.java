@@ -18,7 +18,9 @@ public class UserDomainEntity {
                 entity.getRole(),
                 Boolean.TRUE.equals(entity.getIsActive()),
                 entity.getCreatedAt(),
-                entity.getUpdatedAt()
+                entity.getUpdatedAt(),
+                entity.getDeletionRequestedAt(),
+                entity.getDeletionScheduledFor()
         );
     }
 
@@ -34,6 +36,8 @@ public class UserDomainEntity {
                 .isActive(user.isActive())
                 .createdAt(user.getCreatedAt() != null ? user.getCreatedAt() : now)
                 .updatedAt(user.getUpdatedAt() != null ? user.getUpdatedAt() : now)
+                .deletionRequestedAt(user.getDeletionRequestedAt())
+                .deletionScheduledFor(user.getDeletionScheduledFor())
                 .build();
     }
 }

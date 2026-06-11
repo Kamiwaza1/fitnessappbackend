@@ -56,6 +56,12 @@ public class UserEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "deletion_requested_at")
+    private LocalDateTime deletionRequestedAt;
+
+    @Column(name = "deletion_scheduled_for")
+    private LocalDateTime deletionScheduledFor;
+
     @PrePersist
     void prePersist() {
         LocalDateTime now = LocalDateTime.now();
