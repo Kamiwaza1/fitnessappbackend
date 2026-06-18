@@ -3,7 +3,7 @@ package com.zeki.demo.nutrition.repository;
 import com.zeki.demo.common.exception.NotFoundException;
 import com.zeki.demo.nutrition.domain.Nutrition;
 import com.zeki.demo.nutrition.entity.NutritionEntity;
-import com.zeki.demo.nutrition.mapperEntityDomain.NutritionEntityMapper;
+import com.zeki.demo.nutrition.mapperentitydomain.NutritionEntityMapper;
 import com.zeki.demo.nutrition.repository.jpa.NutritionRepoJPA;
 import com.zeki.demo.users.entity.UserEntity;
 import com.zeki.demo.users.repository.jpa.UserRepoJPA;

@@ -1,6 +1,8 @@
 package com.zeki.demo.users.domain;
 
 import com.zeki.demo.common.exception.BadRequestException;
+import com.zeki.demo.users.enums.ExperienceLevel;
+import com.zeki.demo.workouts.enums.WorkoutCategory;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,10 +22,14 @@ public class User {
     private String email;
     private String password;
     private Integer dailyCalorieTarget;
+    private WorkoutCategory fitnessGoal;
+    private ExperienceLevel experienceLevel;
     private final String role;
     private boolean active;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime deletionRequestedAt;
+    private LocalDateTime deletionScheduledFor;
 
     public User(
             UUID userId,
@@ -36,15 +42,81 @@ public class User {
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
+        this(
+                userId,
+                fullName,
+                email,
+                password,
+                dailyCalorieTarget,
+                WorkoutCategory.GENERAL,
+                ExperienceLevel.BEGINNER,
+                role,
+                active,
+                createdAt,
+                updatedAt,
+                null,
+                null
+        );
+    }
+
+    public User(
+            UUID userId,
+            String fullName,
+            String email,
+            String password,
+            Integer dailyCalorieTarget,
+            String role,
+            boolean active,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
+            LocalDateTime deletionRequestedAt,
+            LocalDateTime deletionScheduledFor
+    ) {
+        this(
+                userId,
+                fullName,
+                email,
+                password,
+                dailyCalorieTarget,
+                WorkoutCategory.GENERAL,
+                ExperienceLevel.BEGINNER,
+                role,
+                active,
+                createdAt,
+                updatedAt,
+                deletionRequestedAt,
+                deletionScheduledFor
+        );
+    }
+
+    public User(
+            UUID userId,
+            String fullName,
+            String email,
+            String password,
+            Integer dailyCalorieTarget,
+            WorkoutCategory fitnessGoal,
+            ExperienceLevel experienceLevel,
+            String role,
+            boolean active,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
+            LocalDateTime deletionRequestedAt,
+            LocalDateTime deletionScheduledFor
+    ) {
         this.userId = userId;
         this.fullName = normalizeNullable(fullName);
         this.email = normalizeEmail(email);
         this.password = password;
         this.dailyCalorieTarget = dailyCalorieTarget;
+        this.fitnessGoal = fitnessGoal == null ? WorkoutCategory.GENERAL : fitnessGoal;
+        this.experienceLevel = experienceLevel == null ? ExperienceLevel.BEGINNER : experienceLevel;
         this.role = role;
         this.active = active;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.deletionRequestedAt = deletionRequestedAt;
+        this.deletionScheduledFor = deletionScheduledFor;
     }
 
     public void validate() {
@@ -100,6 +172,29 @@ public class User {
         this.active = false;
         this.email = "deleted+" + userId + "-" + email;
         touch();
+    }
+
+    public void requestDeletion(LocalDateTime requestedAt, LocalDateTime scheduledFor) {
+        if (requestedAt == null || scheduledFor == null || !scheduledFor.isAfter(requestedAt)) {
+            throw new BadRequestException("Deletion expiry must be after the request time");
+        }
+        this.deletionRequestedAt = requestedAt;
+        this.deletionScheduledFor = scheduledFor;
+        touch();
+    }
+
+    public void cancelDeletion() {
+        this.deletionRequestedAt = null;
+        this.deletionScheduledFor = null;
+        touch();
+    }
+
+    public boolean isDeletionPending() {
+        return deletionRequestedAt != null && deletionScheduledFor != null;
+    }
+
+    public boolean isDeletionExpired(LocalDateTime now) {
+        return isDeletionPending() && !deletionScheduledFor.isAfter(now);
     }
 
     public static String normalizeEmail(String email) {

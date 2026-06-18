@@ -1,7 +1,7 @@
 package com.zeki.demo.liveworkouts.repository;
 
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutMessage;
-import com.zeki.demo.liveworkouts.mapperEntityDomain.LiveWorkoutMessageEntityMapper;
+import com.zeki.demo.liveworkouts.mapperentitydomain.LiveWorkoutMessageEntityMapper;
 import com.zeki.demo.liveworkouts.repository.mongo.LiveWorkoutMessageMongoRepository;
 import java.util.Comparator;
 import java.util.List;

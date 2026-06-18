@@ -7,7 +7,7 @@ import com.zeki.demo.nutrition.dto.FoodProductsRequest;
 import com.zeki.demo.nutrition.dto.FoodProductsResponse;
 import com.zeki.demo.nutrition.dto.NutritionResponse;
 import com.zeki.demo.nutrition.dto.UpdateNutritionRequest;
-import com.zeki.demo.nutrition.mapperDtoDomain.NutritionDtoDomain;
+import com.zeki.demo.nutrition.mapperdtodomain.NutritionDtoDomain;
 import com.zeki.demo.nutrition.service.NutritionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -36,6 +37,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Tag(name = "Nutrition", description = "Endpoints for managing nutrition entries")
 public class        NutritionController {
+
+    private static final String TIME_ZONE_HEADER = "X-Time-Zone";
 
     private final NutritionService nutritionService;
     private final NutritionDtoDomain nutritionDtoDomain;
@@ -117,10 +120,11 @@ public class        NutritionController {
     @ResponseStatus(HttpStatus.CREATED)
     public NutritionResponse createNutrition(
             @Valid @RequestBody CreateNutritionRequest request,
-            Authentication authentication
+            Authentication authentication,
+            @RequestHeader(value = TIME_ZONE_HEADER, required = false) String timeZone
     ) {
         return nutritionDtoDomain.toResponse(
-                nutritionService.createNutrition(nutritionDtoDomain.toDomain(request, authentication.getName()))
+                nutritionService.createNutrition(nutritionDtoDomain.toDomain(request, authentication.getName()), timeZone)
         );
     }
 
@@ -134,10 +138,11 @@ public class        NutritionController {
     public NutritionResponse updateNutrition(
             @PathVariable UUID nutritionId,
             @Valid @RequestBody UpdateNutritionRequest request,
-            Authentication authentication
+            Authentication authentication,
+            @RequestHeader(value = TIME_ZONE_HEADER, required = false) String timeZone
     ) {
         return nutritionDtoDomain.toResponse(
-                nutritionService.updateNutrition(nutritionId, request, authentication.getName())
+                nutritionService.updateNutrition(nutritionId, request, authentication.getName(), timeZone)
         );
     }
 
@@ -148,7 +153,11 @@ public class        NutritionController {
     })
     @DeleteMapping("/{nutritionId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteNutrition(@PathVariable UUID nutritionId, Authentication authentication) {
-        nutritionService.deleteNutrition(nutritionId, authentication.getName());
+    public void deleteNutrition(
+            @PathVariable UUID nutritionId,
+            Authentication authentication,
+            @RequestHeader(value = TIME_ZONE_HEADER, required = false) String timeZone
+    ) {
+        nutritionService.deleteNutrition(nutritionId, authentication.getName(), timeZone);
     }
 }

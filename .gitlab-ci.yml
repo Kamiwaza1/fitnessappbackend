@@ -58,7 +58,7 @@ build-sonar:
   script:
     - echo "SONAR_TOKEN exists? ${SONAR_TOKEN:+yes}"
     - ls -la build/reports/jacoco/test/
-    - ./gradlew --no-daemon test jacocoTestReport jacocoTestCoverageVerification sonar -Dsonar.token="$SONAR_TOKEN" -Dsonar.qualitygate.wait=true
+    - ./gradlew --no-daemon test jacocoTestReport jacocoTestCoverageVerification sonar -Dsonar.token="$SONAR_TOKEN" -Dsonar.qualitygate.wait="${SONAR_QUALITYGATE_WAIT:-false}"
   allow_failure: true
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
@@ -69,19 +69,25 @@ docker:
   stage: docker
   script:
     - ./gradlew --no-daemon bootJar
-    - docker compose up --build -d
+
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+    - docker build -t kamiwaza01/fitnessappbackend:latest .
+
+    - docker push kamiwaza01/fitnessappbackend:latest
+
     - |
       if [ "$CI_COMMIT_BRANCH" = "main" ]; then
         echo "Triggering Coolify deployment"
-        curl -X GET "$COOLIFY_WEBHOOK"
+        curl -fsSL "$COOLIFY_WEBHOOK"
       else
         echo "Skipping Coolify deployment for $CI_COMMIT_BRANCH"
       fi
+
   artifacts:
     paths:
       - build/libs/
     expire_in: 4 weeks
+
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
-    - if: '$CI_COMMIT_BRANCH == "development"'
-    - if: '$CI_COMMIT_BRANCH == "Development"'

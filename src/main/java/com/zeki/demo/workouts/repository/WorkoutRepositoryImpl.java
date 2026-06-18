@@ -5,7 +5,7 @@ import com.zeki.demo.users.entity.UserEntity;
 import com.zeki.demo.users.repository.jpa.UserRepoJPA;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.entity.WorkoutEntity;
-import com.zeki.demo.workouts.mapperEntityDomain.WorkoutEntityMapper;
+import com.zeki.demo.workouts.mapperentitydomain.WorkoutEntityMapper;
 import com.zeki.demo.workouts.repository.jpa.WorkoutRepoJPA;
 import java.time.LocalDate;
 import java.util.List;
@@ -45,6 +45,19 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
     }
 
     @Override
+    public List<Workout> findAll() {
+        return workoutRepoJPA.findAll()
+                .stream()
+                .map(workoutEntityMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public Optional<Workout> getWorkoutById(UUID workoutId) {
+        return workoutRepoJPA.findById(workoutId).map(workoutEntityMapper::toDomain);
+    }
+
+    @Override
     public void delete(UUID workoutId) {
         WorkoutEntity workoutEntity = workoutRepoJPA.findById(workoutId)
                 .orElseThrow(() -> new NotFoundException("Workout not found"));
@@ -59,6 +72,7 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
                 )
                 .stream()
                 .map(workoutEntityMapper::toDomain)
+                .filter(workout -> !workout.isCompleted())
                 .toList();
     }
 

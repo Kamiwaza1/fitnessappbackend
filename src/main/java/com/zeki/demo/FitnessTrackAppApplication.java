@@ -4,12 +4,15 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 @EnableJpaRepositories(basePackages = {
-		"com.zeki.demo.WorkoutHistory.repository.jpa",
+		"com.zeki.demo.workouthistory.repository.jpa",
 		"com.zeki.demo.liveworkouts.repository.jpa",
 		"com.zeki.demo.nutrition.repository.jpa",
+		"com.zeki.demo.recommendations.repository.jpa",
 		"com.zeki.demo.users.repository.jpa",
 		"com.zeki.demo.workouts.repository.jpa"
 })

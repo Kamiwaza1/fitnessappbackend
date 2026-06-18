@@ -1,0 +1,2 @@
+ALTER TABLE password_reset_tokens
+    ADD COLUMN IF NOT EXISTS code_hash VARCHAR(64);

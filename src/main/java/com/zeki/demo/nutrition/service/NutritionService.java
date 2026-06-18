@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface NutritionService {
 
-    Nutrition createNutrition(Nutrition nutrition);
+    Nutrition createNutrition(Nutrition nutrition, String timeZone);
 
     Nutrition getNutritionById(UUID nutritionId, String userEmail);
 
@@ -25,7 +25,7 @@ public interface NutritionService {
 
     FoodProductsResponse getFoodProductsByCategory(String category, FoodProductsRequest request);
 
-    Nutrition updateNutrition(UUID nutritionId, UpdateNutritionRequest request, String userEmail);
+    Nutrition updateNutrition(UUID nutritionId, UpdateNutritionRequest request, String userEmail, String timeZone);
 
-    void deleteNutrition(UUID nutritionId, String userEmail);
+    void deleteNutrition(UUID nutritionId, String userEmail, String timeZone);
 }

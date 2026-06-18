@@ -2,6 +2,7 @@ package com.zeki.demo.workouts.domain;
 
 import com.zeki.demo.workouts.enums.WorkoutCategory;
 import com.zeki.demo.workouts.enums.MuscleType;
+import com.zeki.demo.workouts.enums.WorkoutDifficulty;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ public class Workout {
     private String description;
     private WorkoutCategory category;
     private MuscleType muscleType;
+    private WorkoutDifficulty difficulty;
     private final LocalDate createdAt;
     private LocalDate updatedAt;
     private final LocalDate workoutDate;
@@ -22,6 +24,7 @@ public class Workout {
     private final Integer sets;
     private final Integer reps;
     private final Double weightKg;
+    private final boolean completed;
     private String notes;
     private final List<WorkoutExercise> exercises;
     private final String userEmail;
@@ -43,6 +46,85 @@ public class Workout {
             LocalDate updatedAt,
             String userEmail
     ) {
+        this(
+                workoutName,
+                workoutDate,
+                durationMinutes,
+                sets,
+                reps,
+                weightKg,
+                notes,
+                workoutId,
+                description,
+                category,
+                muscleType,
+                WorkoutDifficulty.BEGINNER,
+                false,
+                exercises,
+                createdAt,
+                updatedAt,
+                userEmail
+        );
+    }
+
+    public Workout(
+            String workoutName,
+            LocalDate workoutDate,
+            Integer durationMinutes,
+            Integer sets,
+            Integer reps,
+            Double weightKg,
+            String notes,
+            UUID workoutId,
+            String description,
+            WorkoutCategory category,
+            MuscleType muscleType,
+            WorkoutDifficulty difficulty,
+            List<WorkoutExercise> exercises,
+            LocalDate createdAt,
+            LocalDate updatedAt,
+            String userEmail
+    ) {
+        this(
+                workoutName,
+                workoutDate,
+                durationMinutes,
+                sets,
+                reps,
+                weightKg,
+                notes,
+                workoutId,
+                description,
+                category,
+                muscleType,
+                difficulty,
+                false,
+                exercises,
+                createdAt,
+                updatedAt,
+                userEmail
+        );
+    }
+
+    public Workout(
+            String workoutName,
+            LocalDate workoutDate,
+            Integer durationMinutes,
+            Integer sets,
+            Integer reps,
+            Double weightKg,
+            String notes,
+            UUID workoutId,
+            String description,
+            WorkoutCategory category,
+            MuscleType muscleType,
+            WorkoutDifficulty difficulty,
+            boolean completed,
+            List<WorkoutExercise> exercises,
+            LocalDate createdAt,
+            LocalDate updatedAt,
+            String userEmail
+    ) {
         this.workoutId = workoutId;
         this.workoutName = normalize(workoutName);
         this.workoutDate = workoutDate;
@@ -50,14 +132,38 @@ public class Workout {
         this.sets = sets;
         this.reps = reps;
         this.weightKg = weightKg;
+        this.completed = completed;
         this.notes = normalizeNullable(notes);
         this.description = normalizeNullable(description);
         this.category = category;
         this.muscleType = muscleType;
+        this.difficulty = difficulty == null ? WorkoutDifficulty.BEGINNER : difficulty;
         this.exercises = exercises == null ? List.of() : new ArrayList<>(exercises);
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.userEmail = normalize(userEmail);
+    }
+
+    public Workout markCompleted() {
+        return new Workout(
+                workoutName,
+                workoutDate,
+                durationMinutes,
+                sets,
+                reps,
+                weightKg,
+                notes,
+                workoutId,
+                description,
+                category,
+                muscleType,
+                difficulty,
+                true,
+                exercises,
+                createdAt,
+                LocalDate.now(),
+                userEmail
+        );
     }
 
     public void validate() {
@@ -103,6 +209,9 @@ public class Workout {
         }
         if (muscleType == null) {
             throw new IllegalArgumentException("Muscle type is required");
+        }
+        if (difficulty == null) {
+            throw new IllegalArgumentException("Workout difficulty is required");
         }
         if (!exercises.isEmpty()) {
             for (WorkoutExercise exercise : exercises) {

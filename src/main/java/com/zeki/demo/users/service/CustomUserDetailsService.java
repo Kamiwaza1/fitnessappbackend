@@ -1,6 +1,7 @@
 package com.zeki.demo.users.service;
 
 import com.zeki.demo.users.repository.jpa.UserRepoJPA;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,6 +17,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepoJPA.findByEmailIgnoreCaseAndIsActiveTrue(email)
+                .filter(user -> user.getDeletionScheduledFor() == null
+                        || user.getDeletionScheduledFor().isAfter(LocalDateTime.now()))
                 .map(user -> org.springframework.security.core.userdetails.User
                         .withUsername(user.getEmail())
                         .password(user.getPassword())

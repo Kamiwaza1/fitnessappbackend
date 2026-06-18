@@ -2,6 +2,7 @@ package com.zeki.demo.workouts.dto;
 
 import com.zeki.demo.workouts.enums.WorkoutCategory;
 import com.zeki.demo.workouts.enums.MuscleType;
+import com.zeki.demo.workouts.enums.WorkoutDifficulty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -25,7 +26,38 @@ public record CreateWorkoutRequest(
         String description,
         WorkoutCategory category,
         MuscleType muscleType,
+        WorkoutDifficulty difficulty,
         List<WorkoutExerciseRequest> exercises,
         UUID workoutId
 ) {
+    public CreateWorkoutRequest(
+            String workoutName,
+            LocalDate workoutDate,
+            Integer durationMinutes,
+            Integer sets,
+            Integer reps,
+            Double weightKg,
+            String notes,
+            String description,
+            WorkoutCategory category,
+            MuscleType muscleType,
+            List<WorkoutExerciseRequest> exercises,
+            UUID workoutId
+    ) {
+        this(
+                workoutName,
+                workoutDate,
+                durationMinutes,
+                sets,
+                reps,
+                weightKg,
+                notes,
+                description,
+                category,
+                muscleType,
+                null,
+                exercises,
+                workoutId
+        );
+    }
 }

@@ -1,5 +1,7 @@
 package com.zeki.demo.users.dto;
 
+import com.zeki.demo.users.enums.ExperienceLevel;
+import com.zeki.demo.workouts.enums.WorkoutCategory;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -21,6 +23,16 @@ public record UpdateUserRequest(
         String password,
         @Min(value = 1, message = "Daily calorie target must be at least 1")
         @Max(value = 10000, message = "Daily calorie target cannot be greater than 10000")
-        Integer dailyCalorieTarget
+        Integer dailyCalorieTarget,
+        WorkoutCategory fitnessGoal,
+        ExperienceLevel experienceLevel
 ) {
+    public UpdateUserRequest(
+            String fullName,
+            String email,
+            String password,
+            Integer dailyCalorieTarget
+    ) {
+        this(fullName, email, password, dailyCalorieTarget, null, null);
+    }
 }

@@ -34,7 +34,6 @@ public class LiveWorkoutMessageServiceImpl implements LiveWorkoutMessageService 
     @Override
     public List<LiveWorkoutMessage> getRecentMessages(String roomCode, String userEmail) {
         LiveWorkoutRoom room = liveWorkoutRoomService.getRoom(roomCode);
-        requireParticipant(room, userEmail);
         return liveWorkoutMessageRepository.findRecentByRoomCode(room.roomCode(), RECENT_MESSAGE_LIMIT);
     }
 

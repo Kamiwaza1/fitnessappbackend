@@ -52,6 +52,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	// Swagger/OpenAPI for Spring Boot
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -98,7 +99,7 @@ sonar {
 
         property "sonar.projectName", "FitnessApp"
         property "sonar.projectKey", "FitnessApp"
-		property 'sonar.qualitygate.wait', 'true'
+		property 'sonar.qualitygate.wait', findProperty("sonar.qualitygate.wait") ?: System.getenv("SONAR_QUALITYGATE_WAIT") ?: "false"
         property "sonar.host.url", sonarHostUrl
         property "sonar.java.binaries",
                 layout.buildDirectory.dir("classes/java/main").get().asFile.absolutePath

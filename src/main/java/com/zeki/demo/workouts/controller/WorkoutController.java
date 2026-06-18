@@ -3,7 +3,7 @@ package com.zeki.demo.workouts.controller;
 import com.zeki.demo.workouts.dto.CreateWorkoutRequest;
 import com.zeki.demo.workouts.dto.UpdateWorkoutRequest;
 import com.zeki.demo.workouts.dto.WorkoutResponse;
-import com.zeki.demo.workouts.mapperDtoDomain.WorkoutDtoDomain;
+import com.zeki.demo.workouts.mapperdtodomain.WorkoutDtoDomain;
 import com.zeki.demo.workouts.service.WorkoutService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
