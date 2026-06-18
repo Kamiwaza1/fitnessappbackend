@@ -35,6 +35,7 @@ public class SecurityConfig {
     private String allowedOrigins;
 
     @Bean
+    @SuppressWarnings("java:S4502")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         CsrfTokenRequestAttributeHandler csrfTokenRequestHandler = new CsrfTokenRequestAttributeHandler();
         csrfTokenRequestHandler.setCsrfRequestAttributeName(null);
@@ -49,7 +50,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(csrfTokenRequestHandler)
-                        .ignoringRequestMatchers("/ws", "/ws/**") // WebSocket/STOMP uses JWT auth, not REST CSRF.
+                        /*
+                         * REST endpoints keep CSRF protection because auth uses HttpOnly cookies.
+                         * SockJS/STOMP cannot send the REST CSRF header reliably, so only the
+                         * WebSocket transport endpoint is excluded. Browser access is still limited
+                         * by the endpoint's allowed Origin list, and STOMP CONNECT is rejected unless
+                         * WebSocketAuthChannelInterceptor validates the JWT from the handshake cookie
+                         * or Authorization header.
+                         */
+                        .ignoringRequestMatchers("/ws", "/ws/**")
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
