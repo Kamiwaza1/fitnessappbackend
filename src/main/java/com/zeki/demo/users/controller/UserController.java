@@ -4,7 +4,7 @@ import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.users.dto.AccountDeletionRequest;
 import com.zeki.demo.users.dto.UpdateUserRequest;
 import com.zeki.demo.users.dto.UserResponse;
-import com.zeki.demo.users.mapperDtoDomain.UserDtoDomain;
+import com.zeki.demo.users.mapperdtodomain.UserDtoDomain;
 import com.zeki.demo.users.security.JwtCookieService;
 import com.zeki.demo.users.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;

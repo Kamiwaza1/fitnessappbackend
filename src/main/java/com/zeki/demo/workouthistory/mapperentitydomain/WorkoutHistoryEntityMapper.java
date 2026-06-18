@@ -1,7 +1,7 @@
-package com.zeki.demo.WorkoutHistory.mapperEntityDomain;
+package com.zeki.demo.workouthistory.mapperentitydomain;
 
-import com.zeki.demo.WorkoutHistory.domain.WorkoutHistory;
-import com.zeki.demo.WorkoutHistory.entity.WorkoutHistoryEntity;
+import com.zeki.demo.workouthistory.domain.WorkoutHistory;
+import com.zeki.demo.workouthistory.entity.WorkoutHistoryEntity;
 import org.springframework.stereotype.Component;
 
 @Component

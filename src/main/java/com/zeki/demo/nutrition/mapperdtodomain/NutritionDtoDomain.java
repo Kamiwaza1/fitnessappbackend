@@ -1,4 +1,4 @@
-package com.zeki.demo.nutrition.mapperDtoDomain;
+package com.zeki.demo.nutrition.mapperdtodomain;
 
 import com.zeki.demo.nutrition.domain.Nutrition;
 import com.zeki.demo.nutrition.dto.CreateNutritionRequest;

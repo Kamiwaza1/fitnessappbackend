@@ -1,9 +1,9 @@
-package com.zeki.demo.WorkoutHistory.controller;
+package com.zeki.demo.workouthistory.controller;
 
-import com.zeki.demo.WorkoutHistory.dto.CreateWorkoutHistoryRequest;
-import com.zeki.demo.WorkoutHistory.dto.WorkoutHistoryResponse;
-import com.zeki.demo.WorkoutHistory.mapperDtoDomain.WorkoutHistoryDtoDomain;
-import com.zeki.demo.WorkoutHistory.service.WorkoutHistoryService;
+import com.zeki.demo.workouthistory.dto.CreateWorkoutHistoryRequest;
+import com.zeki.demo.workouthistory.dto.WorkoutHistoryResponse;
+import com.zeki.demo.workouthistory.mapperdtodomain.WorkoutHistoryDtoDomain;
+import com.zeki.demo.workouthistory.service.WorkoutHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

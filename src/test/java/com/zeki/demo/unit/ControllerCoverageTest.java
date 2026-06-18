@@ -1,24 +1,24 @@
-package com.zeki.demo.Unit;
+package com.zeki.demo.unit;
 
-import com.zeki.demo.WorkoutHistory.domain.WorkoutHistory;
-import com.zeki.demo.WorkoutHistory.dto.WorkoutHistoryResponse;
-import com.zeki.demo.WorkoutHistory.mapperDtoDomain.WorkoutHistoryDtoDomain;
-import com.zeki.demo.WorkoutHistory.service.WorkoutHistoryService;
-import com.zeki.demo.exerciseLibrary.controller.ExerciseLibraryController;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrary;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseLibraryItem;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseLibraryListCriteria;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrarySearchCriteria;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseMuscle;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseReference;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryItemResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryListRequest;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibrarySearchRequest;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseMuscleResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseReferenceResponse;
-import com.zeki.demo.exerciseLibrary.mapperDtoDomain.ExerciseLibraryDtoDomain;
-import com.zeki.demo.exerciseLibrary.service.ExerciseLibraryService;
+import com.zeki.demo.workouthistory.domain.WorkoutHistory;
+import com.zeki.demo.workouthistory.dto.WorkoutHistoryResponse;
+import com.zeki.demo.workouthistory.mapperdtodomain.WorkoutHistoryDtoDomain;
+import com.zeki.demo.workouthistory.service.WorkoutHistoryService;
+import com.zeki.demo.exerciselibrary.controller.ExerciseLibraryController;
+import com.zeki.demo.exerciselibrary.domain.ExerciseLibrary;
+import com.zeki.demo.exerciselibrary.domain.ExerciseLibraryItem;
+import com.zeki.demo.exerciselibrary.domain.ExerciseLibraryListCriteria;
+import com.zeki.demo.exerciselibrary.domain.ExerciseLibrarySearchCriteria;
+import com.zeki.demo.exerciselibrary.domain.ExerciseMuscle;
+import com.zeki.demo.exerciselibrary.domain.ExerciseReference;
+import com.zeki.demo.exerciselibrary.dto.ExerciseLibraryItemResponse;
+import com.zeki.demo.exerciselibrary.dto.ExerciseLibraryListRequest;
+import com.zeki.demo.exerciselibrary.dto.ExerciseLibraryResponse;
+import com.zeki.demo.exerciselibrary.dto.ExerciseLibrarySearchRequest;
+import com.zeki.demo.exerciselibrary.dto.ExerciseMuscleResponse;
+import com.zeki.demo.exerciselibrary.dto.ExerciseReferenceResponse;
+import com.zeki.demo.exerciselibrary.mapperdtodomain.ExerciseLibraryDtoDomain;
+import com.zeki.demo.exerciselibrary.service.ExerciseLibraryService;
 import com.zeki.demo.liveworkouts.controller.LiveWorkoutRoomController;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutMessage;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
@@ -28,8 +28,8 @@ import com.zeki.demo.liveworkouts.dto.LiveWorkoutMessageResponse;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutProgressRequest;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutRoomDetailResponse;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutRoomResponse;
-import com.zeki.demo.liveworkouts.mapperDtoDomain.LiveWorkoutMessageMapper;
-import com.zeki.demo.liveworkouts.mapperDtoDomain.LiveWorkoutRoomMapper;
+import com.zeki.demo.liveworkouts.mapperdtodomain.LiveWorkoutMessageMapper;
+import com.zeki.demo.liveworkouts.mapperdtodomain.LiveWorkoutRoomMapper;
 import com.zeki.demo.liveworkouts.service.LiveWorkoutEventPublisher;
 import com.zeki.demo.liveworkouts.service.LiveWorkoutMessageService;
 import com.zeki.demo.liveworkouts.service.LiveWorkoutRoomService;
@@ -43,12 +43,12 @@ import com.zeki.demo.nutrition.dto.FoodProductsResponse;
 import com.zeki.demo.nutrition.dto.NutritionResponse;
 import com.zeki.demo.nutrition.dto.UpdateNutritionRequest;
 import com.zeki.demo.nutrition.enums.NutritionCategory;
-import com.zeki.demo.nutrition.mapperDtoDomain.NutritionDtoDomain;
+import com.zeki.demo.nutrition.mapperdtodomain.NutritionDtoDomain;
 import com.zeki.demo.nutrition.service.NutritionService;
 import com.zeki.demo.progress.controller.ProgressController;
 import com.zeki.demo.progress.domain.Progress;
 import com.zeki.demo.progress.dto.ProgressResponse;
-import com.zeki.demo.progress.mapperDtoDomain.ProgressDtoDomain;
+import com.zeki.demo.progress.mapperdtodomain.ProgressDtoDomain;
 import com.zeki.demo.progress.service.ProgressService;
 import com.zeki.demo.users.controller.AuthController;
 import com.zeki.demo.users.controller.UserController;
@@ -60,7 +60,7 @@ import com.zeki.demo.users.dto.RefreshTokenRequest;
 import com.zeki.demo.users.dto.RegisterRequest;
 import com.zeki.demo.users.dto.UpdateUserRequest;
 import com.zeki.demo.users.dto.UserResponse;
-import com.zeki.demo.users.mapperDtoDomain.UserDtoDomain;
+import com.zeki.demo.users.mapperdtodomain.UserDtoDomain;
 import com.zeki.demo.users.security.JwtCookieService;
 import com.zeki.demo.users.service.AuthService;
 import com.zeki.demo.users.service.AuthenticatedUser;
@@ -72,7 +72,7 @@ import com.zeki.demo.workouts.dto.UpdateWorkoutRequest;
 import com.zeki.demo.workouts.dto.WorkoutResponse;
 import com.zeki.demo.workouts.enums.MuscleType;
 import com.zeki.demo.workouts.enums.WorkoutCategory;
-import com.zeki.demo.workouts.mapperDtoDomain.WorkoutDtoDomain;
+import com.zeki.demo.workouts.mapperdtodomain.WorkoutDtoDomain;
 import com.zeki.demo.workouts.service.WorkoutService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -130,7 +130,7 @@ class ControllerCoverageTest {
 
     private WorkoutHistoryService historyService;
     private WorkoutHistoryDtoDomain historyMapper;
-    private com.zeki.demo.WorkoutHistory.controller.WorkoutHistoryController historyController;
+    private com.zeki.demo.workouthistory.controller.WorkoutHistoryController historyController;
 
     @BeforeEach
     void setUp() {
@@ -175,7 +175,7 @@ class ControllerCoverageTest {
 
         historyService = mock(WorkoutHistoryService.class);
         historyMapper = mock(WorkoutHistoryDtoDomain.class);
-        historyController = new com.zeki.demo.WorkoutHistory.controller.WorkoutHistoryController(historyService, historyMapper);
+        historyController = new com.zeki.demo.workouthistory.controller.WorkoutHistoryController(historyService, historyMapper);
     }
 
     @Test

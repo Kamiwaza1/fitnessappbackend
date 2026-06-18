@@ -1,11 +1,11 @@
-package com.zeki.demo.Unit;
+package com.zeki.demo.unit;
 
 import com.zeki.demo.nutrition.domain.Nutrition;
 import com.zeki.demo.nutrition.dto.CreateNutritionRequest;
 import com.zeki.demo.nutrition.dto.DeleteNutritionRequest;
 import com.zeki.demo.nutrition.dto.NutritionResponse;
 import com.zeki.demo.nutrition.enums.NutritionCategory;
-import com.zeki.demo.nutrition.mapperDtoDomain.NutritionDtoDomain;
+import com.zeki.demo.nutrition.mapperdtodomain.NutritionDtoDomain;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;

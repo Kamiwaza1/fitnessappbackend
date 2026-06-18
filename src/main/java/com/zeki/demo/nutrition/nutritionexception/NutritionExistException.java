@@ -1,4 +1,4 @@
-package com.zeki.demo.nutrition.NutritionException;
+package com.zeki.demo.nutrition.nutritionexception;
 
 public class NutritionExistException extends RuntimeException {
 

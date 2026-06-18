@@ -7,7 +7,7 @@ import com.zeki.demo.nutrition.dto.FoodProductsRequest;
 import com.zeki.demo.nutrition.dto.FoodProductsResponse;
 import com.zeki.demo.nutrition.dto.NutritionResponse;
 import com.zeki.demo.nutrition.dto.UpdateNutritionRequest;
-import com.zeki.demo.nutrition.mapperDtoDomain.NutritionDtoDomain;
+import com.zeki.demo.nutrition.mapperdtodomain.NutritionDtoDomain;
 import com.zeki.demo.nutrition.service.NutritionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

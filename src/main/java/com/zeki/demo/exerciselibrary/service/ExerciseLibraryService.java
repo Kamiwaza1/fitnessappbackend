@@ -1,11 +1,11 @@
-package com.zeki.demo.exerciseLibrary.service;
+package com.zeki.demo.exerciselibrary.service;
 
-import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrary;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseLibraryItem;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseLibraryListCriteria;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrarySearchCriteria;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseMuscle;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseReference;
+import com.zeki.demo.exerciselibrary.domain.ExerciseLibrary;
+import com.zeki.demo.exerciselibrary.domain.ExerciseLibraryItem;
+import com.zeki.demo.exerciselibrary.domain.ExerciseLibraryListCriteria;
+import com.zeki.demo.exerciselibrary.domain.ExerciseLibrarySearchCriteria;
+import com.zeki.demo.exerciselibrary.domain.ExerciseMuscle;
+import com.zeki.demo.exerciselibrary.domain.ExerciseReference;
 import java.util.List;
 
 public interface ExerciseLibraryService {

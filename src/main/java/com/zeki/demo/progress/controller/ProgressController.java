@@ -1,7 +1,7 @@
 package com.zeki.demo.progress.controller;
 
 import com.zeki.demo.progress.dto.ProgressResponse;
-import com.zeki.demo.progress.mapperDtoDomain.ProgressDtoDomain;
+import com.zeki.demo.progress.mapperdtodomain.ProgressDtoDomain;
 import com.zeki.demo.progress.service.ProgressService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

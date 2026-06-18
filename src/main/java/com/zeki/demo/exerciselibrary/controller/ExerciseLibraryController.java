@@ -1,13 +1,13 @@
-package com.zeki.demo.exerciseLibrary.controller;
+package com.zeki.demo.exerciselibrary.controller;
 
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryItemResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryListRequest;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibraryResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseLibrarySearchRequest;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseMuscleResponse;
-import com.zeki.demo.exerciseLibrary.dto.ExerciseReferenceResponse;
-import com.zeki.demo.exerciseLibrary.mapperDtoDomain.ExerciseLibraryDtoDomain;
-import com.zeki.demo.exerciseLibrary.service.ExerciseLibraryService;
+import com.zeki.demo.exerciselibrary.dto.ExerciseLibraryItemResponse;
+import com.zeki.demo.exerciselibrary.dto.ExerciseLibraryListRequest;
+import com.zeki.demo.exerciselibrary.dto.ExerciseLibraryResponse;
+import com.zeki.demo.exerciselibrary.dto.ExerciseLibrarySearchRequest;
+import com.zeki.demo.exerciselibrary.dto.ExerciseMuscleResponse;
+import com.zeki.demo.exerciselibrary.dto.ExerciseReferenceResponse;
+import com.zeki.demo.exerciselibrary.mapperdtodomain.ExerciseLibraryDtoDomain;
+import com.zeki.demo.exerciselibrary.service.ExerciseLibraryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

@@ -6,7 +6,7 @@ import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.mail.EmailService;
 import com.zeki.demo.users.domain.User;
 import com.zeki.demo.users.dto.UpdateUserRequest;
-import com.zeki.demo.users.mapperDtoDomain.UserDtoDomain;
+import com.zeki.demo.users.mapperdtodomain.UserDtoDomain;
 import com.zeki.demo.users.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;

@@ -1,7 +1,7 @@
 package com.zeki.demo.users.repository;
 
 import com.zeki.demo.users.domain.User;
-import com.zeki.demo.users.mapperDomainEntity.UserDomainEntity;
+import com.zeki.demo.users.mapperdomainentity.UserDomainEntity;
 import com.zeki.demo.users.repository.jpa.UserRepoJPA;
 import java.time.LocalDateTime;
 import java.util.List;

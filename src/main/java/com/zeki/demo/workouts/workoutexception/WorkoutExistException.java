@@ -1,4 +1,4 @@
-package com.zeki.demo.workouts.WorkoutException;
+package com.zeki.demo.workouts.workoutexception;
 
 
 public class WorkoutExistException extends RuntimeException {

@@ -1,10 +1,10 @@
-package com.zeki.demo.Unit;
+package com.zeki.demo.unit;
 
 import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutProgressRequest;
 import com.zeki.demo.liveworkouts.entity.LiveWorkoutRoomEntity;
-import com.zeki.demo.liveworkouts.mapperEntityDomain.LiveWorkoutRoomEntityMapper;
+import com.zeki.demo.liveworkouts.mapperentitydomain.LiveWorkoutRoomEntityMapper;
 import com.zeki.demo.liveworkouts.repository.LiveWorkoutRoomRepository;
 import com.zeki.demo.liveworkouts.repository.LiveWorkoutRoomRepositoryImpl;
 import com.zeki.demo.liveworkouts.repository.jpa.LiveWorkoutRoomRepoJPA;

@@ -1,4 +1,4 @@
-package com.zeki.demo.workouts.mapperDtoDomain;
+package com.zeki.demo.workouts.mapperdtodomain;
 
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.domain.WorkoutExercise;

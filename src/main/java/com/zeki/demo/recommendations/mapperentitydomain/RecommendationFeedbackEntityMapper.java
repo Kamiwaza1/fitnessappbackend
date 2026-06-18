@@ -1,4 +1,4 @@
-package com.zeki.demo.recommendations.mapperEntityDomain;
+package com.zeki.demo.recommendations.mapperentitydomain;
 
 import com.zeki.demo.recommendations.domain.RecommendationFeedback;
 import com.zeki.demo.recommendations.entity.RecommendationFeedbackEntity;

@@ -1,12 +1,12 @@
-package com.zeki.demo.Unit;
+package com.zeki.demo.unit;
 
 import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.common.exception.ExternalServiceException;
 import com.zeki.demo.common.exception.NotFoundException;
-import com.zeki.demo.exerciseLibrary.client.WgerExerciseClient;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrarySearchCriteria;
-import com.zeki.demo.exerciseLibrary.entity.ExerciseLibraryEntity;
-import com.zeki.demo.exerciseLibrary.entity.ExerciseLibraryItemEntity;
+import com.zeki.demo.exerciselibrary.client.WgerExerciseClient;
+import com.zeki.demo.exerciselibrary.domain.ExerciseLibrarySearchCriteria;
+import com.zeki.demo.exerciselibrary.entity.ExerciseLibraryEntity;
+import com.zeki.demo.exerciselibrary.entity.ExerciseLibraryItemEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

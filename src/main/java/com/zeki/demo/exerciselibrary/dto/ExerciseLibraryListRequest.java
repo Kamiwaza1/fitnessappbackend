@@ -1,4 +1,4 @@
-package com.zeki.demo.exerciseLibrary.dto;
+package com.zeki.demo.exerciselibrary.dto;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

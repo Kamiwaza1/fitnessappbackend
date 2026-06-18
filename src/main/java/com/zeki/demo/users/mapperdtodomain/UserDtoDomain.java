@@ -1,4 +1,4 @@
-package com.zeki.demo.users.mapperDtoDomain;
+package com.zeki.demo.users.mapperdtodomain;
 
 import com.zeki.demo.users.domain.User;
 import com.zeki.demo.users.dto.AuthResponse;

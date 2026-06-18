@@ -1,6 +1,6 @@
-package com.zeki.demo.WorkoutHistory.repository;
+package com.zeki.demo.workouthistory.repository;
 
-import com.zeki.demo.WorkoutHistory.domain.WorkoutHistory;
+import com.zeki.demo.workouthistory.domain.WorkoutHistory;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

@@ -1,7 +1,7 @@
 package com.zeki.demo.recommendations.repository;
 
 import com.zeki.demo.recommendations.domain.RecommendationFeedback;
-import com.zeki.demo.recommendations.mapperEntityDomain.RecommendationFeedbackEntityMapper;
+import com.zeki.demo.recommendations.mapperentitydomain.RecommendationFeedbackEntityMapper;
 import com.zeki.demo.recommendations.repository.jpa.RecommendationFeedbackRepoJPA;
 import java.util.List;
 import java.util.Optional;

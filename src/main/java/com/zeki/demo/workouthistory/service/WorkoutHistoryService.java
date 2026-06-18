@@ -1,7 +1,7 @@
-package com.zeki.demo.WorkoutHistory.service;
+package com.zeki.demo.workouthistory.service;
 
-import com.zeki.demo.WorkoutHistory.domain.WorkoutHistory;
-import com.zeki.demo.WorkoutHistory.dto.CreateWorkoutHistoryRequest;
+import com.zeki.demo.workouthistory.domain.WorkoutHistory;
+import com.zeki.demo.workouthistory.dto.CreateWorkoutHistoryRequest;
 import java.util.List;
 import java.util.UUID;
 

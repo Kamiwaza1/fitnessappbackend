@@ -1,4 +1,4 @@
-package com.zeki.demo.nutrition.mapperEntityDomain;
+package com.zeki.demo.nutrition.mapperentitydomain;
 
 import com.zeki.demo.nutrition.domain.Nutrition;
 import com.zeki.demo.nutrition.entity.NutritionEntity;

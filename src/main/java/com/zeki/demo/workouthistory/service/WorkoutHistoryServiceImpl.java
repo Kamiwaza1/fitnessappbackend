@@ -1,10 +1,10 @@
-package com.zeki.demo.WorkoutHistory.service;
+package com.zeki.demo.workouthistory.service;
 
-import com.zeki.demo.WorkoutHistory.domain.WorkoutHistory;
-import com.zeki.demo.WorkoutHistory.dto.CreateWorkoutHistoryRequest;
-import com.zeki.demo.WorkoutHistory.mapperDtoDomain.WorkoutHistoryDtoDomain;
-import com.zeki.demo.WorkoutHistory.repository.WorkoutHistoryRepository;
-import com.zeki.demo.workouts.WorkoutException.WorkoutExistException;
+import com.zeki.demo.workouthistory.domain.WorkoutHistory;
+import com.zeki.demo.workouthistory.dto.CreateWorkoutHistoryRequest;
+import com.zeki.demo.workouthistory.mapperdtodomain.WorkoutHistoryDtoDomain;
+import com.zeki.demo.workouthistory.repository.WorkoutHistoryRepository;
+import com.zeki.demo.workouts.workoutexception.WorkoutExistException;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.repository.WorkoutRepository;
 import java.util.List;

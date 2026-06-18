@@ -1,11 +1,11 @@
-package com.zeki.demo.Unit;
+package com.zeki.demo.unit;
 
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.dto.CreateWorkoutRequest;
 import com.zeki.demo.workouts.dto.WorkoutResponse;
 import com.zeki.demo.workouts.enums.MuscleType;
 import com.zeki.demo.workouts.enums.WorkoutCategory;
-import com.zeki.demo.workouts.mapperDtoDomain.WorkoutDtoDomain;
+import com.zeki.demo.workouts.mapperdtodomain.WorkoutDtoDomain;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;

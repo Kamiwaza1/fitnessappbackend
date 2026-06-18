@@ -1,7 +1,7 @@
-package com.zeki.demo.Unit;
+package com.zeki.demo.unit;
 
-import com.zeki.demo.WorkoutHistory.domain.WorkoutHistory;
-import com.zeki.demo.WorkoutHistory.repository.WorkoutHistoryRepository;
+import com.zeki.demo.workouthistory.domain.WorkoutHistory;
+import com.zeki.demo.workouthistory.repository.WorkoutHistoryRepository;
 import com.zeki.demo.recommendations.rules.DifficultyMatchRule;
 import com.zeki.demo.recommendations.rules.GoalMatchRule;
 import com.zeki.demo.recommendations.rules.MuscleBalanceRule;

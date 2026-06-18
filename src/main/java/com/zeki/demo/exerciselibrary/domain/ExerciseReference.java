@@ -1,4 +1,4 @@
-package com.zeki.demo.exerciseLibrary.domain;
+package com.zeki.demo.exerciselibrary.domain;
 
 public record ExerciseReference(
         Integer id,

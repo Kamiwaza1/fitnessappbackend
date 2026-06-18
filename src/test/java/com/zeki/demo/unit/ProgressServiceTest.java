@@ -1,4 +1,4 @@
-package com.zeki.demo.Unit;
+package com.zeki.demo.unit;
 
 import com.zeki.demo.progress.domain.Progress;
 import com.zeki.demo.progress.repository.ProgressRepository;

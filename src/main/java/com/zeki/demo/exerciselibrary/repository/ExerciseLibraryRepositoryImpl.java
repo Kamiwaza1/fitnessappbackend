@@ -1,13 +1,13 @@
-package com.zeki.demo.exerciseLibrary.repository;
+package com.zeki.demo.exerciselibrary.repository;
 
-import com.zeki.demo.exerciseLibrary.client.WgerExerciseClient;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrary;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseLibraryItem;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseLibraryListCriteria;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrarySearchCriteria;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseMuscle;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseReference;
-import com.zeki.demo.exerciseLibrary.mapperEntityDomain.ExerciseLibraryEntityMapper;
+import com.zeki.demo.exerciselibrary.client.WgerExerciseClient;
+import com.zeki.demo.exerciselibrary.domain.ExerciseLibrary;
+import com.zeki.demo.exerciselibrary.domain.ExerciseLibraryItem;
+import com.zeki.demo.exerciselibrary.domain.ExerciseLibraryListCriteria;
+import com.zeki.demo.exerciselibrary.domain.ExerciseLibrarySearchCriteria;
+import com.zeki.demo.exerciselibrary.domain.ExerciseMuscle;
+import com.zeki.demo.exerciselibrary.domain.ExerciseReference;
+import com.zeki.demo.exerciselibrary.mapperentitydomain.ExerciseLibraryEntityMapper;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

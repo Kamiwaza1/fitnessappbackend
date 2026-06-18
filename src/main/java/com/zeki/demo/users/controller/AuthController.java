@@ -1,7 +1,7 @@
 package com.zeki.demo.users.controller;
 
 import com.zeki.demo.users.dto.*;
-import com.zeki.demo.users.mapperDtoDomain.UserDtoDomain;
+import com.zeki.demo.users.mapperdtodomain.UserDtoDomain;
 import com.zeki.demo.users.security.JwtCookieService;
 import com.zeki.demo.users.service.AuthService;
 import com.zeki.demo.users.service.AuthServiceImpl;

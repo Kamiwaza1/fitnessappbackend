@@ -1,4 +1,4 @@
-package com.zeki.demo.WorkoutHistory.dto;
+package com.zeki.demo.workouthistory.dto;
 
 import com.zeki.demo.workouts.enums.WorkoutCategory;
 import com.zeki.demo.workouts.enums.MuscleType;

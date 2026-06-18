@@ -1,8 +1,8 @@
-package com.zeki.demo.progress.mapperDtoDomain;
+package com.zeki.demo.progress.mapperdtodomain;
 
 import com.zeki.demo.progress.domain.Progress;
 import com.zeki.demo.progress.dto.ProgressResponse;
-import com.zeki.demo.workouts.mapperDtoDomain.WorkoutDtoDomain;
+import com.zeki.demo.workouts.mapperdtodomain.WorkoutDtoDomain;
 import org.springframework.stereotype.Component;
 
 @Component

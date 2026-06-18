@@ -1,7 +1,7 @@
 package com.zeki.demo.recommendations.rules;
 
-import com.zeki.demo.WorkoutHistory.domain.WorkoutHistory;
-import com.zeki.demo.WorkoutHistory.repository.WorkoutHistoryRepository;
+import com.zeki.demo.workouthistory.domain.WorkoutHistory;
+import com.zeki.demo.workouthistory.repository.WorkoutHistoryRepository;
 import com.zeki.demo.users.domain.User;
 import com.zeki.demo.workouts.domain.Workout;
 import java.time.LocalDate;

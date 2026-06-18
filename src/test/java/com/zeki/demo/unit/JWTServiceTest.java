@@ -1,4 +1,4 @@
-package com.zeki.demo.Unit;
+package com.zeki.demo.unit;
 
 import com.zeki.demo.users.security.JWTService;
 import org.junit.jupiter.api.BeforeEach;

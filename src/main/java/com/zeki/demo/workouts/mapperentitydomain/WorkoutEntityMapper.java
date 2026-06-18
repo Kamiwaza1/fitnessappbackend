@@ -1,4 +1,4 @@
-package com.zeki.demo.workouts.mapperEntityDomain;
+package com.zeki.demo.workouts.mapperentitydomain;
 
 import com.zeki.demo.users.entity.UserEntity;
 import com.zeki.demo.workouts.domain.Workout;

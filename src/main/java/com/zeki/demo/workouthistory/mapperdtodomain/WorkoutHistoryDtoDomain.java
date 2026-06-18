@@ -1,8 +1,8 @@
-package com.zeki.demo.WorkoutHistory.mapperDtoDomain;
+package com.zeki.demo.workouthistory.mapperdtodomain;
 
-import com.zeki.demo.WorkoutHistory.domain.WorkoutHistory;
-import com.zeki.demo.WorkoutHistory.dto.CreateWorkoutHistoryRequest;
-import com.zeki.demo.WorkoutHistory.dto.WorkoutHistoryResponse;
+import com.zeki.demo.workouthistory.domain.WorkoutHistory;
+import com.zeki.demo.workouthistory.dto.CreateWorkoutHistoryRequest;
+import com.zeki.demo.workouthistory.dto.WorkoutHistoryResponse;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.enums.MuscleType;
 import com.zeki.demo.workouts.enums.WorkoutCategory;

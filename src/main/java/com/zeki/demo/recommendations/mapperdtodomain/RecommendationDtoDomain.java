@@ -1,4 +1,4 @@
-package com.zeki.demo.recommendations.mapperDtoDomain;
+package com.zeki.demo.recommendations.mapperdtodomain;
 
 import com.zeki.demo.recommendations.domain.WorkoutRecommendation;
 import com.zeki.demo.recommendations.dto.WorkoutRecommendationResponse;

@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @EnableJpaRepositories(basePackages = {
-		"com.zeki.demo.WorkoutHistory.repository.jpa",
+		"com.zeki.demo.workouthistory.repository.jpa",
 		"com.zeki.demo.liveworkouts.repository.jpa",
 		"com.zeki.demo.nutrition.repository.jpa",
 		"com.zeki.demo.recommendations.repository.jpa",

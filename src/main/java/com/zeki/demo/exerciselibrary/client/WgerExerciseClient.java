@@ -1,18 +1,18 @@
-package com.zeki.demo.exerciseLibrary.client;
+package com.zeki.demo.exerciselibrary.client;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.common.exception.ExternalServiceException;
 import com.zeki.demo.common.exception.NotFoundException;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrarySearchCriteria;
-import com.zeki.demo.exerciseLibrary.entity.ExerciseImageEntity;
-import com.zeki.demo.exerciseLibrary.entity.ExerciseLibraryEntity;
-import com.zeki.demo.exerciseLibrary.entity.ExerciseLibraryItemEntity;
-import com.zeki.demo.exerciseLibrary.entity.ExerciseLicenseEntity;
-import com.zeki.demo.exerciseLibrary.entity.ExerciseMuscleEntity;
-import com.zeki.demo.exerciseLibrary.entity.ExerciseReferenceEntity;
-import com.zeki.demo.exerciseLibrary.entity.ExerciseVideoEntity;
+import com.zeki.demo.exerciselibrary.domain.ExerciseLibrarySearchCriteria;
+import com.zeki.demo.exerciselibrary.entity.ExerciseImageEntity;
+import com.zeki.demo.exerciselibrary.entity.ExerciseLibraryEntity;
+import com.zeki.demo.exerciselibrary.entity.ExerciseLibraryItemEntity;
+import com.zeki.demo.exerciselibrary.entity.ExerciseLicenseEntity;
+import com.zeki.demo.exerciselibrary.entity.ExerciseMuscleEntity;
+import com.zeki.demo.exerciselibrary.entity.ExerciseReferenceEntity;
+import com.zeki.demo.exerciselibrary.entity.ExerciseVideoEntity;
 import java.net.URI;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;

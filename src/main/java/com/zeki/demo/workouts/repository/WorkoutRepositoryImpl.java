@@ -5,7 +5,7 @@ import com.zeki.demo.users.entity.UserEntity;
 import com.zeki.demo.users.repository.jpa.UserRepoJPA;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.entity.WorkoutEntity;
-import com.zeki.demo.workouts.mapperEntityDomain.WorkoutEntityMapper;
+import com.zeki.demo.workouts.mapperentitydomain.WorkoutEntityMapper;
 import com.zeki.demo.workouts.repository.jpa.WorkoutRepoJPA;
 import java.time.LocalDate;
 import java.util.List;

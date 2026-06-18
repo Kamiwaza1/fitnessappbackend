@@ -1,11 +1,11 @@
-package com.zeki.demo.Unit;
+package com.zeki.demo.unit;
 
-import com.zeki.demo.nutrition.NutritionException.NutritionExistException;
+import com.zeki.demo.nutrition.nutritionexception.NutritionExistException;
 import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.nutrition.domain.Nutrition;
 import com.zeki.demo.nutrition.dto.UpdateNutritionRequest;
 import com.zeki.demo.nutrition.enums.NutritionCategory;
-import com.zeki.demo.nutrition.mapperDtoDomain.NutritionDtoDomain;
+import com.zeki.demo.nutrition.mapperdtodomain.NutritionDtoDomain;
 import com.zeki.demo.nutrition.repository.FoodProductRepository;
 import com.zeki.demo.nutrition.repository.NutritionRepository;
 import com.zeki.demo.nutrition.service.NutritionServiceImpl;

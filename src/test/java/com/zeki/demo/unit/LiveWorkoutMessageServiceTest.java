@@ -1,4 +1,4 @@
-package com.zeki.demo.Unit;
+package com.zeki.demo.unit;
 
 import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.common.exception.UnauthorizedException;
@@ -70,7 +70,7 @@ class LiveWorkoutMessageServiceTest {
     }
 
     @Test
-    void getRecentMessagesRequiresParticipant() {
+    void getRecentMessagesAllowsAuthenticatedRoomViewers() {
         LiveWorkoutRoom room = LiveWorkoutRoom.create(ROOM_CODE, HOST_EMAIL, UUID.randomUUID(), "Push");
         LiveWorkoutMessage message = LiveWorkoutMessage.create(ROOM_CODE, HOST_EMAIL, "hello");
 
@@ -78,9 +78,6 @@ class LiveWorkoutMessageServiceTest {
         when(liveWorkoutMessageRepository.findRecentByRoomCode(ROOM_CODE, 100)).thenReturn(List.of(message));
 
         assertEquals(List.of(message), liveWorkoutMessageService.getRecentMessages(ROOM_CODE, HOST_EMAIL));
-        assertThrows(
-                UnauthorizedException.class,
-                () -> liveWorkoutMessageService.getRecentMessages(ROOM_CODE, GUEST_EMAIL)
-        );
+        assertEquals(List.of(message), liveWorkoutMessageService.getRecentMessages(ROOM_CODE, GUEST_EMAIL));
     }
 }

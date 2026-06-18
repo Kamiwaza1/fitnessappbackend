@@ -1,4 +1,4 @@
-package com.zeki.demo.Integration;
+package com.zeki.demo.integration;
 
 import com.zeki.demo.liveworkouts.config.WebSocketAuthChannelInterceptor;
 import com.zeki.demo.liveworkouts.config.WebSocketConfig;

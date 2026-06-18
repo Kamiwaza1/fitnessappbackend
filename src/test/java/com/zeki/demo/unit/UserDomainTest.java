@@ -1,4 +1,4 @@
-package com.zeki.demo.Unit;
+package com.zeki.demo.unit;
 
 import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.users.domain.User;

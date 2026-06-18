@@ -1,4 +1,4 @@
-package com.zeki.demo.exerciseLibrary.entity;
+package com.zeki.demo.exerciselibrary.entity;
 
 public record ExerciseImageEntity(
         Integer id,

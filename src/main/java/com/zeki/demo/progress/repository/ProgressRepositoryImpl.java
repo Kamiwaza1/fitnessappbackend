@@ -1,7 +1,7 @@
 package com.zeki.demo.progress.repository;
 
 import com.zeki.demo.workouts.domain.Workout;
-import com.zeki.demo.workouts.mapperEntityDomain.WorkoutEntityMapper;
+import com.zeki.demo.workouts.mapperentitydomain.WorkoutEntityMapper;
 import com.zeki.demo.workouts.repository.jpa.WorkoutRepoJPA;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

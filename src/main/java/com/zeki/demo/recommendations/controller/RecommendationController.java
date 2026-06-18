@@ -1,10 +1,10 @@
 package com.zeki.demo.recommendations.controller;
 
 import com.zeki.demo.recommendations.dto.WorkoutRecommendationResponse;
-import com.zeki.demo.recommendations.mapperDtoDomain.RecommendationDtoDomain;
+import com.zeki.demo.recommendations.mapperdtodomain.RecommendationDtoDomain;
 import com.zeki.demo.recommendations.service.RecommendationService;
 import com.zeki.demo.workouts.dto.WorkoutResponse;
-import com.zeki.demo.workouts.mapperDtoDomain.WorkoutDtoDomain;
+import com.zeki.demo.workouts.mapperdtodomain.WorkoutDtoDomain;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;

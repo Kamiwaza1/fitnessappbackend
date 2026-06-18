@@ -1,19 +1,19 @@
-package com.zeki.demo.exerciseLibrary.mapperEntityDomain;
+package com.zeki.demo.exerciselibrary.mapperentitydomain;
 
-import com.zeki.demo.exerciseLibrary.domain.ExerciseImage;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseLibrary;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseLibraryItem;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseLicense;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseMuscle;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseReference;
-import com.zeki.demo.exerciseLibrary.domain.ExerciseVideo;
-import com.zeki.demo.exerciseLibrary.entity.ExerciseImageEntity;
-import com.zeki.demo.exerciseLibrary.entity.ExerciseLibraryEntity;
-import com.zeki.demo.exerciseLibrary.entity.ExerciseLibraryItemEntity;
-import com.zeki.demo.exerciseLibrary.entity.ExerciseLicenseEntity;
-import com.zeki.demo.exerciseLibrary.entity.ExerciseMuscleEntity;
-import com.zeki.demo.exerciseLibrary.entity.ExerciseReferenceEntity;
-import com.zeki.demo.exerciseLibrary.entity.ExerciseVideoEntity;
+import com.zeki.demo.exerciselibrary.domain.ExerciseImage;
+import com.zeki.demo.exerciselibrary.domain.ExerciseLibrary;
+import com.zeki.demo.exerciselibrary.domain.ExerciseLibraryItem;
+import com.zeki.demo.exerciselibrary.domain.ExerciseLicense;
+import com.zeki.demo.exerciselibrary.domain.ExerciseMuscle;
+import com.zeki.demo.exerciselibrary.domain.ExerciseReference;
+import com.zeki.demo.exerciselibrary.domain.ExerciseVideo;
+import com.zeki.demo.exerciselibrary.entity.ExerciseImageEntity;
+import com.zeki.demo.exerciselibrary.entity.ExerciseLibraryEntity;
+import com.zeki.demo.exerciselibrary.entity.ExerciseLibraryItemEntity;
+import com.zeki.demo.exerciselibrary.entity.ExerciseLicenseEntity;
+import com.zeki.demo.exerciselibrary.entity.ExerciseMuscleEntity;
+import com.zeki.demo.exerciselibrary.entity.ExerciseReferenceEntity;
+import com.zeki.demo.exerciselibrary.entity.ExerciseVideoEntity;
 import java.util.List;
 import org.springframework.stereotype.Component;
 

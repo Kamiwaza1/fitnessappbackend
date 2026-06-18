@@ -71,6 +71,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/progress/**").hasAnyRole("USER")
                         .requestMatchers("/api/v1/workout-history/**", "/api/v1/workout-histories/**").hasAnyRole("USER")
                         .requestMatchers("/api/v1/nutrition/**").hasAnyRole("USER")
+                        .requestMatchers("/api/v1/live-workouts/**").hasAnyRole("USER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

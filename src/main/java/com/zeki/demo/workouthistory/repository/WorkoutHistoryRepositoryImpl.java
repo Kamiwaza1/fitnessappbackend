@@ -1,8 +1,8 @@
-package com.zeki.demo.WorkoutHistory.repository;
+package com.zeki.demo.workouthistory.repository;
 
-import com.zeki.demo.WorkoutHistory.domain.WorkoutHistory;
-import com.zeki.demo.WorkoutHistory.mapperEntityDomain.WorkoutHistoryEntityMapper;
-import com.zeki.demo.WorkoutHistory.repository.jpa.WorkoutHistoryRepoJPA;
+import com.zeki.demo.workouthistory.domain.WorkoutHistory;
+import com.zeki.demo.workouthistory.mapperentitydomain.WorkoutHistoryEntityMapper;
+import com.zeki.demo.workouthistory.repository.jpa.WorkoutHistoryRepoJPA;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package com.zeki.demo.Unit;
+package com.zeki.demo.unit;
 
 import com.zeki.demo.liveworkouts.enums.LiveWorkoutEventType;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutEventResponse;
