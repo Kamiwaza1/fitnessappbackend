@@ -62,7 +62,6 @@ build-sonar:
   allow_failure: true
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
-    - if: '$CI_COMMIT_BRANCH == "development"'
     - if: '$CI_COMMIT_BRANCH == "Development"'
 
 docker:
@@ -79,7 +78,9 @@ docker:
     - |
       if [ "$CI_COMMIT_BRANCH" = "main" ]; then
         echo "Triggering Coolify deployment"
-        curl -fsSL "$COOLIFY_WEBHOOK"
+        curl -fsSL \
+          -H "Authorization: Bearer $COOLIFY_TOKEN" \
+          "$COOLIFY_WEBHOOK"
       else
         echo "Skipping Coolify deployment for $CI_COMMIT_BRANCH"
       fi
