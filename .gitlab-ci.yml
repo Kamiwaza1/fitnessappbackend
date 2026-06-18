@@ -71,9 +71,14 @@ docker:
 
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
-    - docker build -t kamiwaza01/fitnessappbackend:latest .
+    - docker buildx create --use --name multiarch-builder || docker buildx use multiarch-builder
 
-    - docker push kamiwaza01/fitnessappbackend:latest
+    - |
+      docker buildx build \
+        --platform linux/amd64 \
+        -t kamiwaza01/fitnessappbackend:latest \
+        --push \
+        .
 
     - |
       if [ "$CI_COMMIT_BRANCH" = "main" ]; then
@@ -84,11 +89,3 @@ docker:
       else
         echo "Skipping Coolify deployment for $CI_COMMIT_BRANCH"
       fi
-
-  artifacts:
-    paths:
-      - build/libs/
-    expire_in: 4 weeks
-
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
