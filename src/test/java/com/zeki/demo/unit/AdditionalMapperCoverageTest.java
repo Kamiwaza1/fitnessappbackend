@@ -170,6 +170,39 @@ class AdditionalMapperCoverageTest {
     }
 
     @Test
+    void liveWorkoutRoomEntityMapperDefaultsNullParticipantFields() {
+        Instant createdAt = Instant.now().minusSeconds(60);
+        Instant lastActivityAt = Instant.now();
+        UUID workoutId = UUID.randomUUID();
+        LiveWorkoutRoomEntity entity = LiveWorkoutRoomEntity.builder()
+                .roomCode("ROOM3")
+                .hostEmail("host@example.com")
+                .workoutId(workoutId)
+                .workoutName("Push")
+                .status("ACTIVE")
+                .createdAt(createdAt)
+                .lastActivityAt(lastActivityAt)
+                .participants(new java.util.ArrayList<>(java.util.Arrays.asList(null, LiveWorkoutParticipantValue.builder()
+                        .email("user@example.com")
+                        .displayName(null)
+                        .status(null)
+                        .currentExerciseIndex(null)
+                        .completedSets(null)
+                        .joinedAt(null)
+                        .build())))
+                .build();
+
+        LiveWorkoutRoom room = new LiveWorkoutRoomEntityMapper().toDomain(entity);
+        LiveWorkoutParticipant participant = room.participants().get("user@example.com");
+
+        assertEquals("user", participant.displayName());
+        assertEquals("ACTIVE", participant.status());
+        assertEquals(0, participant.currentExerciseIndex());
+        assertEquals(0, participant.completedSets());
+        assertEquals(createdAt, participant.joinedAt());
+    }
+
+    @Test
     void workoutHistoryMappersMapEntityAndResponse() {
         UUID workoutId = UUID.randomUUID();
         LocalDate now = LocalDate.now();

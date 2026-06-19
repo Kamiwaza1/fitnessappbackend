@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,16 +18,20 @@ public class LiveWorkoutRoomEntityMapper {
     public LiveWorkoutRoom toDomain(LiveWorkoutRoomEntity entity) {
         Map<String, LiveWorkoutParticipant> participants = new LinkedHashMap<>();
         entity.getParticipants().stream()
-                .sorted(Comparator.comparing(LiveWorkoutParticipantValue::getJoinedAt))
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(
+                        participant -> participantJoinedAt(participant, entity.getCreatedAt()),
+                        Comparator.nullsLast(Comparator.naturalOrder())
+                ))
                 .forEach(participant -> participants.put(
                         participant.getEmail(),
                         new LiveWorkoutParticipant(
                                 participant.getEmail(),
-                                participant.getDisplayName(),
-                                participant.getStatus(),
-                                participant.getCurrentExerciseIndex(),
-                                participant.getCompletedSets(),
-                                participant.getJoinedAt()
+                                defaultDisplayName(participant),
+                                defaultStatus(participant),
+                                defaultNumber(participant.getCurrentExerciseIndex()),
+                                defaultNumber(participant.getCompletedSets()),
+                                participantJoinedAt(participant, entity.getCreatedAt())
                         )
                 ));
         return new LiveWorkoutRoom(
@@ -48,7 +53,7 @@ public class LiveWorkoutRoomEntityMapper {
                         .status(participant.status())
                         .currentExerciseIndex(participant.currentExerciseIndex())
                         .completedSets(participant.completedSets())
-                        .joinedAt(participant.joinedAt())
+                        .joinedAt(participant.joinedAt() == null ? room.createdAt() : participant.joinedAt())
                         .build())
                 .toList();
         return LiveWorkoutRoomEntity.builder()
@@ -62,5 +67,31 @@ public class LiveWorkoutRoomEntityMapper {
                 .closedAt(closedAt)
                 .participants(participants)
                 .build();
+    }
+
+    private Instant participantJoinedAt(LiveWorkoutParticipantValue participant, Instant roomCreatedAt) {
+        return participant.getJoinedAt() == null ? roomCreatedAt : participant.getJoinedAt();
+    }
+
+    private String defaultDisplayName(LiveWorkoutParticipantValue participant) {
+        if (participant.getDisplayName() != null && !participant.getDisplayName().isBlank()) {
+            return participant.getDisplayName();
+        }
+        String email = participant.getEmail();
+        if (email == null || email.isBlank()) {
+            return "User";
+        }
+        int atIndex = email.indexOf("@");
+        return atIndex > 0 ? email.substring(0, atIndex) : email;
+    }
+
+    private String defaultStatus(LiveWorkoutParticipantValue participant) {
+        return participant.getStatus() == null || participant.getStatus().isBlank()
+                ? "ACTIVE"
+                : participant.getStatus();
+    }
+
+    private Integer defaultNumber(Integer value) {
+        return value == null ? 0 : value;
     }
 }

@@ -4,7 +4,6 @@ import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
@@ -17,7 +16,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final WebSocketAuthChannelInterceptor webSocketAuthChannelInterceptor;
-    private final ObjectProvider<WebSocketCookieAuthHandshakeInterceptor> webSocketCookieAuthHandshakeInterceptor;
+    private final WebSocketCookieAuthHandshakeInterceptor webSocketCookieAuthHandshakeInterceptor;
 
     @Value("${cors.allowed-origins:http://localhost:3000,http://127.0.0.1:3000}")
     private String allowedOrigins;
@@ -36,7 +35,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .toArray(String[]::new);
         var endpoint = registry.addEndpoint("/ws")
                 .setAllowedOrigins(origins);
-        webSocketCookieAuthHandshakeInterceptor.ifAvailable(endpoint::addInterceptors);
+        endpoint.addInterceptors(webSocketCookieAuthHandshakeInterceptor);
         endpoint.withSockJS();
     }
 

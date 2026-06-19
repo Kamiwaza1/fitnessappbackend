@@ -2,6 +2,7 @@ package com.zeki.demo.integration;
 
 import com.zeki.demo.liveworkouts.config.WebSocketAuthChannelInterceptor;
 import com.zeki.demo.liveworkouts.config.WebSocketConfig;
+import com.zeki.demo.liveworkouts.config.WebSocketCookieAuthHandshakeInterceptor;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -35,6 +36,9 @@ class WebSocketRuntimeTest {
 
     @MockitoBean
     private WebSocketAuthChannelInterceptor webSocketAuthChannelInterceptor;
+
+    @MockitoBean
+    private WebSocketCookieAuthHandshakeInterceptor webSocketCookieAuthHandshakeInterceptor;
 
     @Test
     void sockJsEndpointIsAvailableAtRuntime() throws Exception {
