@@ -67,3 +67,4 @@ package-lock.json
 ### Local Docker Compose overrides ###
 compose.override.yaml
 docker-compose.override.yml
+docs/Web Application Development Best Practices (Fitness Application).docx

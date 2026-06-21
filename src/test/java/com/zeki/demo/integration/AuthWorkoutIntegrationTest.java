@@ -39,7 +39,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AuthWorkoutIntegrationTest {
 
     private static final String EMAIL = "integration-user@example.com";
-    private static final String PASSWORD = "StrongPassword123!";
+    private static final String TEST_CREDENTIAL = "StrongPassword123!";
+    private static final String WORKOUT_NAME = "Integration Strength";
+    private static final String WORKOUTS_ENDPOINT = "/api/v1/workouts";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .findAndRegisterModules()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -76,12 +78,12 @@ class AuthWorkoutIntegrationTest {
     void registeredUserCanCreateAndListWorkout() throws Exception {
         Cookie accessTokenCookie = registerAndGetAccessTokenCookie();
 
-        mockMvc.perform(post("/api/v1/workouts")
+        mockMvc.perform(post(WORKOUTS_ENDPOINT)
                         .with(csrf())
                         .cookie(accessTokenCookie)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(OBJECT_MAPPER.writeValueAsString(new CreateWorkoutPayload(
-                                "Integration Strength",
+                                WORKOUT_NAME,
                                 LocalDate.now().plusDays(1),
                                 45,
                                 4,
@@ -94,20 +96,20 @@ class AuthWorkoutIntegrationTest {
                                 "INTERMEDIATE"
                         ))))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.workoutName").value("Integration Strength"))
+                .andExpect(jsonPath("$.workoutName").value(WORKOUT_NAME))
                 .andExpect(jsonPath("$.durationMinutes").value(45))
                 .andExpect(jsonPath("$.category").value("STRENGTH"));
 
-        mockMvc.perform(get("/api/v1/workouts")
+        mockMvc.perform(get(WORKOUTS_ENDPOINT)
                         .cookie(accessTokenCookie))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].workoutName").value("Integration Strength"))
+                .andExpect(jsonPath("$[0].workoutName").value(WORKOUT_NAME))
                 .andExpect(jsonPath("$[0].muscleType").value("FULL_BODY"));
     }
 
     @Test
     void workoutEndpointsRequireAuthentication() throws Exception {
-        mockMvc.perform(get("/api/v1/workouts"))
+        mockMvc.perform(get(WORKOUTS_ENDPOINT))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -118,7 +120,7 @@ class AuthWorkoutIntegrationTest {
                         .content(OBJECT_MAPPER.writeValueAsString(new RegisterPayload(
                                 "Integration User",
                                 EMAIL,
-                                PASSWORD
+                                TEST_CREDENTIAL
                         ))))
                 .andExpect(status().isCreated())
                 .andExpect(cookie().exists("ACCESS_TOKEN"))

@@ -54,6 +54,7 @@ public class WebSocketCookieAuthHandshakeInterceptor implements HandshakeInterce
             WebSocketHandler wsHandler,
             Exception exception
     ) {
+            // No implementation needed for afterHandshake in this case
     }
 
     private Authentication authenticate(String jwt) {

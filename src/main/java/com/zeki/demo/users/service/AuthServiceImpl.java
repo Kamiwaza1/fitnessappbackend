@@ -237,10 +237,18 @@ public class AuthServiceImpl implements AuthService {
     private String buildResetUrl(String rawToken) {
         String normalizedFrontendUrl = frontendUrl == null || frontendUrl.isBlank()
                 ? "http://localhost:3000"
-                : frontendUrl.trim().replaceAll("/+$", "");
+                : removeTrailingSlashes(frontendUrl.trim());
         return normalizedFrontendUrl
                 + "/reset-password?token="
                 + URLEncoder.encode(rawToken, StandardCharsets.UTF_8);
+    }
+
+    private String removeTrailingSlashes(String value) {
+        int endIndex = value.length();
+        while (endIndex > 0 && value.charAt(endIndex - 1) == '/') {
+            endIndex--;
+        }
+        return value.substring(0, endIndex);
     }
 
     private UserEntity toUserEntityReference(User user) {
