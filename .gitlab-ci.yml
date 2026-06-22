@@ -3,6 +3,7 @@ stages:
   - test
   - build-sonar
   - docker
+  - production
 
 variables:
   GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle-home"
@@ -11,24 +12,43 @@ variables:
   COOLIFY_WEBHOOK: "$COOLIFY_WEBHOOK"
 
 before_script:
-  - export JAVA_HOME=$(/usr/libexec/java_home -v 21)
-  - export PATH="$JAVA_HOME/bin:$PATH"
+  - |
+    if command -v /usr/libexec/java_home >/dev/null 2>&1; then
+      export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+      export PATH="$JAVA_HOME/bin:$PATH"
+    fi
   - java -version
   - chmod +x ./gradlew
   - mkdir -p "$GRADLE_USER_HOME"
   - ./gradlew --no-daemon --version
 
-build:
-  stage: build
-  script:
-    - ./gradlew --no-daemon classes
+.run_on_branches_and_merge_requests:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+
+.run_on_main:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
-    - if: '$CI_COMMIT_BRANCH == "development"'
-    - if: '$CI_COMMIT_BRANCH == "Development"'
+
+build:
+  stage: build
+  extends: .run_on_branches_and_merge_requests
+  script:
+    - ./gradlew --no-daemon classes
+  artifacts:
+    when: on_success
+    paths:
+      - build/classes/java/main/
+      - build/resources/main/
+    expire_in: 1 week
 
 test:
   stage: test
+  extends: .run_on_branches_and_merge_requests
+  needs:
+    - job: build
+      artifacts: true
   script:
     - ./gradlew --no-daemon test jacocoTestReport jacocoTestCoverageVerification
   artifacts:
@@ -40,13 +60,10 @@ test:
       - build/reports/jacoco/test/html/
       - build/reports/jacoco/test/jacocoTestReport.xml
     expire_in: 4 weeks
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-    - if: '$CI_COMMIT_BRANCH == "development"'
-    - if: '$CI_COMMIT_BRANCH == "Development"'
 
 build-sonar:
   stage: build-sonar
+  extends: .run_on_branches_and_merge_requests
   needs:
     - job: test
       artifacts: true
@@ -58,14 +75,12 @@ build-sonar:
   script:
     - echo "SONAR_TOKEN exists? ${SONAR_TOKEN:+yes}"
     - ls -la build/reports/jacoco/test/
-    - ./gradlew --no-daemon test jacocoTestReport jacocoTestCoverageVerification sonar -Dsonar.token="$SONAR_TOKEN" -Dsonar.qualitygate.wait="${SONAR_QUALITYGATE_WAIT:-false}"
-  allow_failure: true
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-    - if: '$CI_COMMIT_BRANCH == "Development"'
+    - ./gradlew --no-daemon sonar -Dsonar.token="$SONAR_TOKEN" -Dsonar.qualitygate.wait="${SONAR_QUALITYGATE_WAIT:-true}"
+  allow_failure: false
 
 docker:
   stage: docker
+  extends: .run_on_main
   script:
     - ./gradlew --no-daemon bootJar
 
@@ -80,12 +95,11 @@ docker:
         --push \
         .
 
-    - |
-      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
-        echo "Triggering Coolify deployment"
-        curl -fsSL \
-          -H "Authorization: Bearer $COOLIFY_TOKEN" \
-          "$COOLIFY_WEBHOOK"
-      else
-        echo "Skipping Coolify deployment for $CI_COMMIT_BRANCH"
-      fi
+production:
+  stage: production
+  extends: .run_on_main
+  needs:
+    - job: docker
+  script:
+    - echo "Triggering Coolify deployment"
+    - curl -fsSL -H "Authorization: Bearer $COOLIFY_TOKEN" "$COOLIFY_WEBHOOK"
