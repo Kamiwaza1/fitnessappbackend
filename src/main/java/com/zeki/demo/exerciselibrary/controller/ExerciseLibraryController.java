@@ -47,10 +47,7 @@ public class ExerciseLibraryController {
     }
 
     @Operation(summary = "Get an exercise by ID from the exercise library")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Exercise details"),
-            @ApiResponse(responseCode = "404", description = "Exercise not found")
-    })
+ 
     @GetMapping("/exercises/{exerciseId}")
     public ExerciseLibraryItemResponse getExerciseById(
             @PathVariable @Min(value = 1, message = "Exercise ID must be at least 1") Integer exerciseId,

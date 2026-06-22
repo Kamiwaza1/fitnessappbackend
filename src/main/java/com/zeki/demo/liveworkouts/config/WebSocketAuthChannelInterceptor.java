@@ -1,6 +1,7 @@
 package com.zeki.demo.liveworkouts.config;
 
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
 
     @Override
-    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+    public @Nullable Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         if (!isConnectCommand(accessor)) {
             return message;
