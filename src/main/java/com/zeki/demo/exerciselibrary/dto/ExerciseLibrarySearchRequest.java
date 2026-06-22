@@ -2,8 +2,10 @@ package com.zeki.demo.exerciselibrary.dto;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 
 public record ExerciseLibrarySearchRequest(
+        @Size(max = 100, message = "Search query cannot be longer than 100 characters")
         String q,
         @Min(value = 1, message = "Limit must be at least 1")
         @Max(value = 100, message = "Limit cannot be greater than 100")

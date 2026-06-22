@@ -3,6 +3,10 @@ package com.zeki.demo.unit;
 import com.zeki.demo.nutrition.nutritionexception.NutritionExistException;
 import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.nutrition.domain.Nutrition;
+import com.zeki.demo.nutrition.dto.FoodProductResponse;
+import com.zeki.demo.nutrition.dto.FoodProductSearchRequest;
+import com.zeki.demo.nutrition.dto.FoodProductsRequest;
+import com.zeki.demo.nutrition.dto.FoodProductsResponse;
 import com.zeki.demo.nutrition.dto.UpdateNutritionRequest;
 import com.zeki.demo.nutrition.enums.NutritionCategory;
 import com.zeki.demo.nutrition.mapperdtodomain.NutritionDtoDomain;
@@ -180,6 +184,87 @@ class NutritionServiceTest {
 
         assertEquals("Past nutrition entries cannot be changed", ex.getMessage());
         verify(nutritionRepository, never()).delete(nutritionId);
+    }
+
+    @Test
+    void foodProductSearchValidatesAndDelegates() {
+        FoodProductSearchRequest request = new FoodProductSearchRequest("apple", 10, 0, "en", "netherlands", true);
+        FoodProductsResponse response = new FoodProductsResponse(List.of(), 0, 0);
+        when(foodProductRepository.searchProducts(request)).thenReturn(response);
+
+        assertEquals(response, nutritionService.searchFoodProducts(request));
+        verify(foodProductRepository).searchProducts(request);
+    }
+
+    @Test
+    void foodProductSearchRejectsInvalidInputBeforeRepositoryCall() {
+        assertThrows(BadRequestException.class, () -> nutritionService.searchFoodProducts(null));
+        assertThrows(BadRequestException.class, () -> nutritionService.searchFoodProducts(
+                new FoodProductSearchRequest("a", 10, 0, "en", null, true)
+        ));
+        assertThrows(BadRequestException.class, () -> nutritionService.searchFoodProducts(
+                new FoodProductSearchRequest("apple", 0, 0, "en", null, true)
+        ));
+        assertThrows(BadRequestException.class, () -> nutritionService.searchFoodProducts(
+                new FoodProductSearchRequest("apple", 10, -1, "en", null, true)
+        ));
+        assertThrows(BadRequestException.class, () -> nutritionService.searchFoodProducts(
+                new FoodProductSearchRequest("apple", 10, 0, "eng", null, true)
+        ));
+        assertThrows(BadRequestException.class, () -> nutritionService.searchFoodProducts(
+                new FoodProductSearchRequest("apple", 10, 0, "en", "n".repeat(101), true)
+        ));
+
+        verify(foodProductRepository, never()).searchProducts(any());
+    }
+
+    @Test
+    void foodProductLookupValidatesBarcodeAndLanguage() {
+        FoodProductResponse response = new FoodProductResponse(
+                "123456",
+                "Apple",
+                52.0,
+                null,
+                0.3,
+                14.0,
+                0.2,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "100g",
+                List.of("Brand"),
+                List.of("Fruit"),
+                null,
+                "a",
+                1.0,
+                null,
+                null,
+                List.of("en:netherlands")
+        );
+        when(foodProductRepository.getProductByBarcode("123456", "en")).thenReturn(response);
+
+        assertEquals(response, nutritionService.getFoodProductByBarcode("123456", "en"));
+        assertThrows(BadRequestException.class, () -> nutritionService.getFoodProductByBarcode("abc", "en"));
+        assertThrows(BadRequestException.class, () -> nutritionService.getFoodProductByBarcode("123456", "english"));
+    }
+
+    @Test
+    void foodProductBrandAndCategoryValidateTagsAndPaging() {
+        FoodProductsRequest request = new FoodProductsRequest(10, 0, "en", "nl", true);
+        FoodProductsResponse response = new FoodProductsResponse(List.of(), 0, 0);
+        when(foodProductRepository.getProductsByBrand("fitco", request)).thenReturn(response);
+        when(foodProductRepository.getProductsByCategory("protein-bars", request)).thenReturn(response);
+
+        assertEquals(response, nutritionService.getFoodProductsByBrand("fitco", request));
+        assertEquals(response, nutritionService.getFoodProductsByCategory("protein-bars", request));
+
+        assertThrows(BadRequestException.class, () -> nutritionService.getFoodProductsByBrand("", request));
+        assertThrows(BadRequestException.class, () -> nutritionService.getFoodProductsByBrand("b".repeat(101), request));
+        assertThrows(BadRequestException.class, () -> nutritionService.getFoodProductsByCategory("protein", new FoodProductsRequest(101, 0, "en", null, true)));
+        assertThrows(BadRequestException.class, () -> nutritionService.getFoodProductsByCategory("protein", new FoodProductsRequest(10, 0, "eng", null, true)));
+        assertThrows(BadRequestException.class, () -> nutritionService.getFoodProductsByCategory("protein", new FoodProductsRequest(10, 0, "en", "n".repeat(101), true)));
     }
 
     private Nutrition validNutrition(UUID id, String userEmail) {

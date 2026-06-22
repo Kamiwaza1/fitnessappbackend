@@ -2,6 +2,8 @@ package com.zeki.demo.unit;
 
 import com.zeki.demo.workouthistory.domain.WorkoutHistory;
 import com.zeki.demo.workouthistory.dto.WorkoutHistoryResponse;
+import com.zeki.demo.workouthistory.dto.CreateWorkoutHistoryRequest;
+import com.zeki.demo.workouthistory.dto.WorkoutHistoryExerciseRequest;
 import com.zeki.demo.workouthistory.entity.WorkoutHistoryEntity;
 import com.zeki.demo.workouthistory.mapperdtodomain.WorkoutHistoryDtoDomain;
 import com.zeki.demo.workouthistory.mapperentitydomain.WorkoutHistoryEntityMapper;
@@ -38,10 +40,21 @@ import com.zeki.demo.liveworkouts.mapperdtodomain.LiveWorkoutMessageMapper;
 import com.zeki.demo.liveworkouts.mapperdtodomain.LiveWorkoutRoomMapper;
 import com.zeki.demo.liveworkouts.mapperentitydomain.LiveWorkoutMessageEntityMapper;
 import com.zeki.demo.liveworkouts.mapperentitydomain.LiveWorkoutRoomEntityMapper;
+import com.zeki.demo.recommendations.domain.RecommendationFeedback;
+import com.zeki.demo.recommendations.entity.RecommendationFeedbackEntity;
+import com.zeki.demo.recommendations.mapperentitydomain.RecommendationFeedbackEntityMapper;
+import com.zeki.demo.users.domain.User;
+import com.zeki.demo.users.dto.UpdateUserRequest;
+import com.zeki.demo.users.dto.UserResponse;
+import com.zeki.demo.users.enums.ExperienceLevel;
+import com.zeki.demo.users.mapperdtodomain.UserDtoDomain;
+import com.zeki.demo.workouthistory.domain.WorkoutHistory;
+import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.enums.MuscleType;
 import com.zeki.demo.workouts.enums.WorkoutCategory;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +63,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class AdditionalMapperCoverageTest {
 
@@ -229,6 +244,140 @@ class AdditionalMapperCoverageTest {
         assertEquals(workoutId, response.workoutId());
         assertEquals("Pull Day", response.workoutName());
         assertEquals(MuscleType.BACK, response.muscleType());
+    }
+
+    @Test
+    void workoutHistoryDtoMapperUsesSourceWorkoutFallbacks() {
+        UUID workoutId = UUID.randomUUID();
+        Workout sourceWorkout = mock(Workout.class);
+        LocalDate createdAt = LocalDate.now().minusDays(4);
+        CreateWorkoutHistoryRequest request = new CreateWorkoutHistoryRequest(
+                workoutId,
+                "Copied workout",
+                null,
+                null,
+                null,
+                null,
+                null,
+                "notes",
+                null,
+                null,
+                null,
+                null,
+                List.of()
+        );
+        when(sourceWorkout.getDurationMinutes()).thenReturn(45);
+        when(sourceWorkout.getDescription()).thenReturn("source description");
+        when(sourceWorkout.getCategory()).thenReturn(WorkoutCategory.STRENGTH);
+        when(sourceWorkout.getMuscleType()).thenReturn(MuscleType.CHEST);
+        when(sourceWorkout.getDifficulty()).thenReturn(com.zeki.demo.workouts.enums.WorkoutDifficulty.ADVANCED);
+        when(sourceWorkout.getCreatedAt()).thenReturn(createdAt);
+
+        WorkoutHistory history = new WorkoutHistoryDtoDomain().toDomain(request, "owner@example.com", sourceWorkout);
+
+        assertEquals(45, history.getDurationMinutes());
+        assertEquals(1, history.getSets());
+        assertEquals(1, history.getReps());
+        assertEquals(0, history.getWeightKg());
+        assertEquals("source description", history.getDescription());
+        assertEquals(WorkoutCategory.STRENGTH, history.getCategory());
+        assertEquals(MuscleType.CHEST, history.getMuscleType());
+        assertEquals(com.zeki.demo.workouts.enums.WorkoutDifficulty.ADVANCED, history.getDifficulty());
+        assertEquals(createdAt, history.getCreatedAt());
+    }
+
+    @Test
+    void workoutHistoryDtoMapperFallsBackToRequestExerciseMuscle() {
+        UUID workoutId = UUID.randomUUID();
+        CreateWorkoutHistoryRequest request = new CreateWorkoutHistoryRequest(
+                workoutId,
+                "Logged workout",
+                LocalDate.now(),
+                30,
+                3,
+                30,
+                80.0,
+                null,
+                "request description",
+                null,
+                null,
+                null,
+                List.of(new WorkoutHistoryExerciseRequest("1", "Row", MuscleType.BACK, true))
+        );
+
+        WorkoutHistory history = new WorkoutHistoryDtoDomain().toDomain(request, "owner@example.com", null);
+
+        assertEquals(MuscleType.BACK, history.getMuscleType());
+        assertEquals(WorkoutCategory.GENERAL, history.getCategory());
+        assertEquals(com.zeki.demo.workouts.enums.WorkoutDifficulty.BEGINNER, history.getDifficulty());
+    }
+
+    @Test
+    void userDtoMapperUsesUpdatesAndExistingFallbacks() {
+        LocalDateTime createdAt = LocalDateTime.now().minusDays(3);
+        LocalDateTime updatedAt = LocalDateTime.now().minusDays(1);
+        User existing = new User(
+                UUID.randomUUID(),
+                "Old Name",
+                "old@example.com",
+                "old-password",
+                2200,
+                WorkoutCategory.STRENGTH,
+                ExperienceLevel.INTERMEDIATE,
+                "USER",
+                true,
+                createdAt,
+                updatedAt,
+                null,
+                null
+        );
+        UpdateUserRequest update = new UpdateUserRequest(
+                "New Name",
+                null,
+                null,
+                2500,
+                WorkoutCategory.CARDIO,
+                ExperienceLevel.ADVANCED
+        );
+        UserDtoDomain mapper = new UserDtoDomain();
+
+        User updated = mapper.toUpdatedDomain(update, existing, "encoded");
+        UserResponse response = mapper.toResponse(updated);
+
+        assertEquals("New Name", updated.getFullName());
+        assertEquals("old@example.com", updated.getEmail());
+        assertEquals("encoded", updated.getPassword());
+        assertEquals(2500, updated.getDailyCalorieTarget());
+        assertEquals(WorkoutCategory.CARDIO, updated.getFitnessGoal());
+        assertEquals(ExperienceLevel.ADVANCED, updated.getExperienceLevel());
+        assertEquals("New Name", response.fullName());
+    }
+
+    @Test
+    void recommendationFeedbackMapperMapsBothDirections() {
+        UUID id = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID workoutId = UUID.randomUUID();
+        LocalDateTime createdAt = LocalDateTime.now().minusDays(1);
+        LocalDateTime updatedAt = LocalDateTime.now();
+        RecommendationFeedbackEntityMapper mapper = new RecommendationFeedbackEntityMapper();
+        RecommendationFeedbackEntity entity = RecommendationFeedbackEntity.builder()
+                .id(id)
+                .userId(userId)
+                .workoutId(workoutId)
+                .ignored(true)
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
+                .build();
+
+        RecommendationFeedback domain = mapper.toDomain(entity);
+        RecommendationFeedbackEntity mappedEntity = mapper.toEntity(domain);
+
+        assertEquals(id, domain.getId());
+        assertEquals(userId, domain.getUserId());
+        assertEquals(workoutId, mappedEntity.getWorkoutId());
+        assertEquals(createdAt, mappedEntity.getCreatedAt());
+        assertEquals(updatedAt, mappedEntity.getUpdatedAt());
     }
 
     private ExerciseLibraryItemEntity exerciseEntity() {

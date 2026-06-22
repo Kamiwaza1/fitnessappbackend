@@ -14,6 +14,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -31,12 +34,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
 
 @RestController
 @RequestMapping("/api/v1/nutrition")
 @RequiredArgsConstructor
 @Tag(name = "Nutrition", description = "Endpoints for managing nutrition entries")
-public class        NutritionController {
+@Validated
+public class NutritionController {
 
     private static final String TIME_ZONE_HEADER = "X-Time-Zone";
 
@@ -70,8 +75,13 @@ public class        NutritionController {
     })
     @GetMapping("/foods/{barcode}")
     public FoodProductResponse getFoodProductByBarcode(
-            @PathVariable String barcode,
-            @RequestParam(required = false) String lang,
+            @PathVariable
+            @NotBlank(message = "Barcode is required")
+            @Pattern(regexp = "^[0-9]{4,32}$", message = "Barcode must contain 4 to 32 digits")
+            String barcode,
+            @RequestParam(required = false)
+            @Pattern(regexp = "^[a-zA-Z]{2}$", message = "Language must be a two-letter code")
+            String lang,
             Authentication authentication
     ) {
         return nutritionService.getFoodProductByBarcode(barcode, lang);
@@ -81,7 +91,10 @@ public class        NutritionController {
     @ApiResponse(responseCode = "200", description = "Food products for the requested brand")
     @GetMapping("/foods/brands/{brand}")
     public FoodProductsResponse getFoodProductsByBrand(
-            @PathVariable String brand,
+            @PathVariable
+            @NotBlank(message = "Brand is required")
+            @Size(max = 100, message = "Brand cannot be longer than 100 characters")
+            String brand,
             @Valid @ModelAttribute FoodProductsRequest request,
             Authentication authentication
     ) {
@@ -92,7 +105,10 @@ public class        NutritionController {
     @ApiResponse(responseCode = "200", description = "Food products for the requested category")
     @GetMapping("/foods/categories/{category}")
     public FoodProductsResponse getFoodProductsByCategory(
-            @PathVariable String category,
+            @PathVariable
+            @NotBlank(message = "Category is required")
+            @Size(max = 100, message = "Category cannot be longer than 100 characters")
+            String category,
             @Valid @ModelAttribute FoodProductsRequest request,
             Authentication authentication
     ) {

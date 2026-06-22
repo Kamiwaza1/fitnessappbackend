@@ -6,6 +6,11 @@ import com.zeki.demo.workouthistory.mapperentitydomain.WorkoutHistoryEntityMappe
 import com.zeki.demo.workouthistory.repository.WorkoutHistoryRepositoryImpl;
 import com.zeki.demo.workouthistory.repository.jpa.WorkoutHistoryRepoJPA;
 import com.zeki.demo.common.exception.NotFoundException;
+import com.zeki.demo.liveworkouts.domain.LiveWorkoutMessage;
+import com.zeki.demo.liveworkouts.entity.LiveWorkoutMessageDocument;
+import com.zeki.demo.liveworkouts.mapperentitydomain.LiveWorkoutMessageEntityMapper;
+import com.zeki.demo.liveworkouts.repository.LiveWorkoutMessageRepositoryImpl;
+import com.zeki.demo.liveworkouts.repository.mongo.LiveWorkoutMessageMongoRepository;
 import com.zeki.demo.nutrition.domain.Nutrition;
 import com.zeki.demo.nutrition.entity.NutritionEntity;
 import com.zeki.demo.nutrition.mapperentitydomain.NutritionEntityMapper;
@@ -25,6 +30,7 @@ import com.zeki.demo.workouts.repository.jpa.WorkoutRepoJPA;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -63,6 +69,9 @@ class RepositoryCoverageTest {
 
     private ProgressRepositoryImpl progressRepository;
 
+    private LiveWorkoutMessageMongoRepository liveWorkoutMessageMongoRepository;
+    private LiveWorkoutMessageRepositoryImpl liveWorkoutMessageRepository;
+
     @BeforeEach
     void setUp() {
         id = UUID.randomUUID();
@@ -86,6 +95,12 @@ class RepositoryCoverageTest {
         historyRepository = new WorkoutHistoryRepositoryImpl(historyRepoJPA, historyMapper);
 
         progressRepository = new ProgressRepositoryImpl(workoutRepoJPA, workoutMapper);
+
+        liveWorkoutMessageMongoRepository = mock(LiveWorkoutMessageMongoRepository.class);
+        liveWorkoutMessageRepository = new LiveWorkoutMessageRepositoryImpl(
+                liveWorkoutMessageMongoRepository,
+                new LiveWorkoutMessageEntityMapper()
+        );
     }
 
     @Test
@@ -173,6 +188,28 @@ class RepositoryCoverageTest {
         assertEquals(List.of(workout), progressRepository.findAllByUserEmail(EMAIL));
     }
 
+    @Test
+    void liveWorkoutMessageRepositorySavesAndReturnsRecentMessagesOldestFirst() {
+        Instant first = Instant.now().minusSeconds(60);
+        Instant second = Instant.now();
+        LiveWorkoutMessage message = new LiveWorkoutMessage(null, "ROOM1", EMAIL, "owner", "hello", first);
+        LiveWorkoutMessageDocument savedDocument = messageDocument("msg-1", "ROOM1", "hello", first);
+        LiveWorkoutMessageDocument newestDocument = messageDocument("msg-2", "ROOM1", "later", second);
+        LiveWorkoutMessageDocument oldestDocument = messageDocument("msg-1", "ROOM1", "hello", first);
+
+        when(liveWorkoutMessageMongoRepository.save(any(LiveWorkoutMessageDocument.class))).thenReturn(savedDocument);
+        when(liveWorkoutMessageMongoRepository.findTop100ByRoomCodeOrderByCreatedAtDesc("ROOM1"))
+                .thenReturn(List.of(newestDocument, oldestDocument));
+
+        LiveWorkoutMessage saved = liveWorkoutMessageRepository.save(message);
+        List<LiveWorkoutMessage> recent = liveWorkoutMessageRepository.findRecentByRoomCode("ROOM1", 1000);
+
+        assertEquals("msg-1", saved.messageId());
+        assertEquals("hello", saved.text());
+        assertEquals("msg-1", recent.get(0).messageId());
+        assertEquals("msg-2", recent.get(1).messageId());
+    }
+
     private void stubWorkoutSave(Workout workout, WorkoutEntity entity) {
         when(workout.getUserEmail()).thenReturn(EMAIL);
         when(userRepoJPA.findByEmailIgnoreCaseAndIsActiveTrue(EMAIL)).thenReturn(Optional.of(userEntity));
@@ -187,5 +224,16 @@ class RepositoryCoverageTest {
         when(nutritionMapper.toEntity(nutrition, userEntity)).thenReturn(entity);
         when(nutritionRepoJPA.save(entity)).thenReturn(entity);
         when(nutritionMapper.toDomain(entity)).thenReturn(nutrition);
+    }
+
+    private LiveWorkoutMessageDocument messageDocument(String id, String roomCode, String text, Instant createdAt) {
+        return LiveWorkoutMessageDocument.builder()
+                .messageId(id)
+                .roomCode(roomCode)
+                .senderEmail(EMAIL)
+                .senderName("owner")
+                .text(text)
+                .createdAt(createdAt)
+                .build();
     }
 }

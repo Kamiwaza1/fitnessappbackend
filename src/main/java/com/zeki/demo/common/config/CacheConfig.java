@@ -1,6 +1,4 @@
 package com.zeki.demo.common.config;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
@@ -21,12 +19,9 @@ public class CacheConfig {
     @SuppressWarnings("removal")
     RedisCacheManager cacheManager(
             RedisConnectionFactory redisConnectionFactory,
-            ObjectMapper objectMapper,
             @Value("${cache.exercise-library.ttl:PT6H}") Duration exerciseLibraryTtl
     ) {
-        GenericJackson2JsonRedisSerializer jsonSerializer =
-                new GenericJackson2JsonRedisSerializer(objectMapper.copy());
-                //convert java objects to/from JSON for storing redis values.
+        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer();
         RedisCacheConfiguration cacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(exerciseLibraryTtl)
                 .disableCachingNullValues()
