@@ -39,6 +39,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         CsrfTokenRequestAttributeHandler csrfTokenRequestHandler = new CsrfTokenRequestAttributeHandler();
         csrfTokenRequestHandler.setCsrfRequestAttributeName(null);
+        CookieCsrfTokenRepository csrfTokenRepository = new CookieCsrfTokenRepository();
+        csrfTokenRepository.setCookieCustomizer(cookie -> cookie.httpOnly(true));
 
         http
                 .cors(Customizer.withDefaults())
@@ -48,7 +50,11 @@ public class SecurityConfig {
                         .accessDeniedHandler(restAccessDeniedHandler)
                 )
                 .csrf(csrf -> csrf
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        /*
+                         * The CSRF cookie is HttpOnly. Browser clients obtain the token through
+                         * GET /api/v1/auth/csrf and echo it in the configured CSRF header.
+                         */
+                        .csrfTokenRepository(csrfTokenRepository)
                         .csrfTokenRequestHandler(csrfTokenRequestHandler)
                         /*
                          * REST endpoints keep CSRF protection because auth uses HttpOnly cookies.

@@ -127,7 +127,15 @@ public class UserServiceImpl implements UserService {
     private String buildLoginUrl(String frontendUrl) {
         String normalizedFrontendUrl = frontendUrl == null || frontendUrl.isBlank()
                 ? "http://localhost:3000"
-                : frontendUrl.trim().replaceAll("/+$", "");
+                : removeTrailingSlashes(frontendUrl.trim());
         return normalizedFrontendUrl + "/login";
+    }
+
+    private String removeTrailingSlashes(String value) {
+        int endIndex = value.length();
+        while (endIndex > 0 && value.charAt(endIndex - 1) == '/') {
+            endIndex--;
+        }
+        return value.substring(0, endIndex);
     }
 }
