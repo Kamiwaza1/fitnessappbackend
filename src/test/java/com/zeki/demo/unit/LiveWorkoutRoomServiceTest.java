@@ -5,7 +5,7 @@ import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutProgressRequest;
 import com.zeki.demo.liveworkouts.entity.LiveWorkoutRoomEntity;
 import com.zeki.demo.liveworkouts.mapperentitydomain.LiveWorkoutRoomEntityMapper;
-import com.zeki.demo.liveworkouts.repository.LiveWorkoutRoomRepository;
+import com.zeki.demo.liveworkouts.domain.repository.LiveWorkoutRoomRepository;
 import com.zeki.demo.liveworkouts.repository.LiveWorkoutRoomRepositoryImpl;
 import com.zeki.demo.liveworkouts.repository.jpa.LiveWorkoutRoomRepoJPA;
 import com.zeki.demo.liveworkouts.service.LiveWorkoutRoomService;

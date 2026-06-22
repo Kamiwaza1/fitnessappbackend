@@ -1,5 +1,6 @@
 package com.zeki.demo.exerciselibrary.repository;
 
+import com.zeki.demo.exerciselibrary.domain.repository.ExerciseLibraryRepository;
 import com.zeki.demo.exerciselibrary.client.WgerExerciseClient;
 import com.zeki.demo.exerciselibrary.domain.ExerciseLibrary;
 import com.zeki.demo.exerciselibrary.domain.ExerciseLibraryItem;

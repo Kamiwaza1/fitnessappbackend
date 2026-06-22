@@ -1,4 +1,4 @@
-package com.zeki.demo.progress.repository;
+package com.zeki.demo.progress.domain.repository;
 
 import com.zeki.demo.workouts.domain.Workout;
 import java.util.List;

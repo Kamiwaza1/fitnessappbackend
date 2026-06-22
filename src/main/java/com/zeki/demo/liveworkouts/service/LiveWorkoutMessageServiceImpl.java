@@ -4,7 +4,7 @@ import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutMessage;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
-import com.zeki.demo.liveworkouts.repository.LiveWorkoutMessageRepository;
+import com.zeki.demo.liveworkouts.domain.repository.LiveWorkoutMessageRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

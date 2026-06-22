@@ -1,5 +1,6 @@
 package com.zeki.demo.workouts.repository;
 
+import com.zeki.demo.workouts.domain.repository.WorkoutRepository;
 import com.zeki.demo.common.exception.NotFoundException;
 import com.zeki.demo.users.entity.UserEntity;
 import com.zeki.demo.users.repository.jpa.UserRepoJPA;

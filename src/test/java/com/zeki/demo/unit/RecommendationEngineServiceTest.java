@@ -1,10 +1,10 @@
 package com.zeki.demo.unit;
 
 import com.zeki.demo.workouthistory.domain.WorkoutHistory;
-import com.zeki.demo.workouthistory.repository.WorkoutHistoryRepository;
+import com.zeki.demo.workouthistory.domain.repository.WorkoutHistoryRepository;
 import com.zeki.demo.recommendations.domain.RecommendationFeedback;
 import com.zeki.demo.recommendations.domain.WorkoutRecommendation;
-import com.zeki.demo.recommendations.repository.RecommendationFeedbackRepository;
+import com.zeki.demo.recommendations.domain.repository.RecommendationFeedbackRepository;
 import com.zeki.demo.recommendations.rules.GoalMatchRule;
 import com.zeki.demo.recommendations.rules.WeightedRecommendationRule;
 import com.zeki.demo.recommendations.service.RecommendationEngine;
@@ -16,7 +16,7 @@ import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.enums.MuscleType;
 import com.zeki.demo.workouts.enums.WorkoutCategory;
 import com.zeki.demo.workouts.enums.WorkoutDifficulty;
-import com.zeki.demo.workouts.repository.WorkoutRepository;
+import com.zeki.demo.workouts.domain.repository.WorkoutRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;

@@ -6,7 +6,7 @@ import com.zeki.demo.mail.EmailService;
 import com.zeki.demo.users.domain.User;
 import com.zeki.demo.users.entity.PasswordResetTokenEntity;
 import com.zeki.demo.users.entity.UserEntity;
-import com.zeki.demo.users.repository.UserRepository;
+import com.zeki.demo.users.domain.repository.UserRepository;
 import com.zeki.demo.users.repository.jpa.PasswordResetTokenRepoJPA;
 import com.zeki.demo.users.repository.jpa.UserRepoJPA;
 import com.zeki.demo.users.security.JWTService;

@@ -1,5 +1,6 @@
 package com.zeki.demo.nutrition.repository;
 
+import com.zeki.demo.nutrition.domain.repository.NutritionRepository;
 import com.zeki.demo.common.exception.NotFoundException;
 import com.zeki.demo.nutrition.domain.Nutrition;
 import com.zeki.demo.nutrition.entity.NutritionEntity;

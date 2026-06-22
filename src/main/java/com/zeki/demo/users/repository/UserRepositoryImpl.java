@@ -1,5 +1,6 @@
 package com.zeki.demo.users.repository;
 
+import com.zeki.demo.users.domain.repository.UserRepository;
 import com.zeki.demo.users.domain.User;
 import com.zeki.demo.users.mapperdomainentity.UserDomainEntity;
 import com.zeki.demo.users.repository.jpa.UserRepoJPA;

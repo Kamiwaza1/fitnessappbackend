@@ -1,4 +1,4 @@
-package com.zeki.demo.recommendations.repository;
+package com.zeki.demo.recommendations.domain.repository;
 
 import com.zeki.demo.recommendations.domain.RecommendationFeedback;
 import java.util.List;

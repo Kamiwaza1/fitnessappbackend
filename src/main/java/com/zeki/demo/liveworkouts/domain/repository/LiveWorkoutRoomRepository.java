@@ -1,4 +1,4 @@
-package com.zeki.demo.liveworkouts.repository;
+package com.zeki.demo.liveworkouts.domain.repository;
 
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
 import java.time.Instant;

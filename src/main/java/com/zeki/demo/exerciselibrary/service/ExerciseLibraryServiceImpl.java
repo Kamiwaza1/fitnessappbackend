@@ -6,7 +6,7 @@ import com.zeki.demo.exerciselibrary.domain.ExerciseLibraryListCriteria;
 import com.zeki.demo.exerciselibrary.domain.ExerciseLibrarySearchCriteria;
 import com.zeki.demo.exerciselibrary.domain.ExerciseMuscle;
 import com.zeki.demo.exerciselibrary.domain.ExerciseReference;
-import com.zeki.demo.exerciselibrary.repository.ExerciseLibraryRepository;
+import com.zeki.demo.exerciselibrary.domain.repository.ExerciseLibraryRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

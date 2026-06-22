@@ -1,5 +1,6 @@
 package com.zeki.demo.liveworkouts.repository;
 
+import com.zeki.demo.liveworkouts.domain.repository.LiveWorkoutRoomRepository;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
 import com.zeki.demo.liveworkouts.mapperentitydomain.LiveWorkoutRoomEntityMapper;
 import com.zeki.demo.liveworkouts.repository.jpa.LiveWorkoutRoomRepoJPA;

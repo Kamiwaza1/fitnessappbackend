@@ -7,7 +7,7 @@ import com.zeki.demo.mail.EmailService;
 import com.zeki.demo.users.domain.User;
 import com.zeki.demo.users.dto.UpdateUserRequest;
 import com.zeki.demo.users.mapperdtodomain.UserDtoDomain;
-import com.zeki.demo.users.repository.UserRepository;
+import com.zeki.demo.users.domain.repository.UserRepository;
 import com.zeki.demo.users.service.UserServiceImpl;
 import java.time.LocalDateTime;
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package com.zeki.demo.exerciselibrary.repository;
+package com.zeki.demo.exerciselibrary.domain.repository;
 
 import com.zeki.demo.exerciselibrary.domain.ExerciseLibrary;
 import com.zeki.demo.exerciselibrary.domain.ExerciseLibraryItem;

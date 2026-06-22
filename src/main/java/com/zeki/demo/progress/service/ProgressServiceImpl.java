@@ -1,7 +1,7 @@
 package com.zeki.demo.progress.service;
 
 import com.zeki.demo.progress.domain.Progress;
-import com.zeki.demo.progress.repository.ProgressRepository;
+import com.zeki.demo.progress.domain.repository.ProgressRepository;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.domain.WorkoutExercise;
 import java.time.LocalDate;

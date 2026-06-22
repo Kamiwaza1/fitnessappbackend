@@ -1,5 +1,6 @@
 package com.zeki.demo.workouthistory.repository;
 
+import com.zeki.demo.workouthistory.domain.repository.WorkoutHistoryRepository;
 import com.zeki.demo.workouthistory.domain.WorkoutHistory;
 import com.zeki.demo.workouthistory.mapperentitydomain.WorkoutHistoryEntityMapper;
 import com.zeki.demo.workouthistory.repository.jpa.WorkoutHistoryRepoJPA;

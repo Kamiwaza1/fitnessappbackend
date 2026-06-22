@@ -1,4 +1,4 @@
-package com.zeki.demo.liveworkouts.repository;
+package com.zeki.demo.liveworkouts.domain.repository;
 
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutMessage;
 import java.util.List;

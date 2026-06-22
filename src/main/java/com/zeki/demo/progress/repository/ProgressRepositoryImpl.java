@@ -1,5 +1,6 @@
 package com.zeki.demo.progress.repository;
 
+import com.zeki.demo.progress.domain.repository.ProgressRepository;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.mapperentitydomain.WorkoutEntityMapper;
 import com.zeki.demo.workouts.repository.jpa.WorkoutRepoJPA;

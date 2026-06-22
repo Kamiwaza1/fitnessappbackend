@@ -1,4 +1,4 @@
-package com.zeki.demo.nutrition.repository;
+package com.zeki.demo.nutrition.domain.repository;
 
 import com.zeki.demo.nutrition.domain.Nutrition;
 import java.util.List;

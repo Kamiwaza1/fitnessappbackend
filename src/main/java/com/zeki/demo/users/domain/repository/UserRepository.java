@@ -1,4 +1,4 @@
-package com.zeki.demo.users.repository;
+package com.zeki.demo.users.domain.repository;
 
 import com.zeki.demo.users.domain.User;
 import java.time.LocalDateTime;

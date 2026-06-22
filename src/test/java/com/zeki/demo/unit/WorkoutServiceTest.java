@@ -6,7 +6,7 @@ import com.zeki.demo.workouts.dto.UpdateWorkoutRequest;
 import com.zeki.demo.workouts.enums.MuscleType;
 import com.zeki.demo.workouts.enums.WorkoutCategory;
 import com.zeki.demo.workouts.mapperdtodomain.WorkoutDtoDomain;
-import com.zeki.demo.workouts.repository.WorkoutRepository;
+import com.zeki.demo.workouts.domain.repository.WorkoutRepository;
 import com.zeki.demo.workouts.service.WorkoutServiceImpl;
 import java.time.LocalDate;
 import java.util.Optional;

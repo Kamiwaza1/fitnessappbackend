@@ -1,5 +1,6 @@
 package com.zeki.demo.liveworkouts.repository;
 
+import com.zeki.demo.liveworkouts.domain.repository.LiveWorkoutMessageRepository;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutMessage;
 import com.zeki.demo.liveworkouts.mapperentitydomain.LiveWorkoutMessageEntityMapper;
 import com.zeki.demo.liveworkouts.repository.mongo.LiveWorkoutMessageMongoRepository;

@@ -10,7 +10,7 @@ import com.zeki.demo.nutrition.dto.FoodProductsResponse;
 import com.zeki.demo.nutrition.dto.UpdateNutritionRequest;
 import com.zeki.demo.nutrition.mapperdtodomain.NutritionDtoDomain;
 import com.zeki.demo.nutrition.repository.FoodProductRepository;
-import com.zeki.demo.nutrition.repository.NutritionRepository;
+import com.zeki.demo.nutrition.domain.repository.NutritionRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.ZoneId;

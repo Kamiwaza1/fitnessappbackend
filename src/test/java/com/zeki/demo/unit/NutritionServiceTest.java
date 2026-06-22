@@ -7,7 +7,7 @@ import com.zeki.demo.nutrition.dto.UpdateNutritionRequest;
 import com.zeki.demo.nutrition.enums.NutritionCategory;
 import com.zeki.demo.nutrition.mapperdtodomain.NutritionDtoDomain;
 import com.zeki.demo.nutrition.repository.FoodProductRepository;
-import com.zeki.demo.nutrition.repository.NutritionRepository;
+import com.zeki.demo.nutrition.domain.repository.NutritionRepository;
 import com.zeki.demo.nutrition.service.NutritionServiceImpl;
 import java.time.LocalDate;
 import java.util.List;

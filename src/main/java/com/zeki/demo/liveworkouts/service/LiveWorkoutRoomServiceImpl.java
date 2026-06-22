@@ -6,7 +6,7 @@ import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutParticipant;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutProgressRequest;
-import com.zeki.demo.liveworkouts.repository.LiveWorkoutRoomRepository;
+import com.zeki.demo.liveworkouts.domain.repository.LiveWorkoutRoomRepository;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.service.WorkoutService;
 import java.security.SecureRandom;

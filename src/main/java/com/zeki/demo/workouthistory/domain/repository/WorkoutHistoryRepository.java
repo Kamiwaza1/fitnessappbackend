@@ -1,4 +1,4 @@
-package com.zeki.demo.workouthistory.repository;
+package com.zeki.demo.workouthistory.domain.repository;
 
 import com.zeki.demo.workouthistory.domain.WorkoutHistory;
 import java.util.List;
