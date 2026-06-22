@@ -5,7 +5,8 @@ import com.zeki.demo.workouthistory.dto.CreateWorkoutHistoryRequest;
 import com.zeki.demo.workouthistory.mapperdtodomain.WorkoutHistoryDtoDomain;
 import com.zeki.demo.workouthistory.domain.repository.WorkoutHistoryRepository;
 import com.zeki.demo.workouthistory.service.WorkoutHistoryServiceImpl;
-import com.zeki.demo.workouts.workoutexception.WorkoutExistException;
+import com.zeki.demo.workouts.exception.WorkoutNotFoundException;
+import static com.zeki.demo.workouts.exception.WorkoutNotFoundException.WORKOUT_NOT_FOUND;
 import com.zeki.demo.workouts.domain.repository.WorkoutRepository;
 import com.zeki.demo.workouts.enums.MuscleType;
 import com.zeki.demo.workouts.enums.WorkoutCategory;
@@ -83,12 +84,12 @@ class WorkoutHistoryServiceTest {
         when(workoutHistoryRepository.getByWorkoutIdAndUserEmail(workoutId, "user@example.com"))
                 .thenReturn(Optional.empty());
 
-        WorkoutExistException ex = assertThrows(
-                WorkoutExistException.class,
+        WorkoutNotFoundException ex = assertThrows(
+                WorkoutNotFoundException.class,
                 () -> workoutHistoryService.getWorkoutHistoryById(workoutId, "user@example.com")
         );
 
-        assertEquals("Workout not found", ex.getMessage());
+        assertEquals(WORKOUT_NOT_FOUND, ex.getMessage());
     }
 
     @Test

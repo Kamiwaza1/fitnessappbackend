@@ -1,7 +1,9 @@
 package com.zeki.demo.unit;
 
-import com.zeki.demo.nutrition.nutritionexception.NutritionExistException;
-import com.zeki.demo.common.exception.BadRequestException;
+import com.zeki.demo.nutrition.exception.NutritionNotFoundException;
+import static com.zeki.demo.nutrition.exception.NutritionNotFoundException.NUTRITION_ENTRY_NOT_FOUND;
+import com.zeki.demo.nutrition.exception.FoodProductValidationException;
+import com.zeki.demo.nutrition.exception.NutritionValidationException;
 import com.zeki.demo.nutrition.domain.Nutrition;
 import com.zeki.demo.nutrition.dto.FoodProductResponse;
 import com.zeki.demo.nutrition.dto.FoodProductSearchRequest;
@@ -52,12 +54,12 @@ class NutritionServiceTest {
         when(nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, "owner@example.com"))
                 .thenReturn(Optional.empty());
 
-        NutritionExistException ex = assertThrows(
-                NutritionExistException.class,
+        NutritionNotFoundException ex = assertThrows(
+                NutritionNotFoundException.class,
                 () -> nutritionService.getNutritionById(nutritionId, "owner@example.com")
         );
 
-        assertEquals("Nutrition entry not found", ex.getMessage());
+        assertEquals(NUTRITION_ENTRY_NOT_FOUND, ex.getMessage());
     }
 
     @Test
@@ -78,12 +80,12 @@ class NutritionServiceTest {
         when(nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, "other@example.com"))
                 .thenReturn(Optional.empty());
 
-        NutritionExistException ex = assertThrows(
-                NutritionExistException.class,
+        NutritionNotFoundException ex = assertThrows(
+                NutritionNotFoundException.class,
                 () -> nutritionService.updateNutrition(nutritionId, request, "other@example.com", null)
         );
 
-        assertEquals("Nutrition entry not found", ex.getMessage());
+        assertEquals(NUTRITION_ENTRY_NOT_FOUND, ex.getMessage());
         verify(nutritionRepository, never()).save(any());
     }
 
@@ -108,8 +110,8 @@ class NutritionServiceTest {
     void createNutritionRejectsPastMealDate() {
         Nutrition pastNutrition = nutritionWithDate(UUID.randomUUID(), "owner@example.com", LocalDate.now().minusDays(1));
 
-        BadRequestException ex = assertThrows(
-                BadRequestException.class,
+        NutritionValidationException ex = assertThrows(
+                NutritionValidationException.class,
                 () -> nutritionService.createNutrition(pastNutrition, null)
         );
 
@@ -124,8 +126,8 @@ class NutritionServiceTest {
         when(nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, "owner@example.com"))
                 .thenReturn(Optional.of(existing));
 
-        BadRequestException ex = assertThrows(
-                BadRequestException.class,
+        NutritionValidationException ex = assertThrows(
+                NutritionValidationException.class,
                 () -> nutritionService.updateNutrition(nutritionId, updateRequest(nutritionId), "owner@example.com", null)
         );
 
@@ -138,7 +140,6 @@ class NutritionServiceTest {
         UUID nutritionId = UUID.randomUUID();
         Nutrition existing = validNutrition(nutritionId, "owner@example.com");
         UpdateNutritionRequest request = new UpdateNutritionRequest(
-                nutritionId,
                 "Updated meal",
                 LocalDate.now().minusDays(1),
                 700,
@@ -151,8 +152,8 @@ class NutritionServiceTest {
         when(nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, "owner@example.com"))
                 .thenReturn(Optional.of(existing));
 
-        BadRequestException ex = assertThrows(
-                BadRequestException.class,
+        NutritionValidationException ex = assertThrows(
+                NutritionValidationException.class,
                 () -> nutritionService.updateNutrition(nutritionId, request, "owner@example.com", null)
         );
 
@@ -177,8 +178,8 @@ class NutritionServiceTest {
         when(nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, "owner@example.com"))
                 .thenReturn(Optional.of(nutritionWithDate(nutritionId, "owner@example.com", LocalDate.now().minusDays(1))));
 
-        BadRequestException ex = assertThrows(
-                BadRequestException.class,
+        NutritionValidationException ex = assertThrows(
+                NutritionValidationException.class,
                 () -> nutritionService.deleteNutrition(nutritionId, "owner@example.com", null)
         );
 
@@ -198,20 +199,20 @@ class NutritionServiceTest {
 
     @Test
     void foodProductSearchRejectsInvalidInputBeforeRepositoryCall() {
-        assertThrows(BadRequestException.class, () -> nutritionService.searchFoodProducts(null));
-        assertThrows(BadRequestException.class, () -> nutritionService.searchFoodProducts(
+        assertThrows(FoodProductValidationException.class, () -> nutritionService.searchFoodProducts(null));
+        assertThrows(FoodProductValidationException.class, () -> nutritionService.searchFoodProducts(
                 new FoodProductSearchRequest("a", 10, 0, "en", null, true)
         ));
-        assertThrows(BadRequestException.class, () -> nutritionService.searchFoodProducts(
+        assertThrows(FoodProductValidationException.class, () -> nutritionService.searchFoodProducts(
                 new FoodProductSearchRequest("apple", 0, 0, "en", null, true)
         ));
-        assertThrows(BadRequestException.class, () -> nutritionService.searchFoodProducts(
+        assertThrows(FoodProductValidationException.class, () -> nutritionService.searchFoodProducts(
                 new FoodProductSearchRequest("apple", 10, -1, "en", null, true)
         ));
-        assertThrows(BadRequestException.class, () -> nutritionService.searchFoodProducts(
+        assertThrows(FoodProductValidationException.class, () -> nutritionService.searchFoodProducts(
                 new FoodProductSearchRequest("apple", 10, 0, "eng", null, true)
         ));
-        assertThrows(BadRequestException.class, () -> nutritionService.searchFoodProducts(
+        assertThrows(FoodProductValidationException.class, () -> nutritionService.searchFoodProducts(
                 new FoodProductSearchRequest("apple", 10, 0, "en", "n".repeat(101), true)
         ));
 
@@ -246,8 +247,8 @@ class NutritionServiceTest {
         when(foodProductRepository.getProductByBarcode("123456", "en")).thenReturn(response);
 
         assertEquals(response, nutritionService.getFoodProductByBarcode("123456", "en"));
-        assertThrows(BadRequestException.class, () -> nutritionService.getFoodProductByBarcode("abc", "en"));
-        assertThrows(BadRequestException.class, () -> nutritionService.getFoodProductByBarcode("123456", "english"));
+        assertThrows(FoodProductValidationException.class, () -> nutritionService.getFoodProductByBarcode("abc", "en"));
+        assertThrows(FoodProductValidationException.class, () -> nutritionService.getFoodProductByBarcode("123456", "english"));
     }
 
     @Test
@@ -260,11 +261,11 @@ class NutritionServiceTest {
         assertEquals(response, nutritionService.getFoodProductsByBrand("fitco", request));
         assertEquals(response, nutritionService.getFoodProductsByCategory("protein-bars", request));
 
-        assertThrows(BadRequestException.class, () -> nutritionService.getFoodProductsByBrand("", request));
-        assertThrows(BadRequestException.class, () -> nutritionService.getFoodProductsByBrand("b".repeat(101), request));
-        assertThrows(BadRequestException.class, () -> nutritionService.getFoodProductsByCategory("protein", new FoodProductsRequest(101, 0, "en", null, true)));
-        assertThrows(BadRequestException.class, () -> nutritionService.getFoodProductsByCategory("protein", new FoodProductsRequest(10, 0, "eng", null, true)));
-        assertThrows(BadRequestException.class, () -> nutritionService.getFoodProductsByCategory("protein", new FoodProductsRequest(10, 0, "en", "n".repeat(101), true)));
+        assertThrows(FoodProductValidationException.class, () -> nutritionService.getFoodProductsByBrand("", request));
+        assertThrows(FoodProductValidationException.class, () -> nutritionService.getFoodProductsByBrand("b".repeat(101), request));
+        assertThrows(FoodProductValidationException.class, () -> nutritionService.getFoodProductsByCategory("protein", new FoodProductsRequest(101, 0, "en", null, true)));
+        assertThrows(FoodProductValidationException.class, () -> nutritionService.getFoodProductsByCategory("protein", new FoodProductsRequest(10, 0, "eng", null, true)));
+        assertThrows(FoodProductValidationException.class, () -> nutritionService.getFoodProductsByCategory("protein", new FoodProductsRequest(10, 0, "en", "n".repeat(101), true)));
     }
 
     private Nutrition validNutrition(UUID id, String userEmail) {
@@ -291,7 +292,6 @@ class NutritionServiceTest {
 
     private UpdateNutritionRequest updateRequest(UUID id) {
         return new UpdateNutritionRequest(
-                id,
                 "Updated meal",
                 LocalDate.now(),
                 700,

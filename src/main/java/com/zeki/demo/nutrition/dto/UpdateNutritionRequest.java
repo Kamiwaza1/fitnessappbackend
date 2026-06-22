@@ -5,10 +5,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.UUID;
 
 public record UpdateNutritionRequest(
-        UUID nutritionId,
         @Size(min = 2, max = 255, message = "Meal name must be between 2 and 255 characters")
         String mealName,
         LocalDate mealDate,

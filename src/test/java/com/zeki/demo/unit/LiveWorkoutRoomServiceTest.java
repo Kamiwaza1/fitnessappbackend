@@ -1,6 +1,6 @@
 package com.zeki.demo.unit;
 
-import com.zeki.demo.common.exception.UnauthorizedException;
+import com.zeki.demo.liveworkouts.exception.LiveWorkoutAccessException;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutProgressRequest;
 import com.zeki.demo.liveworkouts.entity.LiveWorkoutRoomEntity;
@@ -102,7 +102,7 @@ class LiveWorkoutRoomServiceTest {
         LiveWorkoutRoom room = createRoom();
 
         assertThrows(
-                UnauthorizedException.class,
+                LiveWorkoutAccessException.class,
                 () -> liveWorkoutRoomService.updateProgress(
                         room.roomCode(),
                         GUEST_EMAIL,
@@ -131,7 +131,7 @@ class LiveWorkoutRoomServiceTest {
     void onlyHostCanCloseRoom() {
         LiveWorkoutRoom room = createRoom();
 
-        assertThrows(UnauthorizedException.class, () -> liveWorkoutRoomService.closeRoom(room.roomCode(), GUEST_EMAIL));
+        assertThrows(LiveWorkoutAccessException.class, () -> liveWorkoutRoomService.closeRoom(room.roomCode(), GUEST_EMAIL));
 
         LiveWorkoutRoom closed = liveWorkoutRoomService.closeRoom(room.roomCode(), HOST_EMAIL);
 

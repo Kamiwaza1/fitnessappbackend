@@ -1,11 +1,11 @@
 package com.zeki.demo.users.service;
 
-import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.common.exception.ConflictException;
 import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.mail.EmailService;
 import com.zeki.demo.users.domain.User;
 import com.zeki.demo.users.dto.UpdateUserRequest;
+import com.zeki.demo.users.exception.UserValidationException;
 import com.zeki.demo.users.mapperdtodomain.UserDtoDomain;
 import com.zeki.demo.users.domain.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
                 ? User.normalizeEmail(updateUserRequest.email())
                 : existingUser.getEmail();
         if (updatedEmail.isBlank()) {
-            throw new BadRequestException("Email is required");
+            throw new UserValidationException("Email is required");
         }
         if (!existingUser.getEmail().equals(updatedEmail) && userRepository.existsActiveByEmail(updatedEmail)) {
             throw new ConflictException("An account with this email already exists");
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
             );
             List<String> passwordIssues = passwordCandidate.getPasswordIssues();
             if (!passwordIssues.isEmpty()) {
-                throw new BadRequestException("Password is not strong enough: " + String.join(", ", passwordIssues));
+                throw new UserValidationException("Password is not strong enough: " + String.join(", ", passwordIssues));
             }
             passwordToSave = passwordEncoder.encode(updateUserRequest.password());
         }
@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteCurrentUser(String email, String password) {
         if (password == null || password.isBlank()) {
-            throw new BadRequestException("Password is required");
+            throw new UserValidationException("Password is required");
         }
         User existingUser = userRepository.findActiveByEmail(User.normalizeEmail(email))
                 .orElseThrow(() -> new UnauthorizedException("User not found"));

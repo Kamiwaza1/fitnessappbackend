@@ -16,7 +16,7 @@ public class NutritionDtoDomain {
     public Nutrition toDomain(CreateNutritionRequest request, String userEmail) {
         LocalDate now = LocalDate.now();
         return new Nutrition(
-                request.nutritionId(),
+                null,
                 request.mealName(),
                 request.mealDate(),
                 request.calories(),

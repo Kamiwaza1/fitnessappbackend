@@ -32,7 +32,7 @@ public class WorkoutDtoDomain {
                 resolveReps(exercises, request.reps()),
                 resolveWeight(exercises, request.weightKg()),
                 request.notes(),
-                request.workoutId(),
+                null,
                 request.description(),
                 request.category() != null ? request.category() : DEFAULT_CATEGORY,
                 request.muscleType() != null ? request.muscleType() : DEFAULT_MUSCLE_TYPE,

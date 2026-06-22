@@ -1,6 +1,6 @@
 package com.zeki.demo.unit;
 
-import com.zeki.demo.common.exception.BadRequestException;
+import com.zeki.demo.users.exception.UserValidationException;
 import com.zeki.demo.common.exception.ConflictException;
 import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.mail.EmailService;
@@ -103,7 +103,7 @@ class UserServiceTest {
         when(userRepository.findActiveByEmail(OWNER_EMAIL)).thenReturn(Optional.of(existing));
         when(userRepository.existsActiveByEmail(UPDATED_EMAIL)).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> userService.updateUser(OWNER_EMAIL, request));
+        assertThrows(UserValidationException.class, () -> userService.updateUser(OWNER_EMAIL, request));
         verify(passwordEncoder, never()).encode(any());
         verify(userRepository, never()).save(any());
     }
@@ -115,7 +115,7 @@ class UserServiceTest {
 
         when(userRepository.findActiveByEmail(OWNER_EMAIL)).thenReturn(Optional.of(existing));
 
-        BadRequestException ex = assertThrows(BadRequestException.class, () -> userService.updateUser(OWNER_EMAIL, request));
+        UserValidationException ex = assertThrows(UserValidationException.class, () -> userService.updateUser(OWNER_EMAIL, request));
 
         assertEquals("Email is required", ex.getMessage());
         verify(userRepository, never()).save(any());

@@ -1,7 +1,7 @@
 package com.zeki.demo.users.domain;
 
-import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.users.enums.ExperienceLevel;
+import com.zeki.demo.users.exception.UserValidationException;
 import com.zeki.demo.workouts.enums.WorkoutCategory;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -121,18 +121,16 @@ public class User {
 
     public void validate() {
         if (!EMAIL_PATTERN.matcher(email).matches()) {
-            throw new BadRequestException("Email should be a valid email address");
+            throw new UserValidationException("Email should be a valid email address");
         }
         String resolvedName = resolveFullName(fullName, email);
         if (resolvedName.length() < 2 || resolvedName.length() > 100) {
-            throw new BadRequestException("Full name must be between 2 and 100 characters");
+            throw new UserValidationException("Full name must be between 2 and 100 characters");
         }
         if (password == null || password.isBlank()) {
-            throw new BadRequestException("Password is required");
+            throw new UserValidationException("Password is required");
         }
-        if (dailyCalorieTarget != null && (dailyCalorieTarget < 1 || dailyCalorieTarget > 10000)) {
-            throw new BadRequestException("Daily calorie target must be between 1 and 10000");
-        }
+       
         this.fullName = resolvedName;
         this.email = normalizeEmail(email);
     }
@@ -176,7 +174,7 @@ public class User {
 
     public void requestDeletion(LocalDateTime requestedAt, LocalDateTime scheduledFor) {
         if (requestedAt == null || scheduledFor == null || !scheduledFor.isAfter(requestedAt)) {
-            throw new BadRequestException("Deletion expiry must be after the request time");
+            throw new UserValidationException("Deletion expiry must be after the request time");
         }
         this.deletionRequestedAt = requestedAt;
         this.deletionScheduledFor = scheduledFor;

@@ -3,6 +3,7 @@ package com.zeki.demo.workouts.domain;
 import com.zeki.demo.workouts.enums.WorkoutCategory;
 import com.zeki.demo.workouts.enums.MuscleType;
 import com.zeki.demo.workouts.enums.WorkoutDifficulty;
+import com.zeki.demo.workouts.exception.WorkoutValidationException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -169,49 +170,49 @@ public class Workout {
     public void validate() {
 
         if (workoutName.length() < 3) {
-            throw new IllegalArgumentException("Name must be at least 3 characters");
+            throw new WorkoutValidationException("Name must be at least 3 characters");
         }
         if (workoutName.length() > 255) {
-            throw new IllegalArgumentException("Name cannot be longer than 255 characters");
+            throw new WorkoutValidationException("Name cannot be longer than 255 characters");
         }
         if (workoutDate == null) {
-            throw new IllegalArgumentException("Workout date is required");
+            throw new WorkoutValidationException("Workout date is required");
         }
         if (workoutDate.isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("Workout date cannot be in the past");
+            throw new WorkoutValidationException("Workout date cannot be in the past");
         }
         if (workoutDate.isAfter(LocalDate.now().plusYears(1))) {
-            throw new IllegalArgumentException("Workout date cannot be more than one year ahead");
+            throw new WorkoutValidationException("Workout date cannot be more than one year ahead");
         }
         if (durationMinutes == null) {
-            throw new IllegalArgumentException("Duration is required");
+            throw new WorkoutValidationException("Duration is required");
         }
         if (durationMinutes < 1) {
-            throw new IllegalArgumentException("Duration must be at least 1 minute");
+            throw new WorkoutValidationException("Duration must be at least 1 minute");
         }
         if (durationMinutes > 999) {
-            throw new IllegalArgumentException("Duration cannot be greater than 999 minutes");
+            throw new WorkoutValidationException("Duration cannot be greater than 999 minutes");
         }
         if (sets == null || sets < 1) {
-            throw new IllegalArgumentException("Sets must be at least 1");
+            throw new WorkoutValidationException("Sets must be at least 1");
         }
         if (reps == null || reps < 1) {
-            throw new IllegalArgumentException("Reps must be at least 1");
+            throw new WorkoutValidationException("Reps must be at least 1");
         }
         if (weightKg == null || weightKg < 0) {
-            throw new IllegalArgumentException("Weight (kg) must be 0 or greater");
+            throw new WorkoutValidationException("Weight (kg) must be 0 or greater");
         }
         if (description != null && description.length() > 255) {
-            throw new IllegalArgumentException("Description cannot be longer than 255 characters");
+            throw new WorkoutValidationException("Description cannot be longer than 255 characters");
         }
         if (category == null) {
-            throw new IllegalArgumentException("Workout category is required");
+            throw new WorkoutValidationException("Workout category is required");
         }
         if (muscleType == null) {
-            throw new IllegalArgumentException("Muscle type is required");
+            throw new WorkoutValidationException("Muscle type is required");
         }
         if (difficulty == null) {
-            throw new IllegalArgumentException("Workout difficulty is required");
+            throw new WorkoutValidationException("Workout difficulty is required");
         }
         if (!exercises.isEmpty()) {
             for (WorkoutExercise exercise : exercises) {
@@ -219,25 +220,25 @@ public class Workout {
             }
         }
         if (notes != null && notes.length() > 1000) {
-            throw new IllegalArgumentException("Notes cannot be longer than 1000 characters");
+            throw new WorkoutValidationException("Notes cannot be longer than 1000 characters");
         }
         if (createdAt == null) {
-            throw new IllegalArgumentException("Created at is required");
+            throw new WorkoutValidationException("Created at is required");
         }
         if (createdAt.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Created at cannot be in the future");
+            throw new WorkoutValidationException("Created at cannot be in the future");
         }
         if (updatedAt == null) {
-            throw new IllegalArgumentException("Updated at is required");
+            throw new WorkoutValidationException("Updated at is required");
         }
         if (updatedAt.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Updated at cannot be in the future");
+            throw new WorkoutValidationException("Updated at cannot be in the future");
         }
         if (updatedAt.isBefore(createdAt)) {
-            throw new IllegalArgumentException("Updated at cannot be before created at");
+            throw new WorkoutValidationException("Updated at cannot be before created at");
         }
         if (userEmail == null || userEmail.isBlank()) {
-            throw new IllegalArgumentException("User email cannot be blank");
+            throw new WorkoutValidationException("User email cannot be blank");
         }
     }
 

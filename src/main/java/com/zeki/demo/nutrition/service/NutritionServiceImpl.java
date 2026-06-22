@@ -1,7 +1,5 @@
 package com.zeki.demo.nutrition.service;
 
-import com.zeki.demo.common.exception.BadRequestException;
-import com.zeki.demo.nutrition.nutritionexception.NutritionExistException;
 import com.zeki.demo.nutrition.domain.Nutrition;
 import com.zeki.demo.nutrition.dto.FoodProductResponse;
 import com.zeki.demo.nutrition.dto.FoodProductSearchRequest;
@@ -9,6 +7,9 @@ import com.zeki.demo.nutrition.dto.FoodProductsRequest;
 import com.zeki.demo.nutrition.dto.FoodProductsResponse;
 import com.zeki.demo.nutrition.dto.UpdateNutritionRequest;
 import com.zeki.demo.nutrition.mapperdtodomain.NutritionDtoDomain;
+import com.zeki.demo.nutrition.exception.FoodProductValidationException;
+import com.zeki.demo.nutrition.exception.NutritionNotFoundException;
+import com.zeki.demo.nutrition.exception.NutritionValidationException;
 import com.zeki.demo.nutrition.repository.FoodProductRepository;
 import com.zeki.demo.nutrition.domain.repository.NutritionRepository;
 import jakarta.transaction.Transactional;
@@ -26,7 +27,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NutritionServiceImpl implements NutritionService {
 
-    private static final Pattern BARCODE_PATTERN = Pattern.compile("^[0-9]{4,32}$");
+    private static final Pattern BARCODE_PATTERN = Pattern.compile("^\\d{4,32}$");
     private static final Pattern LANGUAGE_PATTERN = Pattern.compile("^[a-zA-Z]{2}$");
 
     private final NutritionRepository nutritionRepository;
@@ -43,7 +44,7 @@ public class NutritionServiceImpl implements NutritionService {
     @Override
     public Nutrition getNutritionById(UUID nutritionId, String userEmail) {
         return nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, userEmail)
-                .orElseThrow(() -> new NutritionExistException("Nutrition entry not found"));
+                .orElseThrow(NutritionNotFoundException::new);
     }
 
     @Override
@@ -81,7 +82,7 @@ public class NutritionServiceImpl implements NutritionService {
     @Override
     public Nutrition updateNutrition(UUID nutritionId, UpdateNutritionRequest request, String userEmail, String timeZone) {
         Nutrition existingNutrition = nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, userEmail)
-                .orElseThrow(() -> new NutritionExistException("Nutrition entry not found"));
+                .orElseThrow(NutritionNotFoundException::new);
         ensureEntryCanStillBeChanged(existingNutrition, timeZone);
         Nutrition updatedNutrition = nutritionDtoDomain.toUpdatedDomain(request, existingNutrition);
         ensureCurrentOrFutureMealDate(updatedNutrition.getMealDate(), timeZone);
@@ -92,20 +93,20 @@ public class NutritionServiceImpl implements NutritionService {
     @Override
     public void deleteNutrition(UUID nutritionId, String userEmail, String timeZone) {
         Nutrition existingNutrition = nutritionRepository.getNutritionByIdAndUserEmail(nutritionId, userEmail)
-                .orElseThrow(() -> new NutritionExistException("Nutrition entry not found"));
+                .orElseThrow(NutritionNotFoundException::new);
         ensureEntryCanStillBeChanged(existingNutrition, timeZone);
         nutritionRepository.delete(nutritionId);
     }
 
     private void ensureEntryCanStillBeChanged(Nutrition nutrition, String timeZone) {
         if (nutrition.getMealDate() != null && nutrition.getMealDate().isBefore(today(timeZone))) {
-            throw new BadRequestException("Past nutrition entries cannot be changed");
+            throw new NutritionValidationException("Past nutrition entries cannot be changed");
         }
     }
 
     private void ensureCurrentOrFutureMealDate(LocalDate mealDate, String timeZone) {
         if (mealDate != null && mealDate.isBefore(today(timeZone))) {
-            throw new BadRequestException("Food cannot be added to a past day");
+            throw new NutritionValidationException("Food cannot be added to a past day");
         }
     }
 
@@ -126,7 +127,7 @@ public class NutritionServiceImpl implements NutritionService {
 
     private void validateSearchRequest(FoodProductSearchRequest request) {
         if (request == null) {
-            throw new BadRequestException("Food search request is required");
+            throw new FoodProductValidationException("Food search request is required");
         }
         validateTextLength(request.q(), "Search query", 2, 100, true);
         validatePaging(request.limit(), request.offset());
@@ -145,25 +146,25 @@ public class NutritionServiceImpl implements NutritionService {
 
     private void validatePaging(Integer limit, Integer offset) {
         if (limit != null && (limit < 1 || limit > 100)) {
-            throw new BadRequestException("Limit must be between 1 and 100");
+            throw new FoodProductValidationException("Limit must be between 1 and 100");
         }
         if (offset != null && offset < 0) {
-            throw new BadRequestException("Offset must be at least 0");
+            throw new FoodProductValidationException("Offset must be at least 0");
         }
     }
 
     private void validateBarcode(String barcode) {
         if (barcode == null || barcode.isBlank()) {
-            throw new BadRequestException("Barcode is required");
+            throw new FoodProductValidationException("Barcode is required");
         }
         if (!BARCODE_PATTERN.matcher(barcode.trim()).matches()) {
-            throw new BadRequestException("Barcode must contain 4 to 32 digits");
+            throw new FoodProductValidationException("Barcode must contain 4 to 32 digits");
         }
     }
 
     private void validateLanguage(String lang) {
         if (lang != null && !lang.isBlank() && !LANGUAGE_PATTERN.matcher(lang.trim()).matches()) {
-            throw new BadRequestException("Language must be a two-letter code");
+            throw new FoodProductValidationException("Language must be a two-letter code");
         }
     }
 
@@ -174,19 +175,19 @@ public class NutritionServiceImpl implements NutritionService {
     private void validateTextLength(String value, String label, int min, int max, boolean required) {
         if (value == null || value.isBlank()) {
             if (required) {
-                throw new BadRequestException(label + " is required");
+                throw new FoodProductValidationException(label + " is required");
             }
             return;
         }
         int length = value.trim().length();
         if (length < min || length > max) {
-            throw new BadRequestException(label + " must be between " + min + " and " + max + " characters");
+            throw new FoodProductValidationException(label + " must be between " + min + " and " + max + " characters");
         }
     }
 
     private void validateOptionalMaxLength(String value, String label, int max) {
         if (value != null && value.trim().length() > max) {
-            throw new BadRequestException(label + " cannot be longer than " + max + " characters");
+            throw new FoodProductValidationException(label + " cannot be longer than " + max + " characters");
         }
     }
 }

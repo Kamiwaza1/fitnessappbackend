@@ -1,5 +1,6 @@
 package com.zeki.demo.unit;
 
+import com.zeki.demo.workouts.exception.WorkoutValidationException;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.dto.CreateWorkoutRequest;
 import com.zeki.demo.workouts.dto.WorkoutResponse;
@@ -77,7 +78,7 @@ class WorkoutTest {
     void validate_shouldThrowException_whenWorkoutCategoryIsNull() {
         Workout workout = createWorkout(null, MuscleType.LEGS);
 
-        assertThrows(IllegalArgumentException.class, workout::validate);
+        assertThrows(WorkoutValidationException.class, workout::validate);
     }
 
     private CreateWorkoutRequest createWorkoutRequest(WorkoutCategory category, MuscleType muscleType) {
@@ -92,8 +93,7 @@ class WorkoutTest {
                 DEFAULT_DESCRIPTION,
                 category,
                 muscleType,
-                null,
-                UUID.randomUUID()
+                null
         );
     }
 

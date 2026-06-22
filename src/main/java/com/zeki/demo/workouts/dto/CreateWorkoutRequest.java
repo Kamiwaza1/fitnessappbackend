@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 public record CreateWorkoutRequest(
         @NotBlank(message = "Workout name is required")
@@ -27,8 +26,7 @@ public record CreateWorkoutRequest(
         WorkoutCategory category,
         MuscleType muscleType,
         WorkoutDifficulty difficulty,
-        List<WorkoutExerciseRequest> exercises,
-        UUID workoutId
+        List<WorkoutExerciseRequest> exercises
 ) {
     public CreateWorkoutRequest(
             String workoutName,
@@ -41,8 +39,7 @@ public record CreateWorkoutRequest(
             String description,
             WorkoutCategory category,
             MuscleType muscleType,
-            List<WorkoutExerciseRequest> exercises,
-            UUID workoutId
+            List<WorkoutExerciseRequest> exercises
     ) {
         this(
                 workoutName,
@@ -56,8 +53,7 @@ public record CreateWorkoutRequest(
                 category,
                 muscleType,
                 null,
-                exercises,
-                workoutId
+                exercises
         );
     }
 }

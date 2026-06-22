@@ -1,5 +1,6 @@
 package com.zeki.demo.unit;
 
+import com.zeki.demo.workouts.exception.WorkoutValidationException;
 import com.zeki.demo.workouts.domain.WorkoutExercise;
 import com.zeki.demo.workouts.enums.MuscleType;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,7 @@ class WorkoutExerciseTest {
     void validateRejectsBlankName() {
         WorkoutExercise exercise = new WorkoutExercise(" ", MuscleType.BACK, 4, 10, 0.0, null);
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, exercise::validate);
+        WorkoutValidationException ex = assertThrows(WorkoutValidationException.class, exercise::validate);
 
         assertEquals("Exercise name is required", ex.getMessage());
     }
@@ -32,7 +33,7 @@ class WorkoutExerciseTest {
     void validateRejectsMissingMuscleType() {
         WorkoutExercise exercise = new WorkoutExercise("Row", null, 4, 10, 20.0, null);
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, exercise::validate);
+        WorkoutValidationException ex = assertThrows(WorkoutValidationException.class, exercise::validate);
 
         assertEquals("Exercise muscle type is required", ex.getMessage());
     }
@@ -44,10 +45,10 @@ class WorkoutExerciseTest {
         WorkoutExercise invalidWeight = new WorkoutExercise("Row", MuscleType.BACK, 4, 10, -1.0, null);
 
         assertEquals("Exercise sets must be at least 1",
-                assertThrows(IllegalArgumentException.class, invalidSets::validate).getMessage());
+                assertThrows(WorkoutValidationException.class, invalidSets::validate).getMessage());
         assertEquals("Exercise reps must be at least 1",
-                assertThrows(IllegalArgumentException.class, invalidReps::validate).getMessage());
+                assertThrows(WorkoutValidationException.class, invalidReps::validate).getMessage());
         assertEquals("Exercise weight (kg) must be 0 or greater",
-                assertThrows(IllegalArgumentException.class, invalidWeight::validate).getMessage());
+                assertThrows(WorkoutValidationException.class, invalidWeight::validate).getMessage());
     }
 }

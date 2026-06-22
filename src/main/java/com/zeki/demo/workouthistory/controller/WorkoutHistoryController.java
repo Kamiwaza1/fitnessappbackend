@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.zeki.demo.workouts.exception.WorkoutNotFoundException.WORKOUT_NOT_FOUND;
+
 @RestController
 @RequestMapping({"/api/v1/workout-history", "/api/v1/workout-histories"})
 @RequiredArgsConstructor
@@ -57,7 +59,7 @@ public class WorkoutHistoryController {
     @Operation(summary = "Get a workout history record by workout ID")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Workout history record"),
-            @ApiResponse(responseCode = "404", description = "Workout not found")
+            @ApiResponse(responseCode = "404", description = WORKOUT_NOT_FOUND)
     })
     @GetMapping("/{workoutId}")
     public WorkoutHistoryResponse getWorkoutHistoryById(

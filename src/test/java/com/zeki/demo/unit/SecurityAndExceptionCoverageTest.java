@@ -103,7 +103,8 @@ class SecurityAndExceptionCoverageTest {
                 .getBody();
 
         assertEquals(HttpStatus.BAD_REQUEST.value(), body.get("status"));
-        assertEquals("Invalid input", body.get("error"));
+        assertEquals("DOMAIN_VALIDATION_FAILED", body.get("code"));
+        assertEquals("Invalid input", body.get("message"));
     }
 
     @Test

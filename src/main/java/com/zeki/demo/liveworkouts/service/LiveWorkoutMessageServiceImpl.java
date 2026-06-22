@@ -1,10 +1,10 @@
 package com.zeki.demo.liveworkouts.service;
 
-import com.zeki.demo.common.exception.BadRequestException;
-import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutMessage;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
 import com.zeki.demo.liveworkouts.domain.repository.LiveWorkoutMessageRepository;
+import com.zeki.demo.liveworkouts.exception.LiveWorkoutAccessException;
+import com.zeki.demo.liveworkouts.exception.LiveWorkoutValidationException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,10 +23,10 @@ public class LiveWorkoutMessageServiceImpl implements LiveWorkoutMessageService 
         LiveWorkoutRoom room = liveWorkoutRoomService.getRoom(roomCode);
         requireParticipant(room, senderEmail);
         if (text == null || text.isBlank()) {
-            throw new BadRequestException("Message text is required");
+            throw new LiveWorkoutValidationException("Message text is required");
         }
         if (text.trim().length() > 500) {
-            throw new BadRequestException("Message cannot be longer than 500 characters");
+            throw new LiveWorkoutValidationException("Message cannot be longer than 500 characters");
         }
         return liveWorkoutMessageRepository.save(LiveWorkoutMessage.create(room.roomCode(), senderEmail, text));
     }
@@ -39,7 +39,7 @@ public class LiveWorkoutMessageServiceImpl implements LiveWorkoutMessageService 
 
     private void requireParticipant(LiveWorkoutRoom room, String userEmail) {
         if (!room.participants().containsKey(userEmail)) {
-            throw new UnauthorizedException("Join the live workout before using chat");
+            throw new LiveWorkoutAccessException("Join the live workout before using chat");
         }
     }
 }

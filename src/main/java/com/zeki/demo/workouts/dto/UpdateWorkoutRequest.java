@@ -5,10 +5,8 @@ import com.zeki.demo.workouts.enums.MuscleType;
 import com.zeki.demo.workouts.enums.WorkoutDifficulty;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 public record UpdateWorkoutRequest(
-        UUID workoutId,
         String workoutName,
         LocalDate workoutDate,
         Integer durationMinutes,
@@ -23,7 +21,6 @@ public record UpdateWorkoutRequest(
         String description
 ) {
     public UpdateWorkoutRequest(
-            UUID workoutId,
             String workoutName,
             LocalDate workoutDate,
             Integer durationMinutes,
@@ -37,7 +34,6 @@ public record UpdateWorkoutRequest(
             String description
     ) {
         this(
-                workoutId,
                 workoutName,
                 workoutDate,
                 durationMinutes,

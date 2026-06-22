@@ -1,6 +1,6 @@
 package com.zeki.demo.unit;
 
-import com.zeki.demo.common.exception.BadRequestException;
+import com.zeki.demo.users.exception.UserValidationException;
 import com.zeki.demo.users.domain.User;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,7 +29,7 @@ class UserDomainTest {
     void validateRejectsInvalidEmail() {
         User user = user("Name", "not-an-email", "StrongPassword123!");
 
-        BadRequestException ex = assertThrows(BadRequestException.class, user::validate);
+        UserValidationException ex = assertThrows(UserValidationException.class, user::validate);
 
         assertEquals("Email should be a valid email address", ex.getMessage());
     }

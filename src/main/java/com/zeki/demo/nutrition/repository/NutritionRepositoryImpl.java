@@ -14,6 +14,8 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import static com.zeki.demo.nutrition.exception.NutritionNotFoundException.NUTRITION_ENTRY_NOT_FOUND;
+
 @Repository
 @RequiredArgsConstructor
 public class NutritionRepositoryImpl implements NutritionRepository {
@@ -47,7 +49,7 @@ public class NutritionRepositoryImpl implements NutritionRepository {
     @Override
     public void delete(UUID nutritionId) {
         NutritionEntity nutritionEntity = nutritionRepoJPA.findById(nutritionId)
-                .orElseThrow(() -> new NotFoundException("Nutrition entry not found"));
+                .orElseThrow(() -> new NotFoundException(NUTRITION_ENTRY_NOT_FOUND));
         nutritionRepoJPA.delete(nutritionEntity);
     }
 

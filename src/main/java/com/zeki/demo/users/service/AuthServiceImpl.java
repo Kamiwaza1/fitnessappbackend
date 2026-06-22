@@ -1,6 +1,5 @@
 package com.zeki.demo.users.service;
 
-import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.common.exception.ConflictException;
 import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.mail.EmailService;
@@ -8,6 +7,9 @@ import com.zeki.demo.users.domain.User;
 import com.zeki.demo.users.entity.PasswordResetTokenEntity;
 import com.zeki.demo.users.entity.UserEntity;
 import com.zeki.demo.users.domain.repository.UserRepository;
+import com.zeki.demo.users.exception.AuthenticationValidationException;
+import com.zeki.demo.users.exception.PasswordResetException;
+import com.zeki.demo.users.exception.UserValidationException;
 import com.zeki.demo.users.repository.jpa.PasswordResetTokenRepoJPA;
 import com.zeki.demo.users.repository.jpa.UserRepoJPA;
 import com.zeki.demo.users.security.JWTService;
@@ -65,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
         }
         List<String> passwordIssues = user.getPasswordIssues();
         if (!passwordIssues.isEmpty()) {
-            throw new BadRequestException("Password is not strong enough: " + String.join(", ", passwordIssues));
+            throw new UserValidationException("Password is not strong enough: " + String.join(", ", passwordIssues));
         }
         user.setEncodedPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
@@ -80,7 +82,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthenticatedUser login(User user) {
         String normalizedEmail = User.normalizeEmail(user.getEmail());
         if (normalizedEmail.isBlank()) {
-            throw new BadRequestException("Email is required");
+            throw new AuthenticationValidationException("Email is required");
         }
         try {
             authenticationManager.authenticate(
@@ -108,7 +110,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthenticatedUser refresh(String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {
-            throw new BadRequestException("Refresh token is required");
+            throw new AuthenticationValidationException("Refresh token is required");
         }
 
         try {
@@ -136,7 +138,7 @@ public class AuthServiceImpl implements AuthService {
     public void requestPasswordReset(String email) {
         String normalizedEmail = User.normalizeEmail(email);
         if (normalizedEmail.isBlank()) {
-            throw new BadRequestException("Email is required");
+            throw new PasswordResetException("Email is required");
         }
 
         userRepository.findActiveByEmail(normalizedEmail).ifPresentOrElse(user -> {
@@ -169,20 +171,20 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void resetPassword(String token, String code, String newPassword) {
         if (token == null || token.isBlank()) {
-            throw new BadRequestException("Reset token is required");
+            throw new PasswordResetException("Reset token is required");
         }
         if (code == null || !code.matches("\\d{6}")) {
-            throw new BadRequestException("Security code must be 6 digits");
+            throw new PasswordResetException("Security code must be 6 digits");
         }
 
         LocalDateTime now = LocalDateTime.now();
         PasswordResetTokenEntity tokenEntity = passwordResetTokenRepoJPA.findByTokenHash(hashToken(token))
                 .filter(candidate -> candidate.isUsable(now))
                 .filter(candidate -> hashToken(code).equals(candidate.getCodeHash()))
-                .orElseThrow(() -> new BadRequestException("Password reset link is invalid or expired"));
+                .orElseThrow(() -> new PasswordResetException("Password reset link is invalid or expired"));
 
         User existingUser = userRepository.findActiveByEmail(tokenEntity.getUser().getEmail())
-                .orElseThrow(() -> new BadRequestException("Password reset link is invalid or expired"));
+                .orElseThrow(() -> new PasswordResetException("Password reset link is invalid or expired"));
 
         User passwordCandidate = new User(
                 existingUser.getUserId(),
@@ -197,7 +199,7 @@ public class AuthServiceImpl implements AuthService {
         );
         List<String> passwordIssues = passwordCandidate.getPasswordIssues();
         if (!passwordIssues.isEmpty()) {
-            throw new BadRequestException("Password is not strong enough: " + String.join(", ", passwordIssues));
+            throw new PasswordResetException("Password is not strong enough: " + String.join(", ", passwordIssues));
         }
 
         existingUser.setEncodedPassword(passwordEncoder.encode(newPassword));

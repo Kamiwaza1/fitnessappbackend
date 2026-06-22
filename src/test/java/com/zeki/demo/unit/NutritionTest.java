@@ -2,7 +2,7 @@ package com.zeki.demo.unit;
 
 import com.zeki.demo.nutrition.domain.Nutrition;
 import com.zeki.demo.nutrition.dto.CreateNutritionRequest;
-import com.zeki.demo.nutrition.dto.DeleteNutritionRequest;
+import com.zeki.demo.nutrition.exception.NutritionValidationException;
 import com.zeki.demo.nutrition.dto.NutritionResponse;
 import com.zeki.demo.nutrition.enums.NutritionCategory;
 import com.zeki.demo.nutrition.mapperdtodomain.NutritionDtoDomain;
@@ -52,7 +52,7 @@ class NutritionTest {
     void nutritionRejectsNullCategory() {
         Nutrition nutrition = nutrition("Salmon", null);
 
-        assertThrows(IllegalArgumentException.class, nutrition::validate);
+        assertThrows(NutritionValidationException.class, nutrition::validate);
     }
 
     private CreateNutritionRequest createNutritionRequest(String mealName, NutritionCategory category) {
@@ -64,8 +64,7 @@ class NutritionTest {
                 50,
                 20,
                 "Post workout meal",
-                category,
-                UUID.randomUUID()
+                category
         );
     }
 

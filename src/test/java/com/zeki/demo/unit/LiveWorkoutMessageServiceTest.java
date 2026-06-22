@@ -1,7 +1,7 @@
 package com.zeki.demo.unit;
 
-import com.zeki.demo.common.exception.BadRequestException;
-import com.zeki.demo.common.exception.UnauthorizedException;
+import com.zeki.demo.liveworkouts.exception.LiveWorkoutValidationException;
+import com.zeki.demo.liveworkouts.exception.LiveWorkoutAccessException;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutMessage;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
 import com.zeki.demo.liveworkouts.domain.repository.LiveWorkoutMessageRepository;
@@ -60,11 +60,11 @@ class LiveWorkoutMessageServiceTest {
         when(liveWorkoutRoomService.getRoom(ROOM_CODE)).thenReturn(room);
 
         assertThrows(
-                UnauthorizedException.class,
+                LiveWorkoutAccessException.class,
                 () -> liveWorkoutMessageService.sendMessage(ROOM_CODE, GUEST_EMAIL, "hello")
         );
         assertThrows(
-                BadRequestException.class,
+                LiveWorkoutValidationException.class,
                 () -> liveWorkoutMessageService.sendMessage(ROOM_CODE, HOST_EMAIL, " ")
         );
     }

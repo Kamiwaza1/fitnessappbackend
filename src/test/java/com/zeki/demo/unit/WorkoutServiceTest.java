@@ -1,6 +1,7 @@
 package com.zeki.demo.unit;
 
-import com.zeki.demo.workouts.workoutexception.WorkoutExistException;
+import com.zeki.demo.workouts.exception.WorkoutNotFoundException;
+import static com.zeki.demo.workouts.exception.WorkoutNotFoundException.WORKOUT_NOT_FOUND;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.dto.UpdateWorkoutRequest;
 import com.zeki.demo.workouts.enums.MuscleType;
@@ -49,19 +50,18 @@ class WorkoutServiceTest {
         UUID workoutId = UUID.randomUUID();
         when(workoutRepository.getWorkoutByIdAndUserEmail(workoutId, OWNER_EMAIL)).thenReturn(Optional.empty());
 
-        WorkoutExistException ex = assertThrows(
-                WorkoutExistException.class,
+        WorkoutNotFoundException ex = assertThrows(
+                WorkoutNotFoundException.class,
                 () -> workoutService.getWorkoutById(workoutId, OWNER_EMAIL)
         );
 
-        assertEquals("Workout not found", ex.getMessage());
+        assertEquals(WORKOUT_NOT_FOUND, ex.getMessage());
     }
 
     @Test
     void updateWorkoutWhenNotOwnedByUserThrowsNotFound() {
         UUID workoutId = UUID.randomUUID();
         UpdateWorkoutRequest request = updateRequest(
-                workoutId,
                 LocalDate.now().plusDays(1),
                 45,
                 5,
@@ -72,12 +72,12 @@ class WorkoutServiceTest {
 
         when(workoutRepository.getWorkoutByIdAndUserEmail(workoutId, OTHER_EMAIL)).thenReturn(Optional.empty());
 
-        WorkoutExistException ex = assertThrows(
-                WorkoutExistException.class,
+        WorkoutNotFoundException ex = assertThrows(
+                WorkoutNotFoundException.class,
                 () -> workoutService.updateWorkout(workoutId, request, OTHER_EMAIL)
         );
 
-        assertEquals("Workout not found", ex.getMessage());
+        assertEquals(WORKOUT_NOT_FOUND, ex.getMessage());
         verify(workoutRepository, never()).save(any());
     }
 
@@ -86,7 +86,6 @@ class WorkoutServiceTest {
         UUID workoutId = UUID.randomUUID();
         Workout existing = validWorkout(workoutId, OWNER_EMAIL);
         UpdateWorkoutRequest request = updateRequest(
-                workoutId,
                 LocalDate.now().plusDays(2),
                 50,
                 6,
@@ -141,7 +140,6 @@ class WorkoutServiceTest {
     }
 
     private UpdateWorkoutRequest updateRequest(
-            UUID workoutId,
             LocalDate workoutDate,
             Integer durationMinutes,
             Integer sets,
@@ -150,7 +148,6 @@ class WorkoutServiceTest {
             MuscleType muscleType
     ) {
         return new UpdateWorkoutRequest(
-                workoutId,
                 UPDATED_NAME,
                 workoutDate,
                 durationMinutes,

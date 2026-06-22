@@ -36,6 +36,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.validation.annotation.Validated;
 
+import static com.zeki.demo.nutrition.exception.NutritionNotFoundException.NUTRITION_ENTRY_NOT_FOUND;
+
 @RestController
 @RequestMapping("/api/v1/nutrition")
 @RequiredArgsConstructor
@@ -118,7 +120,7 @@ public class NutritionController {
     @Operation(summary = "Get a nutrition entry by ID for the current user")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Nutrition entry details for the current user"),
-            @ApiResponse(responseCode = "404", description = "Nutrition entry not found")
+            @ApiResponse(responseCode = "404", description = NUTRITION_ENTRY_NOT_FOUND)
     })
     @GetMapping("/{nutritionId}")
     public NutritionResponse getNutritionById(@PathVariable UUID nutritionId, Authentication authentication) {
@@ -148,7 +150,7 @@ public class NutritionController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Nutrition entry updated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request"),
-            @ApiResponse(responseCode = "404", description = "Nutrition entry not found")
+            @ApiResponse(responseCode = "404", description = NUTRITION_ENTRY_NOT_FOUND)
     })
     @PatchMapping("/{nutritionId}")
     public NutritionResponse updateNutrition(
@@ -165,7 +167,7 @@ public class NutritionController {
     @Operation(summary = "Delete an existing nutrition entry for the current user")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Nutrition entry deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Nutrition entry not found")
+            @ApiResponse(responseCode = "404", description = NUTRITION_ENTRY_NOT_FOUND)
     })
     @DeleteMapping("/{nutritionId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

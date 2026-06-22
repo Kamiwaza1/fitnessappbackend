@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.UUID;
 
 public record CreateNutritionRequest(
         @NotBlank(message = "Meal name is required")
@@ -33,7 +32,6 @@ public record CreateNutritionRequest(
         Integer fatGrams,
         @Size(max = 1000, message = "Notes cannot be longer than 1000 characters")
         String notes,
-        NutritionCategory category,
-        UUID nutritionId
+        NutritionCategory category
 ) {
 }

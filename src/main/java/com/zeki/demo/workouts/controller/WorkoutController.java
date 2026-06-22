@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.zeki.demo.workouts.exception.WorkoutNotFoundException.WORKOUT_NOT_FOUND;
+
 @RestController
 @RequestMapping("/api/v1/workouts")
 @RequiredArgsConstructor
@@ -57,7 +59,7 @@ public class WorkoutController {
     @Operation(summary = "Get a workout by ID for the current user")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Workout details for the current user"),
-            @ApiResponse(responseCode = "404", description = "Workout not found")
+            @ApiResponse(responseCode = "404", description = WORKOUT_NOT_FOUND)
     })
     @GetMapping("/{workoutId}")
     public WorkoutResponse getWorkoutById(@PathVariable UUID workoutId, Authentication authentication) {
@@ -85,7 +87,7 @@ public class WorkoutController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Workout updated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request"),
-            @ApiResponse(responseCode = "404", description = "Workout not found")
+            @ApiResponse(responseCode = "404", description = WORKOUT_NOT_FOUND)
     })
     @PatchMapping("/{workoutId}")
     public WorkoutResponse updateWorkout(
@@ -99,7 +101,7 @@ public class WorkoutController {
     @Operation(summary = "Delete an existing workout for the current user")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Workout deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Workout not found")
+            @ApiResponse(responseCode = "404", description = WORKOUT_NOT_FOUND)
     })
     @DeleteMapping("/{workoutId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

@@ -395,11 +395,11 @@ class ControllerCoverageTest {
 
     private CreateWorkoutRequest createWorkoutRequest() {
         return new CreateWorkoutRequest("Push", LocalDate.now(), 30, 3, 10, 40.0,
-                null, null, WorkoutCategory.GENERAL, MuscleType.CHEST, List.of(), id);
+                null, null, WorkoutCategory.GENERAL, MuscleType.CHEST, List.of());
     }
 
     private UpdateWorkoutRequest updateWorkoutRequest() {
-        return new UpdateWorkoutRequest(id, "Pull", LocalDate.now(), 40, 4, 8,
+        return new UpdateWorkoutRequest("Pull", LocalDate.now(), 40, 4, 8,
                 50.0, null, WorkoutCategory.STRENGTH, MuscleType.BACK, List.of(), null);
     }
 
@@ -410,11 +410,11 @@ class ControllerCoverageTest {
 
     private CreateNutritionRequest createNutritionRequest() {
         return new CreateNutritionRequest("Meal", LocalDate.now(), 500, 20, 50, 10,
-                null, NutritionCategory.LUNCH, id);
+                null, NutritionCategory.LUNCH);
     }
 
     private UpdateNutritionRequest updateNutritionRequest() {
-        return new UpdateNutritionRequest(id, "Meal 2", LocalDate.now(), 600, 30, 60, 20,
+        return new UpdateNutritionRequest("Meal 2", LocalDate.now(), 600, 30, 60, 20,
                 null, NutritionCategory.DINNER);
     }
 

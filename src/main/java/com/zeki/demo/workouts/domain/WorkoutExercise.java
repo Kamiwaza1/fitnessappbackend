@@ -1,6 +1,7 @@
 package com.zeki.demo.workouts.domain;
 
 import com.zeki.demo.workouts.enums.MuscleType;
+import com.zeki.demo.workouts.exception.WorkoutValidationException;
 import lombok.Getter;
 
 @Getter
@@ -30,25 +31,25 @@ public class WorkoutExercise {
 
     public void validate() {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Exercise name is required");
+            throw new WorkoutValidationException("Exercise name is required");
         }
         if (name.length() > 255) {
-            throw new IllegalArgumentException("Exercise name cannot be longer than 255 characters");
+            throw new WorkoutValidationException("Exercise name cannot be longer than 255 characters");
         }
         if (muscleType == null) {
-            throw new IllegalArgumentException("Exercise muscle type is required");
+            throw new WorkoutValidationException("Exercise muscle type is required");
         }
         if (sets == null || sets < 1) {
-            throw new IllegalArgumentException("Exercise sets must be at least 1");
+            throw new WorkoutValidationException("Exercise sets must be at least 1");
         }
         if (reps == null || reps < 1) {
-            throw new IllegalArgumentException("Exercise reps must be at least 1");
+            throw new WorkoutValidationException("Exercise reps must be at least 1");
         }
         if (weightKg == null || weightKg < 0) {
-            throw new IllegalArgumentException("Exercise weight (kg) must be 0 or greater");
+            throw new WorkoutValidationException("Exercise weight (kg) must be 0 or greater");
         }
         if (notes != null && notes.length() > 1000) {
-            throw new IllegalArgumentException("Exercise notes cannot be longer than 1000 characters");
+            throw new WorkoutValidationException("Exercise notes cannot be longer than 1000 characters");
         }
     }
 

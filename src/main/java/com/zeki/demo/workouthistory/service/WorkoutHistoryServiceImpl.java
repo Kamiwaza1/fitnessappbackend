@@ -4,7 +4,7 @@ import com.zeki.demo.workouthistory.domain.WorkoutHistory;
 import com.zeki.demo.workouthistory.dto.CreateWorkoutHistoryRequest;
 import com.zeki.demo.workouthistory.mapperdtodomain.WorkoutHistoryDtoDomain;
 import com.zeki.demo.workouthistory.domain.repository.WorkoutHistoryRepository;
-import com.zeki.demo.workouts.workoutexception.WorkoutExistException;
+import com.zeki.demo.workouts.exception.WorkoutNotFoundException;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.domain.repository.WorkoutRepository;
 import java.util.List;
@@ -38,6 +38,6 @@ public class WorkoutHistoryServiceImpl implements WorkoutHistoryService {
     @Override
     public WorkoutHistory getWorkoutHistoryById(UUID workoutId, String userEmail) {
         return workoutHistoryRepository.getByWorkoutIdAndUserEmail(workoutId, userEmail)
-                .orElseThrow(() -> new WorkoutExistException("Workout not found"));
+                .orElseThrow(WorkoutNotFoundException::new);
     }
 }

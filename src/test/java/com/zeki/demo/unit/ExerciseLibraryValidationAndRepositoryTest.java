@@ -2,6 +2,7 @@ package com.zeki.demo.unit;
 
 import com.zeki.demo.exerciselibrary.client.WgerExerciseClient;
 import com.zeki.demo.exerciselibrary.domain.ExerciseLibrary;
+import com.zeki.demo.exerciselibrary.exception.ExerciseLibraryValidationException;
 import com.zeki.demo.exerciselibrary.domain.ExerciseLibraryListCriteria;
 import com.zeki.demo.exerciselibrary.domain.ExerciseLibrarySearchCriteria;
 import com.zeki.demo.exerciselibrary.entity.ExerciseLibraryEntity;
@@ -39,20 +40,20 @@ class ExerciseLibraryValidationAndRepositoryTest {
 
     @Test
     void searchCriteriaRejectsInvalidValues() {
-        assertThrows(IllegalArgumentException.class, () -> new ExerciseLibrarySearchCriteria("a".repeat(101), null, null, null, null, null));
-        assertThrows(IllegalArgumentException.class, () -> new ExerciseLibrarySearchCriteria(null, 0, null, null, null, null));
-        assertThrows(IllegalArgumentException.class, () -> new ExerciseLibrarySearchCriteria(null, 101, null, null, null, null));
-        assertThrows(IllegalArgumentException.class, () -> new ExerciseLibrarySearchCriteria(null, null, -1, null, null, null));
-        assertThrows(IllegalArgumentException.class, () -> new ExerciseLibrarySearchCriteria(null, null, null, 0, null, null));
-        assertThrows(IllegalArgumentException.class, () -> new ExerciseLibrarySearchCriteria(null, null, null, null, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> new ExerciseLibrarySearchCriteria(null, null, null, null, null, 0));
+        assertThrows(ExerciseLibraryValidationException.class, () -> new ExerciseLibrarySearchCriteria("a".repeat(101), null, null, null, null, null));
+        assertThrows(ExerciseLibraryValidationException.class, () -> new ExerciseLibrarySearchCriteria(null, 0, null, null, null, null));
+        assertThrows(ExerciseLibraryValidationException.class, () -> new ExerciseLibrarySearchCriteria(null, 101, null, null, null, null));
+        assertThrows(ExerciseLibraryValidationException.class, () -> new ExerciseLibrarySearchCriteria(null, null, -1, null, null, null));
+        assertThrows(ExerciseLibraryValidationException.class, () -> new ExerciseLibrarySearchCriteria(null, null, null, 0, null, null));
+        assertThrows(ExerciseLibraryValidationException.class, () -> new ExerciseLibrarySearchCriteria(null, null, null, null, 0, null));
+        assertThrows(ExerciseLibraryValidationException.class, () -> new ExerciseLibrarySearchCriteria(null, null, null, null, null, 0));
     }
 
     @Test
     void listCriteriaRejectsInvalidPaging() {
-        assertThrows(IllegalArgumentException.class, () -> new ExerciseLibraryListCriteria(0, null));
-        assertThrows(IllegalArgumentException.class, () -> new ExerciseLibraryListCriteria(101, null));
-        assertThrows(IllegalArgumentException.class, () -> new ExerciseLibraryListCriteria(null, -1));
+        assertThrows(ExerciseLibraryValidationException.class, () -> new ExerciseLibraryListCriteria(0, null));
+        assertThrows(ExerciseLibraryValidationException.class, () -> new ExerciseLibraryListCriteria(101, null));
+        assertThrows(ExerciseLibraryValidationException.class, () -> new ExerciseLibraryListCriteria(null, -1));
     }
 
     @Test

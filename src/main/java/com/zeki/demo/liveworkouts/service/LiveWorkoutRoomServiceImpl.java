@@ -1,12 +1,12 @@
 package com.zeki.demo.liveworkouts.service;
 
-import com.zeki.demo.common.exception.BadRequestException;
 import com.zeki.demo.common.exception.NotFoundException;
-import com.zeki.demo.common.exception.UnauthorizedException;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutParticipant;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
 import com.zeki.demo.liveworkouts.dto.LiveWorkoutProgressRequest;
 import com.zeki.demo.liveworkouts.domain.repository.LiveWorkoutRoomRepository;
+import com.zeki.demo.liveworkouts.exception.LiveWorkoutAccessException;
+import com.zeki.demo.liveworkouts.exception.LiveWorkoutValidationException;
 import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.service.WorkoutService;
 import java.security.SecureRandom;
@@ -71,7 +71,7 @@ public class LiveWorkoutRoomServiceImpl implements LiveWorkoutRoomService {
         return updateRoom(roomCode, room -> {
             LiveWorkoutParticipant participant = room.participants().get(userEmail);
             if (participant == null) {
-                throw new UnauthorizedException("Join the live workout before sending progress");
+                throw new LiveWorkoutAccessException("Join the live workout before sending progress");
             }
 
             Map<String, LiveWorkoutParticipant> participants = new LinkedHashMap<>(room.participants());
@@ -89,7 +89,7 @@ public class LiveWorkoutRoomServiceImpl implements LiveWorkoutRoomService {
     public LiveWorkoutRoom closeRoom(String roomCode, String userEmail) {
         LiveWorkoutRoom room = getActiveRoom(roomCode);
         if (!room.hostEmail().equals(userEmail)) {
-            throw new UnauthorizedException("Only the host can close this live workout room");
+            throw new LiveWorkoutAccessException("Only the host can close this live workout room");
         }
         liveWorkoutRoomRepository.saveClosed(room, Instant.now());
         return room;
@@ -112,7 +112,7 @@ public class LiveWorkoutRoomServiceImpl implements LiveWorkoutRoomService {
                 return roomCode;
             }
         }
-        throw new BadRequestException("Could not create live workout room code");
+        throw new LiveWorkoutValidationException("Could not create live workout room code");
     }
 
     private String generateRoomCode() {
@@ -125,7 +125,7 @@ public class LiveWorkoutRoomServiceImpl implements LiveWorkoutRoomService {
 
     private String normalizeRoomCode(String roomCode) {
         if (roomCode == null || roomCode.isBlank()) {
-            throw new BadRequestException("Room code is required");
+            throw new LiveWorkoutValidationException("Room code is required");
         }
         return roomCode.trim().toUpperCase(Locale.ROOT);
     }

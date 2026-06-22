@@ -15,6 +15,8 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import static com.zeki.demo.workouts.exception.WorkoutNotFoundException.WORKOUT_NOT_FOUND;
+
 @Repository
 @RequiredArgsConstructor
 public class WorkoutRepositoryImpl implements WorkoutRepository {
@@ -61,7 +63,7 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
     @Override
     public void delete(UUID workoutId) {
         WorkoutEntity workoutEntity = workoutRepoJPA.findById(workoutId)
-                .orElseThrow(() -> new NotFoundException("Workout not found"));
+                .orElseThrow(() -> new NotFoundException(WORKOUT_NOT_FOUND));
         workoutRepoJPA.delete(workoutEntity);
     }
 
