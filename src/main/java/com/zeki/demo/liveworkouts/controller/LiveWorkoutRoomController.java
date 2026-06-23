@@ -15,6 +15,9 @@ import jakarta.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -39,6 +42,8 @@ public class LiveWorkoutRoomController {
     private final LiveWorkoutRoomMapper liveWorkoutRoomMapper;
     private final LiveWorkoutMessageMapper liveWorkoutMessageMapper;
     private final LiveWorkoutEventPublisher liveWorkoutEventPublisher;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LiveWorkoutRoomController.class);
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -91,19 +96,23 @@ public class LiveWorkoutRoomController {
     }
 
     @MessageMapping("/live-workouts/{roomCode}/join")
-    public void joinRoom(@DestinationVariable String roomCode, Principal principal) {
+    public void joinRoom(@DestinationVariable String roomCode, Principal principal, @Header("simpSessionId") String sessionId) {
+        String userEmail = principal.getName();
+        LOGGER.debug("WebSocket joinRoom: room={} sessionId={} user={}", roomCode, sessionId, userEmail);
         LiveWorkoutRoomResponse room = liveWorkoutRoomMapper.toResponse(
-                liveWorkoutRoomService.joinRoom(roomCode, principal.getName())
+                liveWorkoutRoomService.joinRoom(roomCode, userEmail)
         );
-        liveWorkoutEventPublisher.publishUserJoined(roomCode, principal.getName(), room);
+        liveWorkoutEventPublisher.publishUserJoined(roomCode, userEmail, room);
     }
 
     @MessageMapping("/live-workouts/{roomCode}/leave")
-    public void leaveRoom(@DestinationVariable String roomCode, Principal principal) {
+    public void leaveRoom(@DestinationVariable String roomCode, Principal principal, @Header("simpSessionId") String sessionId) {
+        String userEmail = principal.getName();
+        LOGGER.debug("WebSocket leaveRoom: room={} sessionId={} user={}", roomCode, sessionId, userEmail);
         LiveWorkoutRoomResponse room = liveWorkoutRoomMapper.toResponse(
-                liveWorkoutRoomService.leaveRoom(roomCode, principal.getName())
+                liveWorkoutRoomService.leaveRoom(roomCode, userEmail)
         );
-        liveWorkoutEventPublisher.publishUserLeft(roomCode, principal.getName(), room);
+        liveWorkoutEventPublisher.publishUserLeft(roomCode, userEmail, room);
     }
 
     @MessageMapping("/live-workouts/{roomCode}/progress")

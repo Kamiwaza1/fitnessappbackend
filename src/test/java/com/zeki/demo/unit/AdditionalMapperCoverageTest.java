@@ -259,6 +259,8 @@ class AdditionalMapperCoverageTest {
                 null,
                 null,
                 null,
+                null,
+                null,
                 "notes",
                 null,
                 null,
@@ -293,6 +295,8 @@ class AdditionalMapperCoverageTest {
                 workoutId,
                 "Logged workout",
                 LocalDate.now(),
+                null,
+                null,
                 30,
                 3,
                 30,
@@ -310,6 +314,32 @@ class AdditionalMapperCoverageTest {
         assertEquals(MuscleType.BACK, history.getMuscleType());
         assertEquals(WorkoutCategory.GENERAL, history.getCategory());
         assertEquals(com.zeki.demo.workouts.enums.WorkoutDifficulty.BEGINNER, history.getDifficulty());
+    }
+
+    @Test
+    void workoutHistoryDtoMapperCalculatesDurationFromSessionTimes() {
+        UUID workoutId = UUID.randomUUID();
+        CreateWorkoutHistoryRequest request = new CreateWorkoutHistoryRequest(
+                workoutId,
+                "Timed workout",
+                LocalDate.now(),
+                Instant.parse("2026-06-23T08:00:00Z"),
+                Instant.parse("2026-06-23T08:44:01Z"),
+                1,
+                3,
+                30,
+                80.0,
+                null,
+                "request description",
+                null,
+                null,
+                null,
+                List.of(new WorkoutHistoryExerciseRequest("1", "Row", MuscleType.BACK, true))
+        );
+
+        WorkoutHistory history = new WorkoutHistoryDtoDomain().toDomain(request, "owner@example.com", null);
+
+        assertEquals(45, history.getDurationMinutes());
     }
 
     @Test

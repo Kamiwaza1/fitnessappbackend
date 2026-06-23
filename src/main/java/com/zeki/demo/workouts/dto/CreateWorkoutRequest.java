@@ -13,7 +13,6 @@ public record CreateWorkoutRequest(
         String workoutName,
         @NotNull(message = "Workout date is required")
         LocalDate workoutDate,
-        @NotNull(message = "Duration minutes is required")
         Integer durationMinutes,
         @NotNull(message = "Sets is required")
         Integer sets,

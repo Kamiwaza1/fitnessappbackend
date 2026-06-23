@@ -184,13 +184,10 @@ public class Workout {
         if (workoutDate.isAfter(LocalDate.now().plusYears(1))) {
             throw new WorkoutValidationException("Workout date cannot be more than one year ahead");
         }
-        if (durationMinutes == null) {
-            throw new WorkoutValidationException("Duration is required");
-        }
-        if (durationMinutes < 1) {
+        if (durationMinutes != null && durationMinutes < 1) {
             throw new WorkoutValidationException("Duration must be at least 1 minute");
         }
-        if (durationMinutes > 999) {
+        if (durationMinutes != null && durationMinutes > 999) {
             throw new WorkoutValidationException("Duration cannot be greater than 999 minutes");
         }
         if (sets == null || sets < 1) {

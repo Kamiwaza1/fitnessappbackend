@@ -65,6 +65,11 @@ class LiveWorkoutRoomServiceTest {
             String status = invocation.getArgument(1);
             return entity != null && status.equals(entity.getStatus()) ? Optional.of(entity) : Optional.empty();
         });
+        lenient().when(liveWorkoutRoomRepoJPA.findByRoomCodeAndStatusForUpdate(any(String.class), any(String.class))).thenAnswer(invocation -> {
+            LiveWorkoutRoomEntity entity = savedRooms.get(invocation.getArgument(0));
+            String status = invocation.getArgument(1);
+            return entity != null && status.equals(entity.getStatus()) ? Optional.of(entity) : Optional.empty();
+        });
         LiveWorkoutRoomRepository liveWorkoutRoomRepository = new LiveWorkoutRoomRepositoryImpl(
                 liveWorkoutRoomRepoJPA,
                 new LiveWorkoutRoomEntityMapper()

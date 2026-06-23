@@ -60,7 +60,7 @@ public class WorkoutHistoryEntity {
     @Column(name = "workout_date", nullable = false)
     private LocalDate workoutDate;
 
-    @Column(name = "duration_minutes", nullable = false)
+    @Column(name = "duration_minutes")
     private Integer durationMinutes;
 
     @Column(name = "sets", nullable = false)

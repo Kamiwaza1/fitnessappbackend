@@ -46,6 +46,12 @@ public class LiveWorkoutRoomRepositoryImpl implements LiveWorkoutRoomRepository 
     }
 
     @Override
+    public Optional<LiveWorkoutRoom> findActiveRoomForUpdate(String roomCode) {
+        return liveWorkoutRoomRepoJPA.findByRoomCodeAndStatusForUpdate(roomCode, ACTIVE)
+                .map(liveWorkoutRoomEntityMapper::toDomain);
+    }
+
+    @Override
     public boolean exists(String roomCode) {
         return liveWorkoutRoomRepoJPA.existsById(roomCode);
     }

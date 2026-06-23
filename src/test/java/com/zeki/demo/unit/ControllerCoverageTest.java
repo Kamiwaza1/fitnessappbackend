@@ -269,8 +269,8 @@ class ControllerCoverageTest {
         assertEquals(detailResponse, liveWorkoutController.getRoomDetails("room1", auth));
         assertEquals(List.of(messageResponse), liveWorkoutController.getMessages("room1", auth));
         assertEquals(response, liveWorkoutController.closeRoom("room1", auth));
-        liveWorkoutController.joinRoom("room1", principal);
-        liveWorkoutController.leaveRoom("room1", principal);
+        liveWorkoutController.joinRoom("room1", principal, "session-1");
+        liveWorkoutController.leaveRoom("room1", principal, "session-1");
         liveWorkoutController.updateProgress("room1", progress, principal);
         liveWorkoutController.sendMessage("room1", messageRequest, principal);
 

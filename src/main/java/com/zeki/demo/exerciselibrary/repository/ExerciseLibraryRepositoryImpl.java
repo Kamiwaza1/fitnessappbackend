@@ -8,6 +8,7 @@ import com.zeki.demo.exerciselibrary.domain.ExerciseLibraryListCriteria;
 import com.zeki.demo.exerciselibrary.domain.ExerciseLibrarySearchCriteria;
 import com.zeki.demo.exerciselibrary.domain.ExerciseMuscle;
 import com.zeki.demo.exerciselibrary.domain.ExerciseReference;
+import com.zeki.demo.exerciselibrary.config.ExerciseLibraryCacheNames;
 import com.zeki.demo.exerciselibrary.mapperentitydomain.ExerciseLibraryEntityMapper;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class ExerciseLibraryRepositoryImpl implements ExerciseLibraryRepository 
 
     @Override
     @Cacheable(
-            cacheNames = "exercise-library:search",
+            cacheNames = ExerciseLibraryCacheNames.SEARCH,
             key = "{#criteria.q(), #criteria.limit(), #criteria.offset(), #criteria.muscleId(), #criteria.equipmentId(), #criteria.categoryId()}"
     )
     public ExerciseLibrary searchExercises(ExerciseLibrarySearchCriteria criteria) {
@@ -31,25 +32,25 @@ public class ExerciseLibraryRepositoryImpl implements ExerciseLibraryRepository 
     }
 
     @Override
-    @Cacheable(cacheNames = "exercise-library:item", key = "#exerciseId")
+    @Cacheable(cacheNames = ExerciseLibraryCacheNames.ITEM, key = "#exerciseId")
     public ExerciseLibraryItem getExerciseById(Integer exerciseId) {
         return exerciseLibraryEntityMapper.toDomain(wgerExerciseClient.getExerciseById(exerciseId));
     }
 
     @Override
-    @Cacheable(cacheNames = "exercise-library:muscles", key = "{#criteria.limit(), #criteria.offset()}")
+    @Cacheable(cacheNames = ExerciseLibraryCacheNames.MUSCLES, key = "{#criteria.limit(), #criteria.offset()}")
     public List<ExerciseMuscle> getMuscles(ExerciseLibraryListCriteria criteria) {
         return exerciseLibraryEntityMapper.toMuscleDomains(wgerExerciseClient.getMuscles(criteria.limit(), criteria.offset()));
     }
 
     @Override
-    @Cacheable(cacheNames = "exercise-library:equipment", key = "{#criteria.limit(), #criteria.offset()}")
+    @Cacheable(cacheNames = ExerciseLibraryCacheNames.EQUIPMENT, key = "{#criteria.limit(), #criteria.offset()}")
     public List<ExerciseReference> getEquipment(ExerciseLibraryListCriteria criteria) {
         return exerciseLibraryEntityMapper.toReferenceDomains(wgerExerciseClient.getEquipment(criteria.limit(), criteria.offset()));
     }
 
     @Override
-    @Cacheable(cacheNames = "exercise-library:categories", key = "{#criteria.limit(), #criteria.offset()}")
+    @Cacheable(cacheNames = ExerciseLibraryCacheNames.CATEGORIES, key = "{#criteria.limit(), #criteria.offset()}")
     public List<ExerciseReference> getCategories(ExerciseLibraryListCriteria criteria) {
         return exerciseLibraryEntityMapper.toReferenceDomains(wgerExerciseClient.getCategories(criteria.limit(), criteria.offset()));
     }

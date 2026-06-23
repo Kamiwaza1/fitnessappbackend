@@ -20,15 +20,16 @@ public class LiveWorkoutMessageServiceImpl implements LiveWorkoutMessageService 
 
     @Override
     public LiveWorkoutMessage sendMessage(String roomCode, String senderEmail, String text) {
-        LiveWorkoutRoom room = liveWorkoutRoomService.getRoom(roomCode);
-        requireParticipant(room, senderEmail);
         if (text == null || text.isBlank()) {
             throw new LiveWorkoutValidationException("Message text is required");
         }
-        if (text.trim().length() > 500) {
+        String trimmedText = text.trim();
+        if (trimmedText.length() > 500) {
             throw new LiveWorkoutValidationException("Message cannot be longer than 500 characters");
         }
-        return liveWorkoutMessageRepository.save(LiveWorkoutMessage.create(room.roomCode(), senderEmail, text));
+        LiveWorkoutRoom room = liveWorkoutRoomService.joinRoom(roomCode, senderEmail);
+        requireParticipant(room, senderEmail);
+        return liveWorkoutMessageRepository.save(LiveWorkoutMessage.create(room.roomCode(), senderEmail, trimmedText));
     }
 
     @Override

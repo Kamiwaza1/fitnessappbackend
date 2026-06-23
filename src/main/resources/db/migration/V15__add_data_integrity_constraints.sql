@@ -183,6 +183,24 @@ END $$;
 
 DO $$
 BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_workout_exercises_order_valid') THEN
+        ALTER TABLE workout_exercises
+            ADD CONSTRAINT chk_workout_exercises_order_valid
+            CHECK (exercise_order >= 0);
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_workout_exercises_name_not_blank') THEN
+        ALTER TABLE workout_exercises
+            ADD CONSTRAINT chk_workout_exercises_name_not_blank
+            CHECK (length(btrim(exercise_name)) > 0);
+    END IF;
+END $$;
+
+DO $$
+BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_workout_exercises_training_values_valid') THEN
         ALTER TABLE workout_exercises
             ADD CONSTRAINT chk_workout_exercises_training_values_valid
@@ -226,6 +244,27 @@ END $$;
 
 DO $$
 BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_live_workout_participants_order_valid') THEN
+        ALTER TABLE live_workout_participants
+            ADD CONSTRAINT chk_live_workout_participants_order_valid
+            CHECK (participant_order >= 0);
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_live_workout_participants_identity_not_blank') THEN
+        ALTER TABLE live_workout_participants
+            ADD CONSTRAINT chk_live_workout_participants_identity_not_blank
+            CHECK (
+                length(btrim(email)) > 0
+                AND length(btrim(display_name)) > 0
+            );
+    END IF;
+END $$;
+
+DO $$
+BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_live_workout_participants_progress_valid') THEN
         ALTER TABLE live_workout_participants
             ADD CONSTRAINT chk_live_workout_participants_progress_valid
@@ -247,13 +286,24 @@ END $$;
 
 DO $$
 BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_live_workout_participants_user_email') THEN
+        ALTER TABLE live_workout_participants
+            ADD CONSTRAINT fk_live_workout_participants_user_email
+            FOREIGN KEY (email) REFERENCES users(email)
+            ON UPDATE CASCADE
+            ON DELETE CASCADE;
+    END IF;
+END $$;
+
+DO $$
+BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_password_reset_tokens_dates_valid') THEN
         ALTER TABLE password_reset_tokens
             ADD CONSTRAINT chk_password_reset_tokens_dates_valid
             CHECK (
                 expires_at > created_at
                 AND (used_at IS NULL OR used_at >= created_at)
-            );
+            ) NOT VALID;
     END IF;
 END $$;
 
@@ -269,3 +319,6 @@ CREATE INDEX IF NOT EXISTS idx_workout_history_user_email_workout_date
 CREATE INDEX IF NOT EXISTS idx_live_workout_rooms_active_last_activity
     ON live_workout_rooms(status, last_activity_at)
     WHERE status = 'ACTIVE';
+
+CREATE INDEX IF NOT EXISTS idx_live_workout_participants_email
+    ON live_workout_participants(email);

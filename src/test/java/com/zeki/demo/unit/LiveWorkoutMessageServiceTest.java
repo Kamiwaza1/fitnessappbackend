@@ -1,14 +1,15 @@
 package com.zeki.demo.unit;
 
 import com.zeki.demo.liveworkouts.exception.LiveWorkoutValidationException;
-import com.zeki.demo.liveworkouts.exception.LiveWorkoutAccessException;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutMessage;
+import com.zeki.demo.liveworkouts.domain.LiveWorkoutParticipant;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
 import com.zeki.demo.liveworkouts.domain.repository.LiveWorkoutMessageRepository;
 import com.zeki.demo.liveworkouts.service.LiveWorkoutMessageService;
 import com.zeki.demo.liveworkouts.service.LiveWorkoutMessageServiceImpl;
 import com.zeki.demo.liveworkouts.service.LiveWorkoutRoomService;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,24 +46,36 @@ class LiveWorkoutMessageServiceTest {
         LiveWorkoutRoom room = LiveWorkoutRoom.create(ROOM_CODE, HOST_EMAIL, UUID.randomUUID(), "Push");
         LiveWorkoutMessage saved = LiveWorkoutMessage.create(ROOM_CODE, HOST_EMAIL, "Nice set");
 
-        when(liveWorkoutRoomService.getRoom(ROOM_CODE)).thenReturn(room);
+        when(liveWorkoutRoomService.joinRoom(ROOM_CODE, HOST_EMAIL)).thenReturn(room);
         when(liveWorkoutMessageRepository.save(any(LiveWorkoutMessage.class))).thenReturn(saved);
 
         LiveWorkoutMessage message = liveWorkoutMessageService.sendMessage(ROOM_CODE, HOST_EMAIL, "Nice set");
 
         assertEquals("Nice set", message.text());
+        verify(liveWorkoutRoomService).joinRoom(ROOM_CODE, HOST_EMAIL);
         verify(liveWorkoutMessageRepository).save(any(LiveWorkoutMessage.class));
     }
 
     @Test
-    void sendMessageRejectsNonParticipantAndBlankText() {
+    void sendMessageJoinsSenderBeforeStoringMessage() {
         LiveWorkoutRoom room = LiveWorkoutRoom.create(ROOM_CODE, HOST_EMAIL, UUID.randomUUID(), "Push");
-        when(liveWorkoutRoomService.getRoom(ROOM_CODE)).thenReturn(room);
+        LiveWorkoutRoom joinedRoom = room.withParticipants(Map.of(
+                HOST_EMAIL, room.participants().get(HOST_EMAIL),
+                GUEST_EMAIL, LiveWorkoutParticipant.joined(GUEST_EMAIL)
+        ));
+        LiveWorkoutMessage saved = LiveWorkoutMessage.create(ROOM_CODE, GUEST_EMAIL, "hello");
 
-        assertThrows(
-                LiveWorkoutAccessException.class,
-                () -> liveWorkoutMessageService.sendMessage(ROOM_CODE, GUEST_EMAIL, "hello")
-        );
+        when(liveWorkoutRoomService.joinRoom(ROOM_CODE, GUEST_EMAIL)).thenReturn(joinedRoom);
+        when(liveWorkoutMessageRepository.save(any(LiveWorkoutMessage.class))).thenReturn(saved);
+
+        LiveWorkoutMessage message = liveWorkoutMessageService.sendMessage(ROOM_CODE, GUEST_EMAIL, "  hello  ");
+
+        assertEquals("hello", message.text());
+        verify(liveWorkoutRoomService).joinRoom(ROOM_CODE, GUEST_EMAIL);
+    }
+
+    @Test
+    void sendMessageRejectsBlankText() {
         assertThrows(
                 LiveWorkoutValidationException.class,
                 () -> liveWorkoutMessageService.sendMessage(ROOM_CODE, HOST_EMAIL, " ")

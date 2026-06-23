@@ -57,6 +57,8 @@ class WorkoutHistoryServiceTest {
                 "Completed Workout",
                 LocalDate.now(),
                 null,
+                null,
+                null,
                 3,
                 10,
                 20.0,

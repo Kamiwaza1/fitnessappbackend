@@ -12,5 +12,7 @@ public interface LiveWorkoutRoomRepository {
 
     Optional<LiveWorkoutRoom> findActiveRoom(String roomCode);
 
+    Optional<LiveWorkoutRoom> findActiveRoomForUpdate(String roomCode);
+
     boolean exists(String roomCode);
 }

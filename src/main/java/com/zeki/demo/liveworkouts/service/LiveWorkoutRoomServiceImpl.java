@@ -96,12 +96,17 @@ public class LiveWorkoutRoomServiceImpl implements LiveWorkoutRoomService {
     }
 
     private LiveWorkoutRoom updateRoom(String roomCode, RoomUpdater updater) {
-        LiveWorkoutRoom updated = updater.update(getActiveRoom(roomCode));
+        LiveWorkoutRoom updated = updater.update(getActiveRoomForUpdate(roomCode));
         return liveWorkoutRoomRepository.saveActive(updated);
     }
 
     private LiveWorkoutRoom getActiveRoom(String roomCode) {
         return liveWorkoutRoomRepository.findActiveRoom(normalizeRoomCode(roomCode))
+                .orElseThrow(() -> new NotFoundException("Live workout room not found"));
+    }
+
+    private LiveWorkoutRoom getActiveRoomForUpdate(String roomCode) {
+        return liveWorkoutRoomRepository.findActiveRoomForUpdate(normalizeRoomCode(roomCode))
                 .orElseThrow(() -> new NotFoundException("Live workout room not found"));
     }
 

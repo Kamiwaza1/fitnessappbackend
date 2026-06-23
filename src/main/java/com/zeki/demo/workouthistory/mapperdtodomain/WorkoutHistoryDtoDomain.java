@@ -7,6 +7,9 @@ import com.zeki.demo.workouts.domain.Workout;
 import com.zeki.demo.workouts.enums.MuscleType;
 import com.zeki.demo.workouts.enums.WorkoutCategory;
 import com.zeki.demo.workouts.enums.WorkoutDifficulty;
+import com.zeki.demo.workouts.exception.WorkoutValidationException;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +21,7 @@ public class WorkoutHistoryDtoDomain {
         return new WorkoutHistory(
                 request.workoutId(),
                 request.workoutDate() != null ? request.workoutDate() : now,
-                request.durationMinutes() != null ? request.durationMinutes() : resolveDuration(sourceWorkout),
+                resolveDuration(request, sourceWorkout),
                 request.sets() != null ? Math.max(1, request.sets()) : 1,
                 request.reps() != null ? Math.max(1, request.reps()) : 1,
                 request.weightKg() != null ? Math.max(0, request.weightKg()) : 0,
@@ -53,10 +56,29 @@ public class WorkoutHistoryDtoDomain {
         );
     }
 
-    private Integer resolveDuration(Workout sourceWorkout) {
+    private Integer resolveDuration(CreateWorkoutHistoryRequest request, Workout sourceWorkout) {
+        Integer elapsedDuration = calculateElapsedDurationMinutes(request.startedAt(), request.finishedAt());
+        if (elapsedDuration != null) {
+            return elapsedDuration;
+        }
+        if (request.durationMinutes() != null) {
+            return request.durationMinutes();
+        }
         return sourceWorkout != null && sourceWorkout.getDurationMinutes() != null
                 ? sourceWorkout.getDurationMinutes()
                 : 1;
+    }
+
+    private Integer calculateElapsedDurationMinutes(Instant startedAt, Instant finishedAt) {
+        if (startedAt == null || finishedAt == null) {
+            return null;
+        }
+        if (finishedAt.isBefore(startedAt)) {
+            throw new WorkoutValidationException("Workout finish time cannot be before start time");
+        }
+
+        long elapsedSeconds = Duration.between(startedAt, finishedAt).toSeconds();
+        return Math.max(1, Math.toIntExact(Math.ceilDiv(elapsedSeconds, 60)));
     }
 
     private String resolveDescription(Workout sourceWorkout) {

@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class WorkoutTest {
@@ -57,6 +58,15 @@ class WorkoutTest {
     }
 
     @Test
+    void toDomain_shouldAllowMissingDuration_whenWorkoutIsOnlyPlanned() {
+        CreateWorkoutRequest request = createWorkoutRequest(WorkoutCategory.STRENGTH, MuscleType.LEGS, null);
+
+        Workout workout = workoutDtoDomain.toDomain(request, TEST_EMAIL);
+
+        assertNull(workout.getDurationMinutes());
+    }
+
+    @Test
     void toResponse_shouldMapWorkoutToWorkoutResponse() {
         Workout workout = createWorkout(WorkoutCategory.STRENGTH, MuscleType.LEGS);
 
@@ -82,10 +92,14 @@ class WorkoutTest {
     }
 
     private CreateWorkoutRequest createWorkoutRequest(WorkoutCategory category, MuscleType muscleType) {
+        return createWorkoutRequest(category, muscleType, 60);
+    }
+
+    private CreateWorkoutRequest createWorkoutRequest(WorkoutCategory category, MuscleType muscleType, Integer durationMinutes) {
         return new CreateWorkoutRequest(
                 DEFAULT_NAME,
                 FIXED_WORKOUT_DATE,
-                60,
+                durationMinutes,
                 4,
                 10,
                 100.0,
