@@ -2,6 +2,7 @@ package com.zeki.demo.liveworkouts.repository;
 
 import com.zeki.demo.liveworkouts.domain.repository.LiveWorkoutRoomRepository;
 import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
+import com.zeki.demo.liveworkouts.entity.LiveWorkoutRoomEntity;
 import com.zeki.demo.liveworkouts.mapperentitydomain.LiveWorkoutRoomEntityMapper;
 import com.zeki.demo.liveworkouts.repository.jpa.LiveWorkoutRoomRepoJPA;
 import java.time.Instant;
@@ -30,13 +31,28 @@ public class LiveWorkoutRoomRepositoryImpl implements LiveWorkoutRoomRepository 
     }
 
     private LiveWorkoutRoom save(LiveWorkoutRoom room, String status, Instant closedAt) {
-        if (liveWorkoutRoomRepoJPA.existsById(room.roomCode())) {
-            liveWorkoutRoomRepoJPA.deleteParticipantsByRoomCode(room.roomCode());
-            liveWorkoutRoomRepoJPA.flush();
-        }
-        return liveWorkoutRoomEntityMapper.toDomain(
-                liveWorkoutRoomRepoJPA.save(liveWorkoutRoomEntityMapper.toEntity(room, status, closedAt))
+        LiveWorkoutRoomEntity nextEntity = liveWorkoutRoomEntityMapper.toEntity(room, status, closedAt);
+        LiveWorkoutRoomEntity savedEntity = liveWorkoutRoomRepoJPA.findById(room.roomCode())
+                .map(existingEntity -> updateExistingRoom(existingEntity, nextEntity))
+                .orElseGet(() -> liveWorkoutRoomRepoJPA.save(nextEntity));
+        return liveWorkoutRoomEntityMapper.toDomain(savedEntity);
+    }
+
+    private LiveWorkoutRoomEntity updateExistingRoom(
+            LiveWorkoutRoomEntity existingEntity,
+            LiveWorkoutRoomEntity nextEntity
+    ) {
+        existingEntity.replaceWith(
+                nextEntity.getHostEmail(),
+                nextEntity.getWorkoutId(),
+                nextEntity.getWorkoutName(),
+                nextEntity.getStatus(),
+                nextEntity.getCreatedAt(),
+                nextEntity.getLastActivityAt(),
+                nextEntity.getClosedAt(),
+                nextEntity.getParticipants()
         );
+        return liveWorkoutRoomRepoJPA.save(existingEntity);
     }
 
     @Override

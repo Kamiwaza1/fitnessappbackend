@@ -5,6 +5,7 @@ import com.zeki.demo.liveworkouts.domain.LiveWorkoutRoom;
 import com.zeki.demo.liveworkouts.entity.LiveWorkoutParticipantValue;
 import com.zeki.demo.liveworkouts.entity.LiveWorkoutRoomEntity;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -55,7 +56,7 @@ public class LiveWorkoutRoomEntityMapper {
                         .completedSets(participant.completedSets())
                         .joinedAt(participant.joinedAt() == null ? room.createdAt() : participant.joinedAt())
                         .build())
-                .toList();
+                .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
         return LiveWorkoutRoomEntity.builder()
                 .roomCode(room.roomCode())
                 .hostEmail(room.hostEmail())

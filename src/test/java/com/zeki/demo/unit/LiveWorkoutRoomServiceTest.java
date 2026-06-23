@@ -55,6 +55,9 @@ class LiveWorkoutRoomServiceTest {
         lenient().when(liveWorkoutRoomRepoJPA.existsById(any(String.class))).thenAnswer(invocation ->
                 savedRooms.containsKey(invocation.getArgument(0))
         );
+        lenient().when(liveWorkoutRoomRepoJPA.findById(any(String.class))).thenAnswer(invocation ->
+                Optional.ofNullable(savedRooms.get(invocation.getArgument(0)))
+        );
         lenient().when(liveWorkoutRoomRepoJPA.save(any(LiveWorkoutRoomEntity.class))).thenAnswer(invocation -> {
             LiveWorkoutRoomEntity entity = invocation.getArgument(0);
             savedRooms.put(entity.getRoomCode(), entity);
@@ -98,8 +101,6 @@ class LiveWorkoutRoomServiceTest {
 
         assertTrue(updated.participants().containsKey(HOST_EMAIL));
         assertTrue(updated.participants().containsKey(GUEST_EMAIL));
-        verify(liveWorkoutRoomRepoJPA).deleteParticipantsByRoomCode(room.roomCode());
-        verify(liveWorkoutRoomRepoJPA).flush();
     }
 
     @Test

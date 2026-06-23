@@ -11,6 +11,7 @@ import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -61,4 +62,25 @@ public class LiveWorkoutRoomEntity {
     @OrderColumn(name = "participant_order")
     @Builder.Default
     private List<LiveWorkoutParticipantValue> participants = new ArrayList<>();
+
+    public void replaceWith(
+            String hostEmail,
+            UUID workoutId,
+            String workoutName,
+            String status,
+            Instant createdAt,
+            Instant lastActivityAt,
+            Instant closedAt,
+            Collection<LiveWorkoutParticipantValue> nextParticipants
+    ) {
+        this.hostEmail = hostEmail;
+        this.workoutId = workoutId;
+        this.workoutName = workoutName;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.lastActivityAt = lastActivityAt;
+        this.closedAt = closedAt;
+        this.participants.clear();
+        this.participants.addAll(nextParticipants);
+    }
 }
