@@ -1,143 +1,136 @@
-# FitnessTrackApp Backend
+# DarkLift Backend
 
-## Overview
-`fitnessappbackend` is a Spring Boot backend for a fitness tracking application. It provides user authentication, profile management, workout management, validation, persistence, and API documentation for a client application that would consume the service through HTTP.
+A Spring Boot REST and WebSocket API for a fitness tracking application: authentication, workout planning and history, nutrition tracking, exercise discovery, progress analytics, personalised recommendations and live shared workout rooms.
 
-This repository is backend-only. In a portfolio context, it demonstrates how I built the server-side part of a broader product by combining security, data access, validation, and deployment-oriented tooling into one project.
+![Java](https://img.shields.io/badge/Java-21-orange)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0-6DB33F)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)
+![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248)
+![Redis](https://img.shields.io/badge/Redis-7-DC382D)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED)
+
+This repository contains the backend only. A client application consumes it over HTTP and WebSocket, and the API is documented through OpenAPI.
 
 ## Features
-- JWT-based authentication with register and login endpoints
-- User profile endpoints for reading and updating the authenticated user
-- Workout endpoints for creating, reading, updating, and deleting workouts
-- Request validation with custom exception handling
-- PostgreSQL persistence through Spring Data JPA
-- Swagger/OpenAPI annotations for discoverable API documentation
-- Docker Compose support for local backend and database startup
 
-## Tech Stack
-- Java 21
-- Spring Boot
-- Spring Security
-- Spring Data JPA
-- PostgreSQL
-- Gradle
-- Docker Compose
-- JaCoCo
-- SonarQube
-- JUnit 5 and Mockito
+- **Authentication and security**: JWT access and refresh tokens delivered in cookies, CSRF protection, email-based password reset with a one-time token plus a 6-digit security code, and account deletion with a grace period.
+- **Workouts**: create, update, delete and list workouts, including upcoming workouts, with per-workout exercises and muscle groups.
+- **Workout history and progress**: record completed sessions and query progress over time.
+- **Nutrition**: log nutrition entries and search foods by name, barcode, brand or category through [Open Food Facts](https://world.openfoodfacts.org).
+- **Exercise library**: search exercises, muscles, equipment and categories from [wger](https://wger.de), cached in Redis.
+- **Recommendations**: rule-based workout suggestions that a user can start or ignore.
+- **Live workouts**: shared rooms joined by room code, with real-time progress updates and chat over STOMP/WebSocket. Chat messages are stored in MongoDB.
+- **Quality tooling**: unit and integration tests, JaCoCo coverage, SonarQube analysis and a GitLab CI pipeline.
+
+## Tech stack
+
+| Area | Technology |
+| --- | --- |
+| Language and framework | Java 21, Spring Boot 4, Spring MVC, Spring WebFlux client, Spring WebSocket |
+| Security | Spring Security, JJWT |
+| Persistence | PostgreSQL (Spring Data JPA, Flyway migrations), MongoDB (live workout chat) |
+| Caching | Redis with Spring Cache |
+| API docs | springdoc-openapi (Swagger UI) |
+| Build and runtime | Gradle, Docker, Docker Compose |
+| Testing and quality | JUnit 5, Mockito, Testcontainers, JaCoCo, SonarQube |
 
 ## Architecture
-The project follows a layered backend structure:
 
-- `controller`: REST endpoints such as auth, users, and workouts
-- `service`: business logic and orchestration
-- `domain`: validation and domain behavior
-- `dto`: request and response models used at the API boundary
-- `entity`: persistence models for database storage
-- `repository`: data access abstractions and implementations
-- `security`: JWT, filter chain, and authentication helpers
-- `common/exception`: centralized exception handling
+The code is organised by feature. Each feature package follows the same layered structure.
 
-This separation helps keep API concerns, domain rules, persistence, and security responsibilities easier to reason about and test.
+```
+src/main/java/com/zeki/demo/
+├── users/            authentication, profiles, password reset, account deletion
+├── workouts/         workout planning
+├── workouthistory/   completed sessions
+├── progress/         progress analytics
+├── nutrition/        nutrition entries and food search
+├── exerciselibrary/  exercise catalogue (wger) with caching
+├── recommendations/  workout recommendation engine
+├── liveworkouts/     rooms, chat and WebSocket events
+├── mail/             transactional email (Resend)
+└── common/           shared configuration and exception handling
+```
 
-## Main API Areas
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `GET /api/v1/users/me`
-- `PUT /api/v1/users/me`
-- `GET /api/v1/workouts`
-- `GET /api/v1/workouts/{workoutId}`
-- `POST /api/v1/workouts`
-- `PATCH /api/v1/workouts/{workoutId}`
-- `DELETE /api/v1/workouts/{workoutId}`
+Inside a feature the layers are `controller`, `service`, `domain`, `dto`, `entity` and `repository`. This keeps HTTP concerns, business rules and persistence separate and independently testable. Database schema changes are versioned in `src/main/resources/db/migration` (Flyway).
 
-OpenAPI annotations are present in the controllers, and with `springdoc-openapi-starter-webmvc-ui` included the Swagger UI is expected to be available at:
+## API overview
 
-- `http://localhost:8080/swagger-ui/index.html`
+Interactive documentation is served by Swagger UI at `http://localhost:8080/swagger-ui/index.html` once the application is running. Unsafe browser requests require the CSRF header, which `GET /api/v1/auth/csrf` provides.
 
-## Local Setup
-### Requirements
+| Area | Base path | Operations |
+| --- | --- | --- |
+| Auth | `/api/v1/auth` | `csrf`, `register`, `login`, `refresh`, `logout`, `forgot-password`, `reset-password` |
+| Users | `/api/v1/users` | read, update and delete the current user (`/me`), cancel a pending deletion |
+| Workouts | `/api/v1/workouts` | list, upcoming, get, create, update, delete |
+| Workout history | `/api/v1/workout-history` | record and list sessions, get one session |
+| Progress | `/api/v1/progress` | progress summary |
+| Nutrition | `/api/v1/nutrition` | entries CRUD, food search by name, barcode, brand and category |
+| Exercise library | `/api/v1/exercise-library` | exercise search and detail, muscles, equipment, categories |
+| Recommendations | `/api/v1/recommendations` | list, start, ignore |
+| Live workouts | `/api/v1/live-workouts` | create, get and delete a room, room details, chat history |
+
+Live workouts also use a WebSocket endpoint at `/ws`. Clients send to the `/app` prefix (`/live-workouts/{roomCode}/join`, `leave`, `progress` and `messages`) and subscribe to `/topic` destinations.
+
+The password reset flow is described in [docs/password-reset.md](docs/password-reset.md).
+
+## Getting started
+
+### Prerequisites
+
 - Java 21
-- Docker and Docker Compose, if you want to run the app with containers
+- Docker and Docker Compose
 
-### Run with Gradle
-1. Move into the project directory:
-
-```bash
-cd fitnessappbackend
-```
-
-2. Start a PostgreSQL database locally, or use Docker for the database.
-
-3. Run the application:
-
-```bash
-./gradlew bootRun
-```
-
-The application uses these defaults from `application.properties`:
-
-- Port: `8080`
-- Database: `jdbc:postgresql://localhost:5432/fitness_app`
-- Username: `postgres`
-- Password: `postgres`
-- JWT secret: fallback value provided for local development
-
-You can override them with environment variables:
-
-- `SPRING_DATASOURCE_URL`
-- `SPRING_DATASOURCE_USERNAME`
-- `SPRING_DATASOURCE_PASSWORD`
-- `SPRING_JPA_HIBERNATE_DDL_AUTO`
-- `JWT_SECRET`
-- `JWT_EXPIRATION`
-
-### Run with Docker Compose
-From the backend directory:
+### Run everything with Docker Compose
 
 ```bash
 docker compose up --build
 ```
 
-This starts:
+This starts PostgreSQL 16, MongoDB 7, Redis 7 and the backend on port `8080`. Flyway applies the database migrations on startup.
 
-- a PostgreSQL 16 container
-- the Spring Boot backend container on port `8080`
+### Run the application with Gradle
 
-## Quality and Automation
-The project includes several quality-focused tools and automation hooks:
+Start the databases, then run the application on your machine:
 
-- `./gradlew test` runs the JUnit and Mockito test suite
-- `./gradlew jacocoTestReport` generates coverage reports
-- SonarQube configuration is defined in `build.gradle`
-- `.gitlab-ci.yml` contains build, test, quality, and Docker pipeline stages
-- `docker compose up --build` provides repeatable local environment setup
+```bash
+docker compose up -d postgres mongo redis
+./gradlew bootRun
+```
 
-These elements are useful both for day-to-day development and for demonstrating software process automation in a portfolio.
+### Configuration
 
-## Current Status
-This project has solid backend foundations, but it is not in a fully polished state yet.
+Settings are read from environment variables, and every variable has a development default in `application.properties` or `compose.yaml`. To override them, create a `.env` file in the project root (it is git-ignored).
 
-Current strengths:
+| Variable | Purpose |
+| --- | --- |
+| `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD` | PostgreSQL connection |
+| `SPRING_MONGODB_URI` | MongoDB connection |
+| `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` | Token signing keys (at least 32 characters) |
+| `JWT_ACCESS_EXPIRATION`, `JWT_REFRESH_EXPIRATION` | Token lifetimes in milliseconds |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed frontend origins |
+| `RESEND_API_KEY`, `MAIL_FROM`, `MAIL_ENABLED` | Transactional email |
+| `APP_FRONTEND_URL` | Base URL used in password reset links |
+| `PASSWORD_RESET_EXPIRATION_MINUTES` | Lifetime of a reset link |
 
-- Authentication and authorization are implemented with Spring Security and JWT
-- Validation and centralized exception handling are present
-- Tests exist for auth and workout-related behavior
-- API documentation annotations are already in place
-- Local infrastructure automation is configured through Docker Compose and GitLab CI
+> The default secrets and credentials are for local development only. Set your own values for any shared or production deployment.
 
-Current limitations:
+## Testing and quality
 
-- The codebase shows signs of active refactoring, especially around package organization
-- There are some duplicated or evolving structures in the user/auth area
-- The current build is failing because of a syntax error in `src/main/java/com/zeki/demo/users/mapperDtoDomain/UserDtoDomain.java`
+```bash
+./gradlew test                  # unit and integration tests
+./gradlew jacocoTestReport      # coverage report in build/reports/jacoco
+```
 
-Because of that compile issue, commands such as `./gradlew test` do not currently complete successfully in this checkout.
+Integration tests use Testcontainers, so Docker must be running. The `.gitlab-ci.yml` pipeline builds the project, runs the tests, performs SonarQube analysis, builds a Docker image and deploys it.
 
-## Portfolio Relevance
-This repository is useful in a portfolio because it shows more than just endpoint creation. It demonstrates how I approached backend architecture, authentication, persistence, testing, containerized setup, and quality tooling while also reflecting honestly on work-in-progress areas. That makes it a strong case study for learning outcomes in full-stack application development, software quality assurance, software process automation, and agile development.
+## Project documentation
 
-## Related Portfolio Docs
+- [Password reset flow](docs/password-reset.md)
 - [Project overview](docs/portfolio/project-overview.md)
 - [Learning outcomes](docs/portfolio/learning-outcomes.md)
 - [Evidence appendix](docs/portfolio/evidence.md)
+
+## Author
+
+Built by [Kamiwaza1](https://github.com/Kamiwaza1).
